@@ -1,0 +1,9 @@
+.editorconfig
+.eslintrc.json
+.github/
+.gitignore
+.mocharc.json
+*.tgz
+node_modules/
+package-lock.json
+tsconfig.*

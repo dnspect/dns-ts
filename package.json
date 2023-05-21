@@ -1,0 +1,44 @@
+{
+    "name": "@dnspect/dns-ts",
+    "version": "0.1.0",
+    "description": "DNS library in TypeScript",
+    "author": "Minghang Chen <chen@minghang.dev> (https://minghang.dev)",
+    "license": "MIT",
+    "type": "module",
+    "types": "./dist/index.d.ts",
+    "main": "./dist/index.js",
+    "dependencies": {
+        "@dnspect/ip-address-ts": "0.1",
+        "base64-js": "1"
+    },
+    "devDependencies": {
+        "@types/chai": "4",
+        "@types/mocha": "10",
+        "@types/node": "18",
+        "@typescript-eslint/eslint-plugin": "5",
+        "chai": "4",
+        "chai-bytes": "0.1.2",
+        "eslint": "8",
+        "mocha": "10",
+        "ts-node": "10",
+        "typescript": "4.9"
+    },
+    "scripts": {
+        "test": "mocha",
+        "build": "tsc -d",
+        "lint": "eslint src/**/**.{ts,tsx}",
+        "lint:fix": "eslint src/**/**.{ts,tsx} --fix"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/dnspect/dns-ts.git"
+    },
+    "keywords": [
+        "dns",
+        "domain"
+    ],
+    "bugs": {
+        "url": "https://github.com/dnspect/dns-ts/issues"
+    },
+    "homepage": "https://github.com/dnspect/dns-ts"
+}
