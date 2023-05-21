@@ -43,7 +43,7 @@ describe("test build questions", () => {
     const mb = new MessageBuilder();
     const qb = mb.question();
 
-    it("should build nonething in question section", () => {
+    it("should build nothing in question section", () => {
         const msg = mb.build();
         expect(msg.header.qdCount).to.equal(0);
         expect(msg.firstQuestion()).to.null;
@@ -73,7 +73,7 @@ describe("test build answers", () => {
     const mb = new MessageBuilder();
     const ab = mb.answer();
 
-    it("should build nonething in answer section", () => {
+    it("should build nothing in answer section", () => {
         const msg = mb.build();
         expect(msg.header.anCount).to.equal(0);
         expect(msg.answer.length()).to.equal(0);
@@ -103,7 +103,7 @@ describe("test build additional", () => {
     const mb = new MessageBuilder();
     const ar = mb.additional();
 
-    it("should build nonething in additional section", () => {
+    it("should build nothing in additional section", () => {
         const msg = mb.build();
         expect(msg.header.arCount).to.equal(0);
         expect(msg.additional.length()).to.equal(0);

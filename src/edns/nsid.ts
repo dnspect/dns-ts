@@ -1,6 +1,6 @@
 import { OptCode, Option } from "./option";
 import { Slice } from "../packet";
-import { decodeString, encodeString } from "../encoding";
+import { binaryToString, stringToBinary } from "../encoding";
 import { Writer } from "../buffer";
 
 /**
@@ -32,7 +32,7 @@ export class NSID extends Option {
 
         const de = new TextDecoder("utf-8");
         const str = de.decode(this.identifier);
-        const hexWS = decodeString(this.identifier, 'hex-ws');
+        const hexWS = binaryToString(this.identifier, 'hex-ws');
         return `; NSID: ${hexWS} ("${str}")`;
     }
 
@@ -44,7 +44,7 @@ export class NSID extends Option {
      * @returns
      */
     static fromString(id: string, encoding: "ascii" | "utf-8" = "utf-8"): NSID {
-        const bin = encodeString(id, encoding);
+        const bin = stringToBinary(id, encoding);
         return new NSID(Slice.from(bin));
     }
 }

@@ -1,5 +1,5 @@
 import { Writer } from "../../buffer";
-import { decodeString } from "../../encoding";
+import { binaryToString } from "../../encoding";
 import { FQDN } from "../../fqdn";
 import { Slice } from "../../packet";
 import { RR } from "../../rr";
@@ -78,7 +78,7 @@ export class RRSIG extends RR {
      * @returns
      */
     toString(): string {
-        const signature = decodeString(this.signature, 'base64');
+        const signature = binaryToString(this.signature, 'base64');
         return `${this.header}\t${RRType[this.typeCovered]} ${this.algorithm} ${this.labels} ${this.originalTTL} ${displayUnixTS(this.expiration)} ${displayUnixTS(this.inception)} ${this.keyTag} ${this.signerName} ${signature}`;
     }
 }

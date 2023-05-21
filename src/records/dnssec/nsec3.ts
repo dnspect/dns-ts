@@ -1,6 +1,6 @@
 import { Base32Spec, Decoder } from "../../base32";
 import { Writer } from "../../buffer";
-import { decodeString } from "../../encoding";
+import { binaryToString } from "../../encoding";
 import { Slice } from "../../packet";
 import { RR } from "../../rr";
 import { Uint16, Uint8 } from "../../types";
@@ -100,7 +100,7 @@ export class NSEC3 extends RR {
      * @returns
      */
     toString(): string {
-        const salt = this.salt.length === 0 ? "-" : decodeString(this.salt, "hex");
+        const salt = this.salt.length === 0 ? "-" : binaryToString(this.salt, "hex");
         const decoder = new Decoder(Base32Spec.ExtendedHex);
         const nextHashedOwnerName = this.nexHashedOwnerName.length === 0 ? "" : decoder.decode(this.salt);
         return `${this.header}\t${this.hashAlg} ${this.flags} ${this.iterations} ${salt} ${nextHashedOwnerName} ${this.typeBitMaps}`;

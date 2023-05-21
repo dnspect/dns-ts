@@ -1,4 +1,4 @@
-import { encodeString, BufferEncoding } from "./encoding";
+import { stringToBinary, EncodingScheme } from "./encoding";
 import { Uint16, Uint8, Uint32 } from "./types";
 
 /**
@@ -108,7 +108,7 @@ export interface Writer {
      *
      * @param str
      */
-    writeString(str: string, encoding: BufferEncoding): number;
+    writeString(str: string, encoding: EncodingScheme): number;
 
     /**
      * Truncates the buffer back to a length of `len` bytes and make the buffer readonly.
@@ -268,8 +268,8 @@ export class OctetBuffer implements Reader, Writer {
         return 4;
     }
 
-    writeString(str: string, encoding: BufferEncoding): number {
-        const data = encodeString(str, encoding);
+    writeString(str: string, encoding: EncodingScheme): number {
+        const data = stringToBinary(str, encoding);
         return this.write(data);
     }
 

@@ -1,5 +1,5 @@
 import { Writer } from "../buffer";
-import { decodeString } from "../encoding";
+import { binaryToString } from "../encoding";
 import { Slice } from "../packet";
 import { RR } from "../rr";
 import { Uint8 } from "../types";
@@ -79,7 +79,7 @@ export class SSHFP extends RR {
      * @returns
      */
     toString(): string {
-        const hex = decodeString(this.fingerprint, 'hex');
+        const hex = binaryToString(this.fingerprint, 'hex');
         return `${this.header}\t${this.algorithm} ${this.fpType} ${hex}`;
     }
 }

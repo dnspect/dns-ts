@@ -2,7 +2,7 @@ import { Uint16, Uint32, Uint48, Uint8 } from "./types";
 import { ParseError } from "./error";
 import { FQDN } from "./fqdn";
 import * as base32 from "./base32";
-import { BufferEncoding, decodeString } from "./encoding";
+import { EncodingScheme, binaryToString } from "./encoding";
 import { Writer, Reader, OctetBuffer } from "./buffer";
 
 
@@ -266,7 +266,7 @@ export class Slice {
      * @param len The character encoding
      * @returns A string.
      */
-    readString(encoding: BufferEncoding, len?: Uint8): string {
+    readString(encoding: EncodingScheme, len?: Uint8): string {
         if (len === undefined) {
             len = this.remaining();
         } else {
@@ -279,7 +279,7 @@ export class Slice {
         const end = this.cur + len;
         const data = this.buf.read(this.offset + this.cur, this.offset + end);
         this.seek(end);
-        return decodeString(data, encoding);
+        return binaryToString(data, encoding);
     }
 
     /**
@@ -393,7 +393,7 @@ export class Slice {
             }
 
             const labelData = this.buf.read(this.offset + cur, this.offset + cur + labelLen);
-            const label = decodeString(labelData, 'ascii');
+            const label = binaryToString(labelData, 'ascii');
             labels.push(label);
 
             if (labelLen > MAX_DOMAIN_LABEL_WIRE_OCTETS) {

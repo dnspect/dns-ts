@@ -1,7 +1,7 @@
 import { OptCode, Option } from "./option";
 import { Slice } from "../packet";
 import { ParseError } from "../error";
-import { decodeString } from "../encoding";
+import { binaryToString } from "../encoding";
 import { Writer } from "../buffer";
 
 /**
@@ -68,7 +68,7 @@ export class Cookie extends Option {
      * @returns
      */
     toString(): string {
-        const hex = decodeString(this.cookie, "hex");
+        const hex = binaryToString(this.cookie, "hex");
         return `; Cookie: ${hex}`;
     }
 

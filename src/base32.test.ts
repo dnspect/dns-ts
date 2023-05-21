@@ -1,7 +1,7 @@
 import { Decoder, Encoder, encode, decode, Base32Spec, encodeExtendedHex, decodeExtendedHex } from "./base32";
 import { expect, use } from "chai";
 import chaibytes from "chai-bytes";
-import { encodeString } from "./encoding";
+import { stringToBinary } from "./encoding";
 
 use(chaibytes);
 
@@ -73,12 +73,12 @@ describe("test withPadding()", () => {
 
     it("should decoder set padding", () => {
         dec.withPadding("@");
-        expect(dec.decode(encodeString("foobar", "ascii"))).to.equal("MZXW6YTBOI@@@@@@");
+        expect(dec.decode(stringToBinary("foobar", "ascii"))).to.equal("MZXW6YTBOI@@@@@@");
     });
 
     it("should encoder set padding", () => {
         enc.withPadding("@");
-        expect(enc.encodeToBinary("MZXW6YTBOI@@@@@@")).to.equalBytes(encodeString("foobar", "ascii"));
+        expect(enc.encodeToBinary("MZXW6YTBOI@@@@@@")).to.equalBytes(stringToBinary("foobar", "ascii"));
     });
 });
 
@@ -89,7 +89,7 @@ describe("test decode()", () => {
             if (hex instanceof Error) {
                 continue;
             }
-            expect(decode(encodeString(hex, "ascii"))).to.equal(base32);
+            expect(decode(stringToBinary(hex, "ascii"))).to.equal(base32);
         }
     });
 });
@@ -101,7 +101,7 @@ describe("test encode()", () => {
             if (output instanceof Error) {
                 expect(() => encode(base32)).to.throw(Error, output.message);
             } else {
-                expect(encode(base32)).to.equalBytes(encodeString(output, "ascii"));
+                expect(encode(base32)).to.equalBytes(stringToBinary(output, "ascii"));
             }
         }
     });
@@ -114,7 +114,7 @@ describe("test decodeExtendedHex()", () => {
             if (hex instanceof Error) {
                 continue;
             }
-            expect(decodeExtendedHex(encodeString(hex, "ascii"))).to.equal(base32);
+            expect(decodeExtendedHex(stringToBinary(hex, "ascii"))).to.equal(base32);
         }
     });
 });
@@ -126,7 +126,7 @@ describe("test encodeExtendedHex()", () => {
             if (output instanceof Error) {
                 expect(() => encode(base32)).to.throw(Error, output.message);
             } else {
-                expect(encodeExtendedHex(base32)).to.equalBytes(encodeString(output, "ascii"));
+                expect(encodeExtendedHex(base32)).to.equalBytes(stringToBinary(output, "ascii"));
             }
         }
     });
@@ -140,7 +140,7 @@ describe("test standard decoder", () => {
             if (hex instanceof Error) {
                 continue;
             }
-            expect(decoder.decode(encodeString(hex, "ascii"))).to.equal(base32);
+            expect(decoder.decode(stringToBinary(hex, "ascii"))).to.equal(base32);
         }
     });
 
@@ -151,7 +151,7 @@ describe("test standard decoder", () => {
                 continue;
             }
 
-            const bin = encodeString(input, "ascii");
+            const bin = stringToBinary(input, "ascii");
             if (bin.length < 2) {
                 continue;
             }
@@ -172,7 +172,7 @@ describe("test standard encoder", () => {
             if (output instanceof Error) {
                 expect(() => encoder.encodeToBinary(base32)).to.throw(Error, output.message);
             } else {
-                expect(encoder.encodeToBinary(base32)).to.equalBytes(encodeString(output, "ascii"));
+                expect(encoder.encodeToBinary(base32)).to.equalBytes(stringToBinary(output, "ascii"));
             }
         }
     });
@@ -186,7 +186,7 @@ describe("test extended-hex decoder", () => {
             if (input instanceof Error) {
                 continue;
             }
-            expect(decoder.decode(encodeString(input, "ascii"))).to.equal(base32);
+            expect(decoder.decode(stringToBinary(input, "ascii"))).to.equal(base32);
         }
     });
 });
@@ -199,7 +199,7 @@ describe("test extended-hex encoder", () => {
             if (output instanceof Error) {
                 expect(() => encoder.encodeToBinary(base32)).to.throw(Error, output.message);
             } else {
-                expect(encoder.encodeToBinary(base32)).to.equalBytes(encodeString(output, "ascii"));
+                expect(encoder.encodeToBinary(base32)).to.equalBytes(stringToBinary(output, "ascii"));
             }
         }
     });

@@ -1,10 +1,10 @@
-import { encodeString } from "./encoding";
+import { stringToBinary } from "./encoding";
 import { ParseError } from "./error";
 import { Message } from "./message";
 import { expect } from "chai";
 
 function hexToBinary(hexStream: string): Uint8Array {
-    return encodeString(hexStream, "hex");
+    return stringToBinary(hexStream, "hex");
 }
 
 function trimStart(input: string): string {

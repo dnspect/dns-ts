@@ -1,5 +1,5 @@
 import { Writer } from "../buffer";
-import { decodeString } from "../encoding";
+import { binaryToString } from "../encoding";
 import { FQDN } from "../fqdn";
 import { Slice } from "../packet";
 import { RR } from "../rr";
@@ -97,8 +97,8 @@ export class TSIG extends RR {
      * @returns
      */
     toString(): string {
-        const mac = decodeString(this.mac, 'base64');
-        const otherData = decodeString(this.otherData, 'base64');
+        const mac = binaryToString(this.mac, 'base64');
+        const otherData = binaryToString(this.otherData, 'base64');
         return `${this.header}\t${this.algorithm} ${displayTimeSigned(this.timeSigned)} ${this.fudge} ${mac} ${this.originalID} ${this.error} ${otherData}`;
     }
 }

@@ -1,5 +1,5 @@
 import { Writer } from "../../buffer";
-import { decodeString } from "../../encoding";
+import { binaryToString } from "../../encoding";
 import { Slice } from "../../packet";
 import { RR } from "../../rr";
 import { Uint16, Uint8 } from "../../types";
@@ -77,7 +77,7 @@ export class DNSKEY extends RR {
      * @returns
      */
     toString(): string {
-        const key = decodeString(this.publicKey, 'base64');
+        const key = binaryToString(this.publicKey, 'base64');
         return `${this.header}\t${this.flags} ${this.protocol} ${this.algorithm} ${key}`;
     }
 }

@@ -1,5 +1,5 @@
 import { Writer } from "../../buffer";
-import { decodeString } from "../../encoding";
+import { binaryToString } from "../../encoding";
 import { Slice } from "../../packet";
 import { RR } from "../../rr";
 import { Uint16, Uint8 } from "../../types";
@@ -88,7 +88,7 @@ export class NSEC3PARAM extends RR {
      * @returns
      */
     toString(): string {
-        const salt = this.salt.length === 0 ? "-" : decodeString(this.salt, "hex");
+        const salt = this.salt.length === 0 ? "-" : binaryToString(this.salt, "hex");
         return `${this.header}\t${this.hashAlg} ${this.flags} ${this.iterations} ${salt}`;
     }
 }

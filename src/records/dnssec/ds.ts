@@ -1,5 +1,5 @@
 import { Writer } from "../../buffer";
-import { decodeString } from "../../encoding";
+import { binaryToString } from "../../encoding";
 import { Slice } from "../../packet";
 import { RR } from "../../rr";
 import { Uint16, Uint8 } from "../../types";
@@ -95,7 +95,7 @@ export class DS extends RR {
      * @returns
      */
     toString(): string {
-        const key = decodeString(this.digest, 'hex').toUpperCase();
+        const key = binaryToString(this.digest, 'hex').toUpperCase();
         return `${this.header}\t${this.keyTag} ${this.algorithm} ${this.digestType} ${key}`;
     }
 }

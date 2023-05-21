@@ -5,17 +5,17 @@ import * as base32 from "./base32";
 /**
  * String encoding schemes.
  */
-export type BufferEncoding = 'ascii' | 'utf8' | 'utf-8' | 'base64' | 'binary' | 'base32' | 'hex' | 'hex-ws';
+export type EncodingScheme = 'ascii' | 'utf8' | 'utf-8' | 'base64' | 'binary' | 'base32' | 'hex' | 'hex-ws';
 
 /**
- * Encodes given string to the specific encoding scheme.
+ * Decodes an encoded string to binary.
  *
- * @param str The string to encode
- * @param encoding The encoding scheme to use
- * @returns A Uint8Array containing the encoded data.
+ * @param str The string to decode
+ * @param scheme The encoding scheme the string was originally encoded with.
+ * @returns A Uint8Array containing the binary data.
  */
-export function encodeString(str: string, encoding: BufferEncoding): Uint8Array {
-    switch (encoding) {
+export function stringToBinary(str: string, scheme: EncodingScheme): Uint8Array {
+    switch (scheme) {
         case "ascii":
         case "binary": {
             const bytes = new Uint8Array(str.length);
@@ -31,7 +31,7 @@ export function encodeString(str: string, encoding: BufferEncoding): Uint8Array 
         }
         case "hex":
         case "hex-ws": {
-            const chars = str.split(encoding === 'hex' ? '' : ' ');
+            const chars = str.split(scheme === 'hex' ? '' : ' ');
             if (chars.length % 2 !== 0) {
                 throw new Error(`Invalid hex: ${str}`);
             }
@@ -48,19 +48,19 @@ export function encodeString(str: string, encoding: BufferEncoding): Uint8Array 
             return base64.toByteArray(str);
 
         default:
-            throw new Error(`Unsupported encoding: ${encoding}`);
+            throw new Error(`Unsupported encoding scheme: ${scheme}`);
     }
 }
 
 /**
- * Decodes given binary data in the specific encoding scheme to a string.
+ * Encodes the binary to string with the specific encoding scheme.
  *
- * @param binaryData The binary data to decode
- * @param encoding The encoding scheme of the data
- * @returns A string containing the decoded data.
+ * @param binaryData The binary data to be encoded.
+ * @param encoding The encoding scheme to use.
+ * @returns The encoded string.
  */
-export function decodeString(binaryData: Uint8Array, encoding: BufferEncoding): string {
-    switch (encoding) {
+export function binaryToString(binaryData: Uint8Array, scheme: EncodingScheme): string {
+    switch (scheme) {
         case "ascii":
         case "binary": {
             const decoder = new TextDecoder('ascii');
@@ -77,7 +77,7 @@ export function decodeString(binaryData: Uint8Array, encoding: BufferEncoding): 
             for (const i in binaryData) {
                 chars[i] = binaryData[i].toString(16).padStart(2, '0');
             }
-            const sep = encoding === 'hex' ? '' : ' ';
+            const sep = scheme === 'hex' ? '' : ' ';
             return chars.join(sep);
         }
         case "base32":
@@ -85,6 +85,6 @@ export function decodeString(binaryData: Uint8Array, encoding: BufferEncoding): 
         case "base64":
             return base64.fromByteArray(binaryData);
         default:
-            throw new Error(`Unsupported encoding: ${encoding}`);
+            throw new Error(`Unsupported encoding scheme: ${scheme}`);
     }
 }
