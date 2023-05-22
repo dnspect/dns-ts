@@ -1,4 +1,4 @@
-import { CharactorString, Slice } from "../packet";
+import { CharacterString, Slice } from "../packet";
 import { RR } from "../rr";
 import { Writer } from "../buffer";
 
@@ -22,16 +22,16 @@ export class HINFO extends RR {
     /**
      * A <character-string> which specifies the CPU type.
      */
-    cpu!: CharactorString;
+    cpu!: CharacterString;
     /**
      * A <character-string> which specifies the operating system type.
      */
-    os!: CharactorString;
+    os!: CharacterString;
 
     unpackRdata(rdata: Slice): void {
         const s = rdata.readSlice(this.header.rdlength);
-        this.cpu = CharactorString.unpack(s);
-        this.os = CharactorString.unpack(s);
+        this.cpu = CharacterString.unpack(s);
+        this.os = CharacterString.unpack(s);
     }
 
     packRdata(buf: Writer): number {

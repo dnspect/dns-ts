@@ -58,8 +58,8 @@ export class DNSKEY extends RR {
 
     unpackRdata(rdata: Slice): void {
         this.flags = rdata.readUint16();
-        this.protocol = rdata.readOctet();
-        this.algorithm = rdata.readOctet();
+        this.protocol = rdata.readUint8();
+        this.algorithm = rdata.readUint8();
         this.publicKey = rdata.readUint8Array(this.header.rdlength - 4);
     }
 

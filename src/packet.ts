@@ -1,7 +1,6 @@
 import { Uint16, Uint32, Uint48, Uint8 } from "./types";
 import { ParseError } from "./error";
 import { FQDN } from "./fqdn";
-import * as base32 from "./base32";
 import { EncodingScheme, binaryToString } from "./encoding";
 import { Writer, Reader, OctetBuffer } from "./buffer";
 
@@ -80,11 +79,11 @@ export class HexString {
 }
 
 /**
- * CharactorString (aka <character-string> in the RFCs) is a single length octet followed by that
- * number of characters. CharactorString is treated as binary information, and can be up to 256
+ * CharacterString (aka <character-string> in the RFCs) is a single length octet followed by that
+ * number of characters. CharacterString is treated as binary information, and can be up to 256
  * characters in length (including the length octet).
  */
-export class CharactorString {
+export class CharacterString {
     private str: string;
 
     constructor(str: string) {
@@ -104,10 +103,10 @@ export class CharactorString {
         return buf.writeUint8(this.str.length) + buf.writeString(this.str, "ascii");
     }
 
-    static unpack(s: Slice): CharactorString {
-        const len = s.readOctet();
+    static unpack(s: Slice): CharacterString {
+        const len = s.readUint8();
         const str = s.readString("ascii", len);
-        return new CharactorString(str);
+        return new CharacterString(str);
     }
 }
 
@@ -124,7 +123,6 @@ export class Slice {
     private cur: number;
     private len: number;
     private lookupLabels?: (offset: Uint16, pointers: number) => [string[], Uint16];
-    private base32HexDec: base32.Decoder | null = null;
 
     /**
      * Creates a new slice from passed data.
@@ -212,11 +210,11 @@ export class Slice {
     }
 
     /**
-     * Reads a 8-bit octet and advances the read cursor.
+     * Reads a byte and advances the read cursor.
      *
      * @returns
      */
-    readOctet(): Uint8 {
+    readUint8(): Uint8 {
         this.check(1);
         const n = this.buf.readUint8(this.offset + this.cur);
         this.cur += 1;

@@ -6,7 +6,7 @@ import { Writer } from "../buffer";
 /**
  * Start of the private range for EDE codes.
  */
-export const PRIVATE_RANGE_BEGIN: Uint16 = 49152;
+export const EDE_PRIVATE_RANGE_BEGIN: Uint16 = 49152;
 
 /**
  * A complementary data can be put in EDNS opt, providing additional information about the cause of

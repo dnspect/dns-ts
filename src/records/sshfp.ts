@@ -55,8 +55,8 @@ export class SSHFP extends RR {
     fingerprint!: Uint8Array;
 
     unpackRdata(rdata: Slice): void {
-        this.algorithm = rdata.readOctet();
-        this.fpType = rdata.readOctet();
+        this.algorithm = rdata.readUint8();
+        this.fpType = rdata.readUint8();
         this.fingerprint = rdata.readUint8Array(this.header.rdlength - 2);
     }
 

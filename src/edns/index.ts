@@ -13,7 +13,8 @@ import { NSID } from "./nsid";
 import { OptCode, Option } from "./option";
 import { Slice } from "../packet";
 
-export { ExtendedError } from "./ede";
+export { Cookie } from "./cookie";
+export { ExtendedError, ExtendedErrorCode, EDE_PRIVATE_RANGE_BEGIN } from "./ede";
 export { NSID } from "./nsid";
 export { OptCode, Option } from "./option";
 

@@ -67,10 +67,10 @@ export class NSEC3PARAM extends RR {
     salt!: Uint8Array;
 
     unpackRdata(rdata: Slice): void {
-        this.hashAlg = rdata.readOctet();
-        this.flags = rdata.readOctet();
+        this.hashAlg = rdata.readUint8();
+        this.flags = rdata.readUint8();
         this.iterations = rdata.readUint16();
-        this.salt = rdata.readUint8Array(rdata.readOctet());
+        this.salt = rdata.readUint8Array(rdata.readUint8());
     }
 
     packRdata(buf: Writer): number {

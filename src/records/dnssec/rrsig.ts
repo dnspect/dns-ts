@@ -49,8 +49,8 @@ export class RRSIG extends RR {
         const bytesLeft = rdata.remaining();
 
         this.typeCovered = rdata.readUint16();
-        this.algorithm = rdata.readOctet();
-        this.labels = rdata.readOctet();
+        this.algorithm = rdata.readUint8();
+        this.labels = rdata.readUint8();
         this.originalTTL = rdata.readUint32();
         this.expiration = rdata.readUint32();
         this.inception = rdata.readUint32();

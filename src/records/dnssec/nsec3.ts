@@ -70,11 +70,11 @@ export class NSEC3 extends RR {
     typeBitMaps!: TypeBitMaps;
 
     unpackRdata(rdata: Slice): void {
-        this.hashAlg = rdata.readOctet();
-        this.flags = rdata.readOctet();
+        this.hashAlg = rdata.readUint8();
+        this.flags = rdata.readUint8();
         this.iterations = rdata.readUint16();
-        this.salt = rdata.readUint8Array(rdata.readOctet());
-        this.nexHashedOwnerName = rdata.readUint8Array(rdata.readOctet());
+        this.salt = rdata.readUint8Array(rdata.readUint8());
+        this.nexHashedOwnerName = rdata.readUint8Array(rdata.readUint8());
         this.typeBitMaps = TypeBitMaps.unpack(rdata.readSlice(rdata.remaining()));
     }
 

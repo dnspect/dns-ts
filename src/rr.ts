@@ -7,7 +7,7 @@ import { Class, RRType, Uint16, Uint32, classAbbr } from "./types";
 import { Writer } from "./buffer";
 
 /**
- * RRHeader represents the fields before the record data.
+ * Header represents the fields before the record data.
  *
  * The answer, authority, and additional sections all share the same format: a variable number of resource records,
  * where the number of records is specified in the corresponding count field in the header. Each resource record has

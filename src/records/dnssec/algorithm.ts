@@ -168,7 +168,7 @@ export const enum SecurityAlgorithm {
  *
  * Refer to {@link https://www.iana.org/assignments/ds-rr-types/ds-rr-types.xhtml | DNSSEC Delegation Signer (DS) Resource Record (RR) Type Digest Algorithms }
  */
-export const enum DigestAlgoithm {
+export const enum DigestAlgorithm {
     /*
      * Specifies that the SHA-1 hash function is used.
      *

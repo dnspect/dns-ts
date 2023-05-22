@@ -5,7 +5,7 @@ import { Uint16, Uint8, Uint32 } from "./types";
  * Maximum size of a TCP packet is 64K (65535 bytes), length of a DNS message is 2 bytes.
  * Thus, the message size itself should not exceed 65535-2, which is 0xfffd.
  */
-const MAX_MESSAGE_SIZE = 0xFFFD;
+export const MAX_MESSAGE_SIZE = 0xFFFD;
 
 /**
  * Allows for reading bytes from a source.

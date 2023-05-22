@@ -1,5 +1,5 @@
 import { Writer } from "../buffer";
-import { CharactorString, Slice } from "../packet";
+import { CharacterString, Slice } from "../packet";
 import { RR } from "../rr";
 
 /**
@@ -18,12 +18,12 @@ export class TXT extends RR {
     /**
      * One or more <character-string>s.
      */
-    content!: CharactorString[];
+    content!: CharacterString[];
 
     unpackRdata(rdata: Slice): void {
-        this.content = new Array<CharactorString>();
+        this.content = new Array<CharacterString>();
         while (rdata.remaining() > 0) {
-            this.content.push(CharactorString.unpack(rdata));
+            this.content.push(CharacterString.unpack(rdata));
         }
     }
 

@@ -101,10 +101,10 @@ export class LOC extends RR {
     altitude!: Uint32;
 
     unpackRdata(rdata: Slice): void {
-        this.version = rdata.readOctet();
-        this.size = rdata.readOctet();
-        this.horizPrecision = rdata.readOctet();
-        this.vertPrecision = rdata.readOctet();
+        this.version = rdata.readUint8();
+        this.size = rdata.readUint8();
+        this.horizPrecision = rdata.readUint8();
+        this.vertPrecision = rdata.readUint8();
         this.latitude = rdata.readUint32();
         this.longitude = rdata.readUint32();
         this.altitude = rdata.readUint32();

@@ -76,8 +76,8 @@ export class DS extends RR {
 
     unpackRdata(rdata: Slice): void {
         this.keyTag = rdata.readUint16();
-        this.algorithm = rdata.readOctet();
-        this.digestType = rdata.readOctet();
+        this.algorithm = rdata.readUint8();
+        this.digestType = rdata.readUint8();
         this.digest = rdata.readUint8Array(this.header.rdlength - 4);
     }
 

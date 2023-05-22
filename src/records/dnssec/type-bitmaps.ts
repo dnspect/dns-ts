@@ -38,8 +38,8 @@ export class TypeBitMaps {
 
         let lastWindow = -1;
         while (bin.remaining() >= 2) {
-            const window = bin.readOctet();
-            const len = bin.readOctet();
+            const window = bin.readUint8();
+            const len = bin.readUint8();
 
             if (window <= lastWindow) {
                 // Blocks are present in the NSEC RR RDATA in increasing numerical order.

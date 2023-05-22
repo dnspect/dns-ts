@@ -1,6 +1,6 @@
 import { A, AAAA, CNAME, OPT, OptHeader, TXT } from "./records";
 import { Address4, Address6 } from "@dnspect/ip-address-ts";
-import { CharactorString } from "./packet";
+import { CharacterString } from "./packet";
 import { Class, Opcode, QType, RRType, Rcode, Uint32 } from "./types";
 import { FQDN } from "./fqdn";
 import { Message, Header } from "./message";
@@ -329,7 +329,7 @@ class AnswerBuilder extends SectionBuilder {
      */
     push_txt(owner: Owner, ttl: Uint32, content: string[], cls: Class = Class.INET) {
         const txt = new TXT(new RRHeader(owner, RRType.TXT, cls, ttl));
-        txt.content = content.map((str) => new CharactorString(str));
+        txt.content = content.map((str) => new CharacterString(str));
         this.push(txt);
     }
 }
