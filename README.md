@@ -27,12 +27,11 @@ This package is designed to have no dependency on specific JavaScript runtime.
 Build a DNS message:
 
 ```javascript
-import { MessageBuilder } from "@dnspect/dns-ts";
+import { MessageBuilder, RRType } from "@dnspect/dns-ts";
 
 const mb = new MessageBuilder();
 const hb = mb.header();
 hb.randomId();
-
 
 const qb = mb.question();
 qb.push_in("example.com", RRType.A);
@@ -88,7 +87,7 @@ This is a list adopted from <https://github.com/miekg/dns/blob/master/README.md>
 - [x] 4592 - Wildcards in the DNS
 - [ ] 4635 - HMAC SHA TSIG
 - [ ] 4701 - DHCID
-- [ ] 4892 - id.server
+- [x] 4892 - id.server
 - [x] 5001 - NSID
 - [x] 5155 - NSEC3 record
 - [ ] 5205 - HIP record

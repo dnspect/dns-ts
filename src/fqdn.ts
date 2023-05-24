@@ -361,3 +361,8 @@ export const IP6_ARPA_ZONE = new FQDN(["ip6", "arpa", NULL_LABEL]);
  * The `example.com.` zone name.
  */
 export const EXAMPLE_ZONE = new FQDN(["example", "com", NULL_LABEL]);
+
+/**
+ * The reserved (RFC-2606) `localhost.` domain name.
+ */
+export const LOCALHOST = new FQDN(["localhost", NULL_LABEL]);
