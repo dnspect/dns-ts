@@ -33,16 +33,25 @@ export class MX extends RR {
      */
     exchange!: FQDN;
 
+    /**
+     * @override
+     */
     unpackRdata(rdata: Slice): void {
         this.preference = rdata.readUint16();
         this.exchange = rdata.readDomainName();
     }
 
+    /**
+     * @override
+     */
     packRdata(buf: Writer): number {
         return buf.writeUint16(this.preference) + this.exchange.pack(buf);
     }
 
-    toString(): string {
-        return `${this.header}\t${this.preference} ${this.exchange}`;
+    /**
+     * @override
+     */
+    dataString(): string {
+        return `${this.preference} ${this.exchange}`;
     }
 }

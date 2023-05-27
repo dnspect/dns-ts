@@ -87,8 +87,8 @@ export class NSEC3PARAM extends RR {
      * {@link https://datatracker.ietf.org/doc/html/rfc5155#section-4.3 | NSEC3PARAM RR Presentation Format}
      * @returns
      */
-    toString(): string {
+    dataString(): string {
         const salt = this.salt.length === 0 ? "-" : binaryToString(this.salt, "hex");
-        return `${this.header}\t${this.hashAlg} ${this.flags} ${this.iterations} ${salt}`;
+        return `${this.hashAlg} ${this.flags} ${this.iterations} ${salt}`;
     }
 }

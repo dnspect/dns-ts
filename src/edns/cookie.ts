@@ -78,7 +78,7 @@ export class Cookie extends Option {
      * @param data Cookie data
      * @returns
      */
-    static from(data: ArrayLike<number>): Cookie {
+    static from(data: ArrayLike<number> | ArrayBufferLike): Cookie {
         return new Cookie(Slice.from(data));
     }
 }

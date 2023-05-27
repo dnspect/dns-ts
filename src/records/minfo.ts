@@ -33,16 +33,25 @@ export class MINFO extends RR {
      */
     emailbx!: FQDN;
 
+    /**
+     * @override
+     */
     unpackRdata(rdata: Slice): void {
         this.rmailbx = rdata.readDomainName();
         this.emailbx = rdata.readDomainName();
     }
 
+    /**
+     * @override
+     */
     packRdata(buf: Writer): number {
         return this.rmailbx.pack(buf) + this.emailbx.pack(buf);
     }
 
-    toString(): string {
-        return `${this.header}\t${this.rmailbx} ${this.emailbx}`;
+    /**
+     * @override
+     */
+    dataString(): string {
+        return `${this.rmailbx} ${this.emailbx}`;
     }
 }

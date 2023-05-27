@@ -94,8 +94,8 @@ export class DS extends RR {
      * {@link https://datatracker.ietf.org/doc/html/rfc4034#section-5.3 | DS RR Presentation Format}
      * @returns
      */
-    toString(): string {
+    dataString(): string {
         const key = binaryToString(this.digest, 'hex').toUpperCase();
-        return `${this.header}\t${this.keyTag} ${this.algorithm} ${this.digestType} ${key}`;
+        return `${this.keyTag} ${this.algorithm} ${this.digestType} ${key}`;
     }
 }

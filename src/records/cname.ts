@@ -29,8 +29,8 @@ export class CNAME extends RR {
         return this.target.pack(buf);
     }
 
-    toString(): string {
-        return `${this.header}\t${this.target}`;
+    dataString(): string {
+        return `${this.target}`;
     }
 }
 

@@ -35,8 +35,8 @@ export class A extends RR implements AddressRR {
     /**
      * @override
      */
-    toString(): string {
-        return `${this.header}\t${this.address}`;
+    dataString(): string {
+        return `${this.address}`;
     }
 }
 

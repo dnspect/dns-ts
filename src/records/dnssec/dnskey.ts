@@ -76,8 +76,8 @@ export class DNSKEY extends RR {
      * {@link https://datatracker.ietf.org/doc/html/rfc4034#section-2.2 | DNSKEY RR Presentation Format}
      * @returns
      */
-    toString(): string {
+    dataString(): string {
         const key = binaryToString(this.publicKey, 'base64');
-        return `${this.header}\t${this.flags} ${this.protocol} ${this.algorithm} ${key}`;
+        return `${this.flags} ${this.protocol} ${this.algorithm} ${key}`;
     }
 }

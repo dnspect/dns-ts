@@ -7,15 +7,17 @@
  * @packageDocumentation
  */
 
+import { NSID } from "./nsid";
+import { ClientSubnet } from "./client-subnet";
 import { Cookie } from "./cookie";
 import { ExtendedError } from "./ede";
-import { NSID } from "./nsid";
 import { OptCode, Option } from "./option";
 import { Slice } from "../packet";
 
+export { NSID } from "./nsid";
+export { ClientSubnet } from "./client-subnet";
 export { Cookie } from "./cookie";
 export { ExtendedError, ExtendedErrorCode, EDE_PRIVATE_RANGE_BEGIN } from "./ede";
-export { NSID } from "./nsid";
 export { OptCode, Option } from "./option";
 
 export function unpack(data: Slice): Option[] {
@@ -28,6 +30,9 @@ export function unpack(data: Slice): Option[] {
         switch (code) {
             case OptCode.NSID:
                 options.push(new NSID(data.readSlice(len)));
+                break;
+            case OptCode.ClientSubnet:
+                options.push(new ClientSubnet(data.readSlice(len)));
                 break;
             case OptCode.Cookie:
                 options.push(new Cookie(data.readSlice(len)));

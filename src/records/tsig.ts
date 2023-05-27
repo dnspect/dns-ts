@@ -96,10 +96,10 @@ export class TSIG extends RR {
      *
      * @returns
      */
-    toString(): string {
+    dataString(): string {
         const mac = binaryToString(this.mac, 'base64');
         const otherData = binaryToString(this.otherData, 'base64');
-        return `${this.header}\t${this.algorithm} ${displayTimeSigned(this.timeSigned)} ${this.fudge} ${mac} ${this.originalID} ${this.error} ${otherData}`;
+        return `${this.algorithm} ${displayTimeSigned(this.timeSigned)} ${this.fudge} ${mac} ${this.originalID} ${this.error} ${otherData}`;
     }
 }
 

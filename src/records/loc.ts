@@ -121,9 +121,9 @@ export class LOC extends RR {
     }
 
     /**
-     * <owner> <TTL> <class> LOC ( d1 [m1 [s1]] {"N"|"S"} d2 [m2 [s2]]
-     *                            {"E"|"W"} alt["m"] [siz["m"] [hp["m"]
-     *                            [vp["m"]]]] )
+     * LOC ( d1 [m1 [s1]] {"N"|"S"} d2 [m2 [s2]]
+     *       {"E"|"W"} alt["m"] [siz["m"] [hp["m"]
+     *       [vp["m"]]]] )
      *
      * where:
      *   d1:     [0 .. 90]                                  (degrees latitude)
@@ -141,7 +141,7 @@ export class LOC extends RR {
      *  statdns.net.   IN LOC   52 22 23.000 N 4 53 32.000 E -2.00m 0.00m 10000m 10m
      *  ```
      */
-    toString(): string {
+    dataString(): string {
         const [nOrS, lat] = this.latitude > LOC_EQUATOR ? ["N", this.latitude - LOC_EQUATOR] : ["S", LOC_EQUATOR - this.latitude];
         const [eOrW, lon] = this.longitude > LOC_PRIMEMERIDIAN ? ["E", this.longitude - LOC_PRIMEMERIDIAN] : ["W", LOC_PRIMEMERIDIAN - this.longitude];
         const latStr = displayLatLon(lat, nOrS);
@@ -153,7 +153,7 @@ export class LOC extends RR {
         const horiz = displaySizePrecision(this.horizPrecision);
         const vert = displaySizePrecision(this.vertPrecision);
 
-        return `${this.header}\t${latStr} ${lonStr} ${altStr} ${size} ${horiz} ${vert}`;
+        return `${latStr} ${lonStr} ${altStr} ${size} ${horiz} ${vert}`;
     }
 }
 

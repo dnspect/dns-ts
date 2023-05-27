@@ -4,7 +4,7 @@ import { RR } from "./rr";
 import { Opcode, RRType, Rcode, Uint16 } from "./types";
 import { unpackRecord } from "./records";
 import { OPT } from "./records/opt";
-import { Writer, OctetBuffer } from "./buffer";
+import { Writer, PacketBuffer } from "./buffer";
 
 type Flags = {
     /**
@@ -559,8 +559,9 @@ export class Message {
      *
      * @throws ParseError
      */
-    static unpack(buf: ArrayLike<number> | ArrayBufferLike): Message {
-        const packet = new Packet(OctetBuffer.from(buf));
+    static unpack(buf: ArrayLike<number> | ArrayBufferLike | PacketBuffer): Message {
+        const pb = (buf instanceof PacketBuffer) ? buf : PacketBuffer.from(buf);
+        const packet = new Packet(pb);
         const header = Header.unpack(packet.readSlice(12));
         const msg = new Message(header);
 

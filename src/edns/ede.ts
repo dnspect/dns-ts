@@ -18,10 +18,15 @@ export class ExtendedError extends Option {
     infoCode!: ExtendedErrorCode;
     extraText!: string;
 
-    constructor(data: Slice) {
+    constructor(data: Slice | ExtendedErrorCode, text?: string) {
         super(OptCode.ExtendedError);
-        this.infoCode = data.readUint16();
-        this.extraText = data.readUTF8String();
+        if (data instanceof Slice) {
+            this.infoCode = data.readUint16();
+            this.extraText = data.readUTF8String();
+        } else {
+            this.infoCode = data;
+            this.extraText = text ?? '';
+        }
     }
 
     /**
@@ -48,6 +53,27 @@ export class ExtendedError extends Option {
             output += `: (${this.extraText})`;
         }
         return output;
+    }
+
+    /**
+     * Creates a new ExtendedError from the option data.
+     *
+     * @param data The option data.
+     * @returns
+     */
+    static from(data: ArrayLike<number> | ArrayBufferLike): ExtendedError {
+        return new ExtendedError(Slice.from(data));
+    }
+
+    /**
+     * Creates a new ExtendedError from error code and optional text.
+     *
+     * @param infoCode
+     * @param extraText
+     * @returns
+     */
+    static fromCode(infoCode: ExtendedErrorCode, extraText?: string): ExtendedError {
+        return new ExtendedError(infoCode, extraText);
     }
 }
 

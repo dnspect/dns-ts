@@ -12,9 +12,13 @@ import { Writer } from "../buffer";
 export class NSID extends Option {
     identifier!: Uint8Array;
 
-    constructor(data: Slice) {
+    constructor(data: Slice | Uint8Array) {
         super(OptCode.NSID);
-        this.identifier = data.readUint8Array();
+        if (data instanceof Slice) {
+            this.identifier = data.readUint8Array();
+        } else {
+            this.identifier = data;
+        }
     }
 
     packOptionData(buf: Writer): number {
@@ -45,6 +49,6 @@ export class NSID extends Option {
      */
     static fromString(id: string, encoding: "ascii" | "utf-8" = "utf-8"): NSID {
         const bin = stringToBinary(id, encoding);
-        return new NSID(Slice.from(bin));
+        return new NSID(bin);
     }
 }

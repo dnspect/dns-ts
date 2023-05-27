@@ -1,4 +1,4 @@
-import { OctetBuffer } from "./buffer";
+import { PacketBuffer } from "./buffer";
 import { binaryToString, stringToBinary } from "./encoding";
 import { Message } from "./message";
 import { expect } from "chai";
@@ -20,10 +20,10 @@ describe("test pack()", () => {
             ;example.com.		IN	A
         `));
 
-        const buf = OctetBuffer.alloc(1024);
+        const buf = PacketBuffer.alloc(1024);
         const n = query.pack(buf);
 
-        const actual = binaryToString(buf.freeze(n).read(), 'hex');
+        const actual = binaryToString(buf.freeze(n).slice(), 'hex');
         expect(actual).to.equal(expected);
     });
 });

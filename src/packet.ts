@@ -2,7 +2,7 @@ import { Uint16, Uint32, Uint48, Uint8 } from "./types";
 import { ParseError } from "./error";
 import { FQDN } from "./fqdn";
 import { EncodingScheme, binaryToString } from "./encoding";
-import { Writer, Reader, OctetBuffer } from "./buffer";
+import { Writer, Reader, PacketBuffer } from "./buffer";
 
 
 /**
@@ -131,7 +131,7 @@ export class Slice {
      * @returns
      */
     static from(data: ArrayLike<number> | ArrayBufferLike): Slice {
-        return new Slice(OctetBuffer.from(data));
+        return new Slice(PacketBuffer.from(data));
     }
 
     /**
@@ -275,7 +275,7 @@ export class Slice {
         }
 
         const end = this.cur + len;
-        const data = this.buf.read(this.offset + this.cur, this.offset + end);
+        const data = this.buf.slice(this.offset + this.cur, this.offset + end);
         this.seek(end);
         return binaryToString(data, encoding);
     }
@@ -390,7 +390,7 @@ export class Slice {
                 return [labels, cur - startPos];
             }
 
-            const labelData = this.buf.read(this.offset + cur, this.offset + cur + labelLen);
+            const labelData = this.buf.slice(this.offset + cur, this.offset + cur + labelLen);
             const label = binaryToString(labelData, 'ascii');
             labels.push(label);
 

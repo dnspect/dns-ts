@@ -69,11 +69,16 @@ export abstract class Option {
 /**
  *
  */
+
 export enum OptCode {
     /**
      * Name server identifier. RFC 5001
      */
     NSID = 3,
+    /**
+     * Client Subnet. RFC 7871
+     */
+    ClientSubnet = 8,
     /**
      * DNS Cookies. RFC 7873
      */

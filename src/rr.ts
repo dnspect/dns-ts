@@ -3,7 +3,7 @@
 import { Address } from "@dnspect/ip-address-ts";
 import { FQDN } from "./fqdn";
 import { Slice } from "./packet";
-import { Class, RRType, Uint16, Uint32, classAbbr } from "./types";
+import { Class, RRType, Uint16, Uint32 } from "./types";
 import { Writer } from "./buffer";
 
 /**
@@ -74,11 +74,7 @@ export class Header {
     }
 
     toString(): string {
-        const s = `${this.name}\t\t${this.ttl}\t${classAbbr(this.class)}\t${RRType[this.type]}`;
-        if (this.type === RRType.OPT) {
-            return `;${s}`;
-        }
-        return s;
+        return `${this.name}\t\t${this.ttl}\t${Class[this.class]}\t${RRType[this.type]}`;
     }
 
     pack(buf: Writer): number {
@@ -153,9 +149,26 @@ export abstract class RR {
     abstract packRdata(buf: Writer): number;
 
     /**
-     *
+     * Return the rr data in it's textual form.
      */
-    abstract toString(): string;
+    abstract dataString(): string;
+
+    /**
+     * Returns textual representation of the RR in dig-like format.
+     */
+    toString(): string {
+        if (this.header.type === RRType.OPT) {
+            return this.dataString();
+        }
+        return `${this.header}\t${this.dataString()}`;
+    }
+
+    /**
+     * Returns texual representation of the RR in application/dns-json format.
+     */
+    toJSON(): string {
+        return `{"name": "${this.header.name}", "type": ${this.header.type}, "TTL": ${this.header.ttl}, "data": ${JSON.stringify(this.dataString())}}`;
+    }
 }
 
 /**
