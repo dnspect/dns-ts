@@ -72,7 +72,7 @@ export class Question {
     toJsonObject(): object {
         return {
             "name": this.qname.toString(),
-            "type": this.qclass,
+            "type": this.qtype,
         };
     }
 

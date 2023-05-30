@@ -5,6 +5,7 @@ import { Opcode, RRType, Rcode, Uint16 } from "./types";
 import { unpackRecord } from "./records";
 import { OPT } from "./records/opt";
 import { Writer, PacketBuffer } from "./buffer";
+import { ClientSubnet } from "./edns";
 
 type Flags = {
     /**
@@ -538,6 +539,41 @@ export class Message {
         }
 
         return sections.join("\n");
+    }
+
+    /**
+     * Returns a JSON object of the message that will generate textual in application/dns-json format.
+     *
+     * @returns The JSON object.
+     */
+    toJsonObject(): object {
+        const header = this.header;
+
+        let obj = {
+            Status: header.rcode(),
+            TC: header.truncated(),
+            RD: header.recursionDesired(),
+            RA: header.recursionAvailable(),
+            AD: header.authenticatedData(),
+            CD: header.checkingDisabled(),
+            Question: this.question.map((q) => q.toJsonObject()),
+            Answer: this.answer.records.map((rr) => rr.toJsonObject()),
+        };
+
+        if (header.authoritative()) {
+            obj = { ...obj, ...{ AA: true } };
+        }
+
+        const opt = this.opt();
+        if (opt !== null) {
+            for (const item of opt.options) {
+                if (item instanceof ClientSubnet) {
+                    obj = { ...obj, ...{ edns_client_subnet: `${item.address}/${item.scopePrefixLength}` } };
+                }
+            }
+        }
+
+        return obj;
     }
 
     pack(buf: Writer): number {
