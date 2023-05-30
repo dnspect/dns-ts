@@ -6,11 +6,11 @@ import { Class, RRType } from "./types";
 describe("test stringify", () => {
     const q = new Question(FQDN.parse('example.com'), RRType.A, Class.IN);
 
-    it("should get dig-like", () => {
+    it("should get dig-like text", () => {
         expect(q.toString()).to.be.equal(';example.com.\t\tIN\tA');
     });
 
-    it("should get dns-json", () => {
-        expect(q.toJSON()).to.be.equal('{"name": "example.com.", "type": 1}');
+    it("should get dns-json object", () => {
+        expect(JSON.stringify(q.toJsonObject())).to.be.equal(JSON.stringify({ "name": "example.com.", "type": 1 }));
     });
 });

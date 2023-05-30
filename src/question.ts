@@ -65,12 +65,15 @@ export class Question {
     }
 
     /**
-     * Generates textual representation in dns-json format.
+     * Returns JSON object of the question that will generate textual in application/dns-json format.
      *
      * @returns
      */
-    toJSON(): string {
-        return `{"name": "${this.qname.toString()}", "type": ${this.qclass}}`;
+    toJsonObject(): object {
+        return {
+            "name": this.qname.toString(),
+            "type": this.qclass,
+        };
     }
 
     pack(buf: Writer): number {

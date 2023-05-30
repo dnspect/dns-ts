@@ -164,10 +164,15 @@ export abstract class RR {
     }
 
     /**
-     * Returns texual representation of the RR in application/dns-json format.
+     * Returns JSON object of the RR that will generate textual in application/dns-json format.
      */
-    toJSON(): string {
-        return `{"name": "${this.header.name}", "type": ${this.header.type}, "TTL": ${this.header.ttl}, "data": ${JSON.stringify(this.dataString())}}`;
+    toJsonObject(): object {
+        return {
+            "name": this.header.name.toString(),
+            "type": this.header.type,
+            "TTL": this.header.ttl,
+            "data": this.dataString(),
+        };
     }
 }
 
