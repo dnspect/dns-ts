@@ -12,11 +12,13 @@ import { ClientSubnet } from "./client-subnet";
 import { Cookie } from "./cookie";
 import { ExtendedError } from "./ede";
 import { OptCode, Option } from "./option";
+import { Padding } from "./padding";
 import { Slice } from "../packet";
 
 export { NSID } from "./nsid";
 export { ClientSubnet } from "./client-subnet";
 export { Cookie } from "./cookie";
+export { Padding } from "./padding";
 export { ExtendedError, ExtendedErrorCode, EDE_PRIVATE_RANGE_BEGIN } from "./ede";
 export { OptCode, Option } from "./option";
 
@@ -36,6 +38,9 @@ export function unpack(data: Slice): Option[] {
                 break;
             case OptCode.Cookie:
                 options.push(new Cookie(data.readSlice(len)));
+                break;
+            case OptCode.Padding:
+                options.push(new Padding(data.readSlice(len)));
                 break;
             case OptCode.ExtendedError:
                 options.push(new ExtendedError(data.readSlice(len)));

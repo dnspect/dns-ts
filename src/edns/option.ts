@@ -84,6 +84,10 @@ export enum OptCode {
      */
     Cookie = 10,
     /**
+     * Padding. RFC 7830
+     */
+    Padding = 12,
+    /**
      * Extended DNS Error. RFC 8914
      */
     ExtendedError = 15,

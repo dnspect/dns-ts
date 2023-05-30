@@ -546,7 +546,7 @@ export class Message {
      *
      * @returns The JSON object.
      */
-    toJsonObject(): object {
+    toJsonObject(comment?: string): object {
         const header = this.header;
 
         let obj = {
@@ -558,6 +558,7 @@ export class Message {
             CD: header.checkingDisabled(),
             Question: this.question.map((q) => q.toJsonObject()),
             Answer: this.answer.records.map((rr) => rr.toJsonObject()),
+            Comment: comment,
         };
 
         if (header.authoritative()) {

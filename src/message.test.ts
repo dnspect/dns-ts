@@ -326,6 +326,6 @@ describe('test toJsonObject', function () {
         const msg = Message.unpack(
             hexToBinary("c58781a00001000100000001076578616d706c6503636f6d0000010001c00c00010001000145c200045db8d82200002904d0000000000000")
         );
-        expect(JSON.stringify(msg.toJsonObject())).to.equal(`{"Status":0,"TC":false,"RD":true,"RA":true,"AD":true,"CD":false,"Question":[{"name":"example.com.","type":1}],"Answer":[{"name":"example.com.","type":1,"TTL":83394,"data":"93.184.216.34"}]}`);
+        expect(JSON.stringify(msg.toJsonObject('this is a test'))).to.equal(`{"Status":0,"TC":false,"RD":true,"RA":true,"AD":true,"CD":false,"Question":[{"name":"example.com.","type":1}],"Answer":[{"name":"example.com.","type":1,"TTL":83394,"data":"93.184.216.34"}],"Comment":"this is a test"}`);
     });
 });
