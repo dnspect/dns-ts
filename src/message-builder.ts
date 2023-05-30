@@ -242,7 +242,7 @@ class QuestionBuilder {
      */
     push_in(queryName: Owner, queryType: QType): void {
         const qname = (queryName instanceof FQDN) ? queryName : FQDN.parse(queryName);
-        this.append(new Question(qname, queryType, Class.INET));
+        this.append(new Question(qname, queryType, Class.IN));
     }
 
     /**
@@ -253,7 +253,7 @@ class QuestionBuilder {
      */
     push_ch(queryName: Owner, queryType: QType): void {
         const qname = (queryName instanceof FQDN) ? queryName : FQDN.parse(queryName);
-        this.append(new Question(qname, queryType, Class.CHAOS));
+        this.append(new Question(qname, queryType, Class.CH));
     }
 }
 
@@ -288,7 +288,7 @@ class AnswerBuilder extends SectionBuilder {
      * @param address
      */
     push_a(owner: Owner, ttl: Uint32, address: Address4) {
-        const a = new A(new RRHeader(owner, RRType.A, Class.INET, ttl));
+        const a = new A(new RRHeader(owner, RRType.A, Class.IN, ttl));
         a.address = address;
         this.push(a);
     }
@@ -301,7 +301,7 @@ class AnswerBuilder extends SectionBuilder {
      * @param address
      */
     push_aaaa(owner: Owner, ttl: Uint32, address: Address6) {
-        const aaaa = new AAAA(new RRHeader(owner, RRType.AAAA, Class.INET, ttl));
+        const aaaa = new AAAA(new RRHeader(owner, RRType.AAAA, Class.IN, ttl));
         aaaa.address = address;
         this.push(aaaa);
     }
@@ -314,7 +314,7 @@ class AnswerBuilder extends SectionBuilder {
      * @param target
      */
     push_cname(owner: Owner, ttl: Uint32, target: FQDN) {
-        const cname = new CNAME(new RRHeader(owner, RRType.CNAME, Class.INET, ttl));
+        const cname = new CNAME(new RRHeader(owner, RRType.CNAME, Class.IN, ttl));
         cname.target = target;
         this.push(cname);
     }
@@ -327,7 +327,7 @@ class AnswerBuilder extends SectionBuilder {
      * @param content
      * @param cls The class of resource record
      */
-    push_txt(owner: Owner, ttl: Uint32, content: string[], cls: Class = Class.INET) {
+    push_txt(owner: Owner, ttl: Uint32, content: string[], cls: Class = Class.IN) {
         const txt = new TXT(new RRHeader(owner, RRType.TXT, cls, ttl));
         txt.content = content.map((str) => new CharacterString(str));
         this.push(txt);
@@ -346,7 +346,7 @@ class AdditionalBuilder extends SectionBuilder {
      * @param address
      */
     push_a(owner: Owner, ttl: Uint32, address: Address4) {
-        const a = new A(new RRHeader(owner, RRType.A, Class.INET, ttl));
+        const a = new A(new RRHeader(owner, RRType.A, Class.IN, ttl));
         a.address = address;
         this.push(a);
     }
@@ -359,7 +359,7 @@ class AdditionalBuilder extends SectionBuilder {
      * @param address
      */
     push_aaaa(owner: Owner, ttl: Uint32, address: Address6) {
-        const aaaa = new AAAA(new RRHeader(owner, RRType.AAAA, Class.INET, ttl));
+        const aaaa = new AAAA(new RRHeader(owner, RRType.AAAA, Class.IN, ttl));
         aaaa.address = address;
         this.push(aaaa);
     }

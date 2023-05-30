@@ -63,7 +63,7 @@ export class NSEC extends RR {
      * {@link https://datatracker.ietf.org/doc/html/rfc4034#section-4.2 | NSEC RR Presentation Format}
      * @returns
      */
-    toString(): string {
-        return `${this.header}\t${this.nextName} ${this.typeBitMaps}`;
+    dataString(): string {
+        return `${this.nextName} ${this.typeBitMaps}`;
     }
 }

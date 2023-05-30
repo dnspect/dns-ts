@@ -22,15 +22,24 @@ export class MR extends RR {
      */
     newname!: FQDN;
 
+    /**
+     * @override
+     */
     unpackRdata(rdata: Slice): void {
         this.newname = rdata.readDomainName();
     }
 
+    /**
+     * @override
+     */
     packRdata(buf: Writer): number {
         return this.newname.pack(buf);
     }
 
-    toString(): string {
-        return `${this.header}\t${this.newname}`;
+    /**
+     * @override
+     */
+    dataString(): string {
+        return `${this.newname}`;
     }
 }

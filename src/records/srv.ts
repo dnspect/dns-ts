@@ -115,7 +115,10 @@ export class SRV extends RR {
             this.target.pack(buf);
     }
 
-    toString(): string {
-        return `${this.header}\t${this.priority} ${this.port} ${this.weight} ${this.target}`;
+    /**
+     * @override
+     */
+    dataString(): string {
+        return `${this.priority} ${this.port} ${this.weight} ${this.target}`;
     }
 }

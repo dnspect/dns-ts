@@ -73,11 +73,9 @@ export class OPT extends RR {
     }
 
     /**
-     * Builds a dig-like output of the OPT info.
-     *
-     * @returns
+     * @override
      */
-    toString(): string {
+    dataString(): string {
         const flags = [];
         if (this.optHeader().dnssecOk()) {
             flags.push(" do");

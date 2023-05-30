@@ -35,7 +35,10 @@ export class TXT extends RR {
         return n;
     }
 
-    toString(): string {
-        return `${this.header}\t${this.content.map((cs) => `"${cs}"`).join(" ")}`;
+    /**
+     * @override
+     */
+    dataString(): string {
+        return `${this.content.map((cs) => `"${cs}"`).join(" ")}`;
     }
 }

@@ -22,15 +22,24 @@ export class MB extends RR {
      */
     madname!: FQDN;
 
+    /**
+     * @override
+     */
     unpackRdata(rdata: Slice): void {
         this.madname = rdata.readDomainName();
     }
 
+    /**
+     * @override
+     */
     packRdata(buf: Writer): number {
         return this.madname.pack(buf);
     }
 
-    toString(): string {
-        return `${this.header}\t${this.madname}`;
+    /**
+     * @override
+     */
+    dataString(): string {
+        return `${this.madname}`;
     }
 }

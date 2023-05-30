@@ -77,9 +77,9 @@ export class RRSIG extends RR {
      * {@link https://datatracker.ietf.org/doc/html/rfc4034#autoid-24 | RRSIG RR Presentation Format}
      * @returns
      */
-    toString(): string {
+    dataString(): string {
         const signature = binaryToString(this.signature, 'base64');
-        return `${this.header}\t${RRType[this.typeCovered]} ${this.algorithm} ${this.labels} ${this.originalTTL} ${displayUnixTS(this.expiration)} ${displayUnixTS(this.inception)} ${this.keyTag} ${this.signerName} ${signature}`;
+        return `${RRType[this.typeCovered]} ${this.algorithm} ${this.labels} ${this.originalTTL} ${displayUnixTS(this.expiration)} ${displayUnixTS(this.inception)} ${this.keyTag} ${this.signerName} ${signature}`;
     }
 }
 

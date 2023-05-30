@@ -28,17 +28,26 @@ export class HINFO extends RR {
      */
     os!: CharacterString;
 
+    /**
+     * @override
+     */
     unpackRdata(rdata: Slice): void {
         const s = rdata.readSlice(this.header.rdlength);
         this.cpu = CharacterString.unpack(s);
         this.os = CharacterString.unpack(s);
     }
 
+    /**
+     * @override
+     */
     packRdata(buf: Writer): number {
         return this.cpu.pack(buf) + this.os.pack(buf);
     }
 
-    toString(): string {
-        return `${this.header}\t${this.cpu} ${this.os}`;
+    /**
+     * @override
+     */
+    dataString(): string {
+        return `${this.cpu} ${this.os}`;
     }
 }

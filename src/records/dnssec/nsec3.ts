@@ -99,10 +99,10 @@ export class NSEC3 extends RR {
      * {@link https://datatracker.ietf.org/doc/html/rfc5155#section-3.3 | NSEC3 RR Presentation Format}
      * @returns
      */
-    toString(): string {
+    dataString(): string {
         const salt = this.salt.length === 0 ? "-" : binaryToString(this.salt, "hex");
         const decoder = new Decoder(Base32Spec.ExtendedHex);
         const nextHashedOwnerName = this.nexHashedOwnerName.length === 0 ? "" : decoder.decode(this.salt);
-        return `${this.header}\t${this.hashAlg} ${this.flags} ${this.iterations} ${salt} ${nextHashedOwnerName} ${this.typeBitMaps}`;
+        return `${this.hashAlg} ${this.flags} ${this.iterations} ${salt} ${nextHashedOwnerName} ${this.typeBitMaps}`;
     }
 }

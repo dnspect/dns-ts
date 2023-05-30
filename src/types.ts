@@ -6,7 +6,7 @@ export type Uint48 = number; // less then Number.MAX_SAFE_INTEGER
 /**
  * The max value of a Uint16 number.
  */
-export const Uint16Max = 0xFFFF;
+export const Uint16Max = 0xffff;
 
 /**
  * A four bit field that specifies kind of query in this message.
@@ -21,12 +21,35 @@ export const Uint16Max = 0xFFFF;
  * See also https://datatracker.ietf.org/doc/html/rfc1035#section-4.1.1
  */
 export enum Opcode {
-    Query = 0,
-    IQuery = 1,
-    Status = 2,
+    QUERY = 0,
+    IQUERY = 1,
+    STATUS = 2,
     // There is no 3 yet.
-    Notify = 4,
-    Update = 5,
+    NOTIFY = 4,
+    UPDATE = 5,
+}
+
+/**
+ * Converts a string to Opcode.
+ *
+ * @param name The op name.
+ * @returns
+ */
+export function opcodeFrom(op: string): Opcode | null {
+    switch (op.toUpperCase()) {
+        case "QUERY":
+            return Opcode.QUERY;
+        case "IQUERY":
+            return Opcode.IQUERY;
+        case "STATUS":
+            return Opcode.STATUS;
+        case "NOTIFY":
+            return Opcode.NOTIFY;
+        case "UPDATE":
+            return Opcode.UPDATE;
+        default:
+            return null;
+    }
 }
 
 /**
@@ -35,28 +58,34 @@ export enum Opcode {
  * See also https://datatracker.ietf.org/doc/html/rfc1035#section-3.2.4
  */
 export enum Class {
-    INET = 1,   // The Internet
-    CSNET = 2,  // The CSNET class (Obsolete - used only for examples in some obsolete RFCs)
-    CHAOS = 3,  // The CHAOS class
-    Hesiod = 4, // Hesiod [Dyer 87]
+    IN = 1, // The Internet
+    CS = 2, // The CSNET class (Obsolete - used only for examples in some obsolete RFCs)
+    CH = 3, // The CHAOS class
+    HS = 4, // Hesiod [Dyer 87]
 }
 
 /**
- * Returns the abbreviation of the class name.
+ * Converts a string to Class.
  *
- * @param c
+ * @param name The resource record class name.
  * @returns
  */
-export function classAbbr(c: Class): string {
-    switch (c) {
-        case Class.INET:
-            return "IN";
-        case Class.CSNET:
-            return "CS";
-        case Class.CHAOS:
-            return "CH";
-        case Class.Hesiod:
-            return "HS";
+export function classFrom(name: string): Class | null {
+    switch (name.toUpperCase()) {
+        case "IN":
+        case "INET":
+            return Class.IN;
+        case "CS":
+        case "CSNET":
+            return Class.CS;
+        case "CH":
+        case "CHAOS":
+            return Class.CH;
+        case "HS":
+        case "HESIOD":
+            return Class.HS;
+        default:
+            return null;
     }
 }
 
@@ -71,8 +100,24 @@ export function classAbbr(c: Class): string {
  * See also https://datatracker.ietf.org/doc/html/rfc1035#section-3.2.5
  */
 export type QClass = Class | QClassExtend;
-const enum QClassExtend {
-    Any = 255, // The ANY class
+export enum QClassExtend {
+    ANY = 255, // The ANY class
+}
+
+/**
+ * Converts a string to QClass.
+ *
+ * @param name The query class name.
+ * @returns
+ */
+export function qclassFrom(name: string): QClass | null {
+    name = name.toUpperCase();
+
+    if (name === "ANY") {
+        return QClassExtend.ANY;
+    }
+
+    return classFrom(name);
 }
 
 /**
@@ -83,11 +128,11 @@ const enum QClassExtend {
  */
 export function qclassAbbr(c: QClass): string {
     if (c in Class) {
-        return classAbbr(c as Class);
+        return Class[c as Class];
     }
 
     switch (c) {
-        case QClassExtend.Any:
+        case QClassExtend.ANY:
             return "ANY";
         default:
             return "";
@@ -115,33 +160,32 @@ export function qclassAbbr(c: QClass): string {
  * See also https://datatracker.ietf.org/doc/html/rfc1035#section-4.1.1
  */
 export enum Rcode {
-    NoError = 0, // No Error                          [DNS]
-    FormErr = 1, // Format Error                      [DNS]
-    ServFail = 2, // Server Failure                   [DNS]
-    NXDomain = 3, // Name Error                       [DNS]
-    NotImp = 4, // Not Implemented                    [DNS]
-    Refused = 5, // Query Refused                     [DNS]
-    YXDomain = 6, // Name Exists when it should not   [DNS Update]
-    YXRrset = 7, // RR Set Exists when it should not  [DNS Update]
-    NXRrset = 8, // RR Set that should exist does not [DNS Update]
-    NotAuth = 9, // Server Not Authoritative for zone [DNS Update]
-    NotZone = 10, // Name not contained in zone       [DNS Update/TSIG]
-    BadSig = 16, // TSIG Signature Failure            [TSIG]
-    BadVers = 16, // Bad OPT Version                  [EDNS0]
-    BadKey = 17, // Key not recognized                [TSIG]
-    BadTime = 18, // Signature out of time window     [TSIG]
-    BadMode = 19, // Bad TKEY Mode                    [TKEY]
-    BadName = 20, // Duplicate key name               [TKEY]
-    BadAlg = 21, // Algorithm not supported           [TKEY]
-    BadTrunc = 22, // Bad Truncation                  [TSIG]
-    BadCookie = 23, // Bad/missing Server Cookie      [DNS Cookies]
+    NOERROR = 0, // No Error                          [DNS]
+    FORMERR = 1, // Format Error                      [DNS]
+    SERVFAIL = 2, // Server Failure                   [DNS]
+    NXDOMAIN = 3, // Name Error                       [DNS]
+    NOTIMP = 4, // Not Implemented                    [DNS]
+    REFUSED = 5, // Query Refused                     [DNS]
+    YXDOMAIN = 6, // Name Exists when it should not   [DNS Update]
+    YXRRSET = 7, // RR Set Exists when it should not  [DNS Update]
+    NXRRSET = 8, // RR Set that should exist does not [DNS Update]
+    NOTAUTH = 9, // Server Not Authoritative for zone [DNS Update]
+    NOTZONE = 10, // Name not contained in zone       [DNS Update/TSIG]
+    BADSIG = 16, // TSIG Signature Failure            [TSIG]
+    BADVERS = 16, // Bad OPT Version                  [EDNS0]
+    BADKEY = 17, // Key not recognized                [TSIG]
+    BADTIME = 18, // Signature out of time window     [TSIG]
+    BADMODE = 19, // Bad TKEY Mode                    [TKEY]
+    BADNAME = 20, // Duplicate key name               [TKEY]
+    BADALG = 21, // Algorithm not supported           [TKEY]
+    BADTRUNC = 22, // Bad Truncation                  [TSIG]
+    BADCOOKIE = 23, // Bad/missing Server Cookie      [DNS Cookies]
 }
 
 /**
  * Resrouce record type.
  */
 export enum RRType {
-    None = 0,
     A = 1,
     NS = 2,
     MD = 3,
@@ -221,11 +265,103 @@ export enum RRType {
 
     TA = 32768,
     DLV = 32769,
-    Reserved = 65535,
+    RESERVED = 65535,
 }
 
-/** All types */
+/** All record record types */
 export type RRTypes = keyof typeof RRType;
+
+/**
+ * Converts a string to RRType.
+ *
+ * @param name The resource record type name.
+ * @returns
+ */
+export function rrtypeFrom(name: string): RRType | null {
+    name = name.toUpperCase();
+
+    switch (name) {
+        case 'A': return RRType.A;
+        case 'NS': return RRType.NS;
+        case 'MD': return RRType.MD;
+        case 'MF': return RRType.MF;
+        case 'CNAME': return RRType.CNAME;
+        case 'SOA': return RRType.SOA;
+        case 'MB': return RRType.MB;
+        case 'MG': return RRType.MG;
+        case 'MR': return RRType.MR;
+        case 'NULL': return RRType.NULL;
+        case 'PTR': return RRType.PTR;
+        case 'HINFO': return RRType.HINFO;
+        case 'MINFO': return RRType.MINFO;
+        case 'MX': return RRType.MX;
+        case 'TXT': return RRType.TXT;
+        case 'RP': return RRType.RP;
+        case 'AFSDB': return RRType.AFSDB;
+        case 'X25': return RRType.X25;
+        case 'ISDN': return RRType.ISDN;
+        case 'RT': return RRType.RT;
+        case 'NSAPPTR': return RRType.NSAPPTR;
+        case 'SIG': return RRType.SIG;
+        case 'KEY': return RRType.KEY;
+        case 'PX': return RRType.PX;
+        case 'GPOS': return RRType.GPOS;
+        case 'AAAA': return RRType.AAAA;
+        case 'LOC': return RRType.LOC;
+        case 'NXT': return RRType.NXT;
+        case 'EID': return RRType.EID;
+        case 'NIMLOC': return RRType.NIMLOC;
+        case 'SRV': return RRType.SRV;
+        case 'ATMA': return RRType.ATMA;
+        case 'NAPTR': return RRType.NAPTR;
+        case 'KX': return RRType.KX;
+        case 'CERT': return RRType.CERT;
+        case 'DNAME': return RRType.DNAME;
+        case 'OPT': return RRType.OPT; // EDNS
+        case 'APL': return RRType.APL;
+        case 'DS': return RRType.DS;
+        case 'SSHFP': return RRType.SSHFP;
+        case 'RRSIG': return RRType.RRSIG;
+        case 'NSEC': return RRType.NSEC;
+        case 'DNSKEY': return RRType.DNSKEY;
+        case 'DHCID': return RRType.DHCID;
+        case 'NSEC3': return RRType.NSEC3;
+        case 'NSEC3PARAM': return RRType.NSEC3PARAM;
+        case 'TLSA': return RRType.TLSA;
+        case 'SMIMEA': return RRType.SMIMEA;
+        case 'HIP': return RRType.HIP;
+        case 'NINFO': return RRType.NINFO;
+        case 'RKEY': return RRType.RKEY;
+        case 'TALINK': return RRType.TALINK;
+        case 'CDS': return RRType.CDS;
+        case 'CDNSKEY': return RRType.CDNSKEY;
+        case 'OPENPGPKEY': return RRType.OPENPGPKEY;
+        case 'CSYNC': return RRType.CSYNC;
+        case 'ZONEMD': return RRType.ZONEMD;
+        case 'SVCB': return RRType.SVCB;
+        case 'HTTPS': return RRType.HTTPS;
+        case 'SPF': return RRType.SPF;
+        case 'UINFO': return RRType.UINFO;
+        case 'UID': return RRType.UID;
+        case 'GID': return RRType.GID;
+        case 'UNSPEC': return RRType.UNSPEC;
+        case 'NID': return RRType.NID;
+        case 'L32': return RRType.L32;
+        case 'L64': return RRType.L64;
+        case 'LP': return RRType.LP;
+        case 'EUI48': return RRType.EUI48;
+        case 'EUI64': return RRType.EUI64;
+        case 'URI': return RRType.URI;
+        case 'CAA': return RRType.CAA;
+        case 'AVC': return RRType.AVC;
+        case 'TKEY': return RRType.TKEY;
+        case 'TSIG': return RRType.TSIG;
+        case 'TA': return RRType.TA;
+        case 'DLV': return RRType.DLV;
+        case 'RESERVED': return RRType.RESERVED;
+        default: return null;
+    }
+}
 
 /**
  * QTYPE fields appear in the question part of a query. QTYPES are a superset of TYPEs, hence all
@@ -242,10 +378,34 @@ export type RRTypes = keyof typeof RRType;
  * See also https://datatracker.ietf.org/doc/html/rfc1035#section-3.2.3
  */
 export type QType = RRType | QTypeExtend;
-const enum QTypeExtend {
+export enum QTypeExtend {
     IXFR = 251,
     AXFR = 252,
     MAILB = 253,
     MAILA = 254,
     ANY = 255,
+}
+
+/**
+ * Converts a string to QType.
+ *
+ * @param name The query type name.
+ * @returns
+ */
+export function qtypeFrom(name: string): QType | null {
+    name = name.toUpperCase();
+    switch (name) {
+        case "IXFR":
+            return QTypeExtend.IXFR;
+        case "AXFR":
+            return QTypeExtend.AXFR;
+        case "MAILB":
+            return QTypeExtend.MAILB;
+        case "MAILA":
+            return QTypeExtend.MAILA;
+        case "ANY":
+            return QTypeExtend.ANY;
+    }
+
+    return rrtypeFrom(name);
 }

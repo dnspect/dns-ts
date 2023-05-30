@@ -2,10 +2,9 @@ import { stringToBinary, EncodingScheme } from "./encoding";
 import { Uint16, Uint8, Uint32 } from "./types";
 
 /**
- * Maximum size of a TCP packet is 64K (65535 bytes), length of a DNS message is 2 bytes.
- * Thus, the message size itself should not exceed 65535-2, which is 0xfffd.
+ * Maximum size of a DNS packet is 64K (65535 bytes) because the payload length field is a 16-bit.
  */
-export const MAX_MESSAGE_SIZE = 0xFFFD;
+export const MAX_MESSAGE_SIZE = 0xFFFF;
 
 /**
  * Allows for reading bytes from a source.
@@ -49,7 +48,7 @@ export interface Reader {
      *        at the index 'end'. Default to the end of the source if not specified.
      * @returns An array of bytes read
      */
-    read(offset?: number, end?: number): Uint8Array;
+    slice(offset?: number, end?: number): Uint8Array;
 }
 
 /**
@@ -123,13 +122,13 @@ export interface Writer {
  *
  * It is able to grow exponentially when it is writable.
  */
-export class OctetBuffer implements Reader, Writer {
+export class PacketBuffer implements Reader, Writer {
     buf!: Uint8Array;
     private offset = 0;
     private writable = false;
 
     /**
-     * Initializes a writable OctetBuffer object with default 1232 bytes that are zero-filled.
+     * Initializes a writable PacketBuffer object with default 1232 bytes that are zero-filled.
      *
      * @param buf
      */
@@ -143,21 +142,21 @@ export class OctetBuffer implements Reader, Writer {
      *
      * @param size The initial size of the buffer.
      */
-    static alloc(size: number): OctetBuffer {
-        return new OctetBuffer(new Uint8Array(size), true);
+    static alloc(size: number): PacketBuffer {
+        return new PacketBuffer(new Uint8Array(size), true);
     }
 
     /**
-     * Creates a readonly OctetBuffer object using the passed data.
+     * Creates a readonly PacketBuffer object using the passed data.
      *
      * @param buf
      * @returns
      */
-    static from(buf: ArrayLike<number> | ArrayBufferLike): OctetBuffer {
+    static from(buf: ArrayLike<number> | ArrayBufferLike): PacketBuffer {
         if (buf instanceof Uint8Array) {
-            return new OctetBuffer(buf, false);
+            return new PacketBuffer(buf, false);
         }
-        return new OctetBuffer(new Uint8Array(buf), false);
+        return new PacketBuffer(new Uint8Array(buf), false);
     }
 
     checkWrite(offset: number, extra: number): void {
@@ -221,7 +220,7 @@ export class OctetBuffer implements Reader, Writer {
         return (this.buf[pos] * 0x1000000) + ((this.buf[pos + 1] << 16) | (this.buf[pos + 2] << 8) | this.buf[pos + 3]);
     }
 
-    read(offset = 0, end = this.buf.length): Uint8Array {
+    slice(offset = 0, end = this.buf.length): Uint8Array {
         this.checkRead(offset, end - offset);
         return this.buf.slice(offset, end);
     }
@@ -273,7 +272,7 @@ export class OctetBuffer implements Reader, Writer {
         return this.write(data);
     }
 
-    freeze(len: number): OctetBuffer {
+    freeze(len: number): PacketBuffer {
         this.buf = this.buf.subarray(0, len);
         this.writable = false;
         return this;

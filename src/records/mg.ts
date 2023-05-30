@@ -23,15 +23,24 @@ export class MG extends RR {
      */
     mgmname!: FQDN;
 
+    /**
+     * @override
+     */
     unpackRdata(rdata: Slice): void {
         this.mgmname = rdata.readDomainName();
     }
 
+    /**
+     * @override
+     */
     packRdata(buf: Writer): number {
         return this.mgmname.pack(buf);
     }
 
-    toString(): string {
-        return `${this.header}\t${this.mgmname}`;
+    /**
+     * @override
+     */
+    dataString(): string {
+        return `${this.mgmname}`;
     }
 }

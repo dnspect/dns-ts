@@ -55,8 +55,22 @@ export class Question {
         return new Question(this.qname.clone(), this.qtype, this.qclass);
     }
 
+    /**
+     * Generates textual representation in dig-like format.
+     *
+     * @returns
+     */
     toString(): string {
         return `;${this.qname.toString()}\t\t${qclassAbbr(this.qclass)}\t${RRType[this.qtype].toUpperCase()}`;
+    }
+
+    /**
+     * Generates textual representation in dns-json format.
+     *
+     * @returns
+     */
+    toJSON(): string {
+        return `{"name": "${this.qname.toString()}", "type": ${this.qclass}}`;
     }
 
     pack(buf: Writer): number {

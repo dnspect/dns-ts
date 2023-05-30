@@ -100,7 +100,10 @@ export class SOA extends RR {
             buf.writeUint32(this.minimum);
     }
 
-    toString(): string {
-        return `${this.header}\t${this.mname} ${this.rname} ${this.serial} ${this.refresh} ${this.retry} ${this.expire} ${this.minimum}`;
+    /**
+     * @override
+     */
+    dataString(): string {
+        return `${this.mname} ${this.rname} ${this.serial} ${this.refresh} ${this.retry} ${this.expire} ${this.minimum}`;
     }
 }

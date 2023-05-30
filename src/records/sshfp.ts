@@ -78,8 +78,8 @@ export class SSHFP extends RR {
      *
      * @returns
      */
-    toString(): string {
+    dataString(): string {
         const hex = binaryToString(this.fingerprint, 'hex');
-        return `${this.header}\t${this.algorithm} ${this.fpType} ${hex}`;
+        return `${this.algorithm} ${this.fpType} ${hex}`;
     }
 }

@@ -14,8 +14,8 @@ describe("test build message header", () => {
         expect(msg.header.id).to.equal(0);
         expect(msg.header.isQuery()).to.true;
         expect(msg.header.isResponse()).to.false;
-        expect(msg.header.opcode()).to.equal(Opcode.Query);
-        expect(msg.header.rcode()).to.equal(Rcode.NoError);
+        expect(msg.header.opcode()).to.equal(Opcode.QUERY);
+        expect(msg.header.rcode()).to.equal(Rcode.NOERROR);
         expect(msg.header.qdCount).to.equal(0);
     });
 
@@ -28,14 +28,14 @@ describe("test build message header", () => {
 
     it("should build header", () => {
         hb.randomId();
-        hb.setRcode(Rcode.NXDomain);
+        hb.setRcode(Rcode.NXDOMAIN);
         hb.setQR(true);
         const msg = mb.build();
 
         expect(msg.header.id).to.gt(0);
         expect(msg.header.isQuery()).to.false;
         expect(msg.header.isResponse()).to.true;
-        expect(msg.header.rcode()).to.equal(Rcode.NXDomain);
+        expect(msg.header.rcode()).to.equal(Rcode.NXDOMAIN);
     });
 });
 

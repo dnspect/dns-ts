@@ -20,15 +20,24 @@ export class PTR extends RR {
      */
     domain!: FQDN;
 
+    /**
+     * @override
+     */
     unpackRdata(rdata: Slice): void {
         this.domain = rdata.readDomainName();
     }
 
+    /**
+     * @override
+     */
     packRdata(buf: Writer): number {
         return this.domain.pack(buf);
     }
 
-    toString(): string {
-        return `${this.header}\t${this.domain}`;
+    /**
+     * @override
+     */
+    dataString(): string {
+        return `${this.domain}`;
     }
 }
