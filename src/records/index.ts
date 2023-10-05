@@ -21,6 +21,7 @@ import { SRV } from "./srv";
 import { SSHFP } from "./sshfp";
 import { TSIG } from "./tsig";
 import { TXT } from "./txt";
+import { ZONEMD } from "./zonemd";
 
 export { A, isA } from "./a";
 export { AAAA, isAAAA } from "./aaaa";
@@ -40,6 +41,7 @@ export { SRV } from "./srv";
 export { SSHFP } from "./sshfp";
 export { TSIG } from "./tsig";
 export { TXT } from "./txt";
+export { ZONEMD } from "./zonemd";
 
 export function unpackRecord(s: Slice): RR {
     const h = Header.unpack(s);
@@ -142,8 +144,14 @@ export function unpackRecord(s: Slice): RR {
             record = new TXT(h);
             break;
         }
+        case RRType.ZONEMD: {
+            record = new ZONEMD(h);
+            break;
+        }
         default:
-            throw new ParseError(`unsupported resource record type: TYPE${h.type}`);
+            throw new ParseError(
+                `unsupported resource record type: TYPE${h.type}`
+            );
     }
 
     record.unpackRdata(s.readSlice(h.rdlength));

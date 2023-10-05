@@ -116,4 +116,4 @@ This is a list adopted from <https://github.com/miekg/dns/blob/master/README.md>
 - [ ] 8659 - DNS Certification Authority Authorization (CAA) Resource Record
 - [ ] 8777 - DNS Reverse IP Automatic Multicast Tunneling (AMT) Discovery
 - [x] 8914 - Extended DNS Errors
-- [ ] 8976 - Message Digest for DNS Zones (ZONEMD RR)
+- [x] 8976 - Message Digest for DNS Zones (ZONEMD RR)
