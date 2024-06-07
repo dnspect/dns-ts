@@ -1,6 +1,6 @@
 {
     "name": "@dnspect/dns-ts",
-    "version": "0.2.2",
+    "version": "0.2.3",
     "description": "DNS library in TypeScript",
     "author": "Minghang Chen <chen@minghang.dev> (https://minghang.dev)",
     "license": "MIT",
@@ -48,11 +48,12 @@
         "eslint": "8",
         "mocha": "10",
         "ts-node": "10",
+        "tsc-alias": "1.8",
         "typescript": "4.9"
     },
     "scripts": {
         "test": "mocha",
-        "build": "tsc -d",
+        "build": "tsc -d && tsc-alias -f",
         "lint": "eslint src/**/**.{ts,tsx}",
         "lint:fix": "eslint src/**/**.{ts,tsx} --fix"
     },
