@@ -1,5 +1,4 @@
 import { ParseError } from "./error";
-import { Writer } from "./buffer";
 
 /**
  * Current rules:
@@ -26,7 +25,7 @@ const NULL_LABEL = "";
  *
  * Note that this field may be an odd number of octets; no padding is used.
  */
-export class FQDN {
+export class FQDN implements Iterable<string> {
     private readonly labels: string[];
     private str?: string;
 
@@ -39,6 +38,15 @@ export class FQDN {
         } else {
             this.labels = labels;
         }
+    }
+
+    /**
+     * New a label iterator.
+     *
+     * @returns
+     */
+    [Symbol.iterator](): Iterator<string> {
+        return new LabelIterator(this.labels);
     }
 
     /**
@@ -125,15 +133,6 @@ export class FQDN {
     }
 
     /**
-     * New a label iterator.
-     *
-     * @returns
-     */
-    iter(): Iterator<string> {
-        return new LabelIterator(this.labels);
-    }
-
-    /**
      * Determines whether the other name has the exact same labels with this name.
      *
      * @param other
@@ -162,7 +161,10 @@ export class FQDN {
      */
     startWith(base: FQDN, excludeSelf = false): boolean {
         const baseLen = base.labelLength();
-        if (this.labels.length < baseLen || (excludeSelf && this.labels.length === baseLen)) {
+        if (
+            this.labels.length < baseLen ||
+            (excludeSelf && this.labels.length === baseLen)
+        ) {
             return false;
         }
 
@@ -190,7 +192,10 @@ export class FQDN {
      */
     endsWith(base: FQDN, excludeSelf = false): boolean {
         const baseLen = base.labelLength();
-        if (this.labels.length < baseLen || (excludeSelf && this.labels.length === baseLen)) {
+        if (
+            this.labels.length < baseLen ||
+            (excludeSelf && this.labels.length === baseLen)
+        ) {
             return false;
         }
 
@@ -303,7 +308,9 @@ export class FQDN {
 
         for (let i = 0; i < labels.length - 1; i++) {
             if (!LABEL_RE.test(labels[i])) {
-                throw new ParseError(`invalid domain name: label "${labels[i]}" is invalid`);
+                throw new ParseError(
+                    `invalid domain name: label "${labels[i]}" is invalid`
+                );
             }
         }
 
@@ -317,22 +324,30 @@ export class FQDN {
 class LabelIterator implements Iterator<string, string> {
     private labels: string[];
     private idx = 0;
+    private done = false;
 
     constructor(labels: string[]) {
         this.labels = labels;
     }
 
     next(): IteratorResult<string> {
-        if (this.idx >= this.labels.length) {
+        if (this.done) {
+            return { done: this.done, value: undefined };
+        }
+
+        if (this.idx === this.labels.length) {
+            this.done = true;
             return {
                 done: true,
-                value: null,
+                value: this.idx,
             };
         }
 
+        const value = this.labels[this.idx];
+        this.idx += 1;
         return {
-            done: this.idx + 1 === this.labels.length,
-            value: this.labels[this.idx],
+            done: false,
+            value,
         };
     }
 }

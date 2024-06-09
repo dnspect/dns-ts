@@ -1,5 +1,12 @@
 import { expect } from "chai";
-import { ARPA_ZONE, EXAMPLE_ZONE, FQDN, IN_ADDR_ARPA_ZONE, IP6_ARPA_ZONE, ROOT_ZONE } from "./fqdn";
+import {
+    ARPA_ZONE,
+    EXAMPLE_ZONE,
+    FQDN,
+    IN_ADDR_ARPA_ZONE,
+    IP6_ARPA_ZONE,
+    ROOT_ZONE,
+} from "./fqdn";
 
 describe("test FQDN()", () => {
     it("should construct", () => {
@@ -7,8 +14,12 @@ describe("test FQDN()", () => {
         expect(new FQDN([""]).toString()).to.equal(".");
         expect(new FQDN(["com"]).toString()).to.equal("com.");
         expect(new FQDN(["com", ""]).toString()).to.equal("com.");
-        expect(new FQDN(["example", "com"]).toString()).to.equal("example.com.");
-        expect(new FQDN(["example", "com", ""]).toString()).to.equal("example.com.");
+        expect(new FQDN(["example", "com"]).toString()).to.equal(
+            "example.com."
+        );
+        expect(new FQDN(["example", "com", ""]).toString()).to.equal(
+            "example.com."
+        );
     });
 
     it("should parse", () => {
@@ -18,6 +29,15 @@ describe("test FQDN()", () => {
         expect(FQDN.parse("com.").toString()).to.equal("com.");
         expect(FQDN.parse("example.com").toString()).to.equal("example.com.");
         expect(FQDN.parse("example.com.").toString()).to.equal("example.com.");
+    });
+
+    it("should iter", () => {
+        const name = FQDN.parse("www.example.com.");
+        const labels: string[] = [];
+        for (const label of name) {
+            labels.push(label);
+        }
+        expect(labels).to.have.ordered.members(["www", "example", "com", ""]);
     });
 
     it("should get label length", () => {
@@ -121,9 +141,11 @@ describe("test FQDN()", () => {
 
     it("should create subdomain", () => {
         expect(ROOT_ZONE.subdomain("arpa").equal(ARPA_ZONE)).to.true;
-        expect(ROOT_ZONE.subdomain("in-addr", "arpa").equal(IN_ADDR_ARPA_ZONE)).to.true;
+        expect(ROOT_ZONE.subdomain("in-addr", "arpa").equal(IN_ADDR_ARPA_ZONE))
+            .to.true;
         expect(ARPA_ZONE.subdomain("in-addr").equal(IN_ADDR_ARPA_ZONE)).to.true;
-        expect(EXAMPLE_ZONE.subdomain("www").equal(FQDN.parse("www.example.com"))).to.true;
+        expect(
+            EXAMPLE_ZONE.subdomain("www").equal(FQDN.parse("www.example.com"))
+        ).to.true;
     });
 });
-
