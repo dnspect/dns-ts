@@ -81,8 +81,8 @@ export class SOA extends RR {
     minimum!: Uint32;
 
     unpackRdata(rdata: Slice): void {
-        this.mname = rdata.readDomainName();
-        this.rname = rdata.readDomainName();
+        this.mname = rdata.readName();
+        this.rname = rdata.readName();
         this.serial = rdata.readUint32();
         this.refresh = rdata.readUint32();
         this.retry = rdata.readUint32();
@@ -91,13 +91,15 @@ export class SOA extends RR {
     }
 
     packRdata(buf: Writer): number {
-        return this.mname.pack(buf) +
-            this.rname.pack(buf) +
+        return (
+            buf.writeName(this.mname, true) +
+            buf.writeName(this.rname, true) +
             buf.writeUint32(this.serial) +
             buf.writeUint32(this.refresh) +
             buf.writeUint32(this.retry) +
             buf.writeUint32(this.expire) +
-            buf.writeUint32(this.minimum);
+            buf.writeUint32(this.minimum)
+        );
     }
 
     /**

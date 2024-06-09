@@ -27,14 +27,14 @@ export class MG extends RR {
      * @override
      */
     unpackRdata(rdata: Slice): void {
-        this.mgmname = rdata.readDomainName();
+        this.mgmname = rdata.readName();
     }
 
     /**
      * @override
      */
     packRdata(buf: Writer): number {
-        return this.mgmname.pack(buf);
+        return buf.writeName(this.mgmname, false);
     }
 
     /**

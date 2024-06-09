@@ -55,20 +55,24 @@ export class RRSIG extends RR {
         this.expiration = rdata.readUint32();
         this.inception = rdata.readUint32();
         this.keyTag = rdata.readUint16();
-        this.signerName = rdata.readDomainName();
-        this.signature = rdata.readUint8Array(this.header.rdlength - (bytesLeft - rdata.remaining()));
+        this.signerName = rdata.readName();
+        this.signature = rdata.readUint8Array(
+            this.header.rdlength - (bytesLeft - rdata.remaining())
+        );
     }
 
     packRdata(buf: Writer): number {
-        return buf.writeUint16(this.typeCovered) +
+        return (
+            buf.writeUint16(this.typeCovered) +
             buf.writeUint8(this.algorithm) +
             buf.writeUint8(this.labels) +
             buf.writeUint32(this.originalTTL) +
             buf.writeUint32(this.expiration) +
             buf.writeUint32(this.inception) +
             buf.writeUint16(this.keyTag) +
-            this.signerName.pack(buf) +
-            buf.write(this.signature);
+            buf.writeName(this.signerName, true) +
+            buf.write(this.signature)
+        );
     }
 
     /**
@@ -78,8 +82,12 @@ export class RRSIG extends RR {
      * @returns
      */
     dataString(): string {
-        const signature = binaryToString(this.signature, 'base64');
-        return `${RRType[this.typeCovered]} ${this.algorithm} ${this.labels} ${this.originalTTL} ${displayUnixTS(this.expiration)} ${displayUnixTS(this.inception)} ${this.keyTag} ${this.signerName} ${signature}`;
+        const signature = binaryToString(this.signature, "base64");
+        return `${RRType[this.typeCovered]} ${this.algorithm} ${this.labels} ${
+            this.originalTTL
+        } ${displayUnixTS(this.expiration)} ${displayUnixTS(this.inception)} ${
+            this.keyTag
+        } ${this.signerName} ${signature}`;
     }
 }
 
@@ -91,5 +99,13 @@ export class RRSIG extends RR {
  */
 function displayUnixTS(ts: Uint32): string {
     const dt = new Date(ts * 1000);
-    return `${dt.getUTCFullYear()}${(dt.getUTCMonth() + 1).toString().padStart(2, "0")}${dt.getUTCDate().toString().padStart(2, "0")}${dt.getUTCHours().toString().padStart(2, "0")}${dt.getUTCMinutes().toString().padStart(2, "0")}${dt.getUTCSeconds().toString().padStart(2, "0")}`;
+    return `${dt.getUTCFullYear()}${(dt.getUTCMonth() + 1)
+        .toString()
+        .padStart(2, "0")}${dt.getUTCDate().toString().padStart(2, "0")}${dt
+        .getUTCHours()
+        .toString()
+        .padStart(2, "0")}${dt.getUTCMinutes().toString().padStart(2, "0")}${dt
+        .getUTCSeconds()
+        .toString()
+        .padStart(2, "0")}`;
 }

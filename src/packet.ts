@@ -4,7 +4,6 @@ import { FQDN } from "./fqdn";
 import { EncodingScheme, binaryToString } from "./encoding";
 import { Writer, Reader, PacketBuffer } from "./buffer";
 
-
 /**
  * Max domain label octets
  *
@@ -57,14 +56,16 @@ export class HexString {
      */
     toBytes(): Uint8Array {
         if (this.hex.length % 2 !== 0) {
-            throw new Error(`expect even number of hex digits to convert to bytes`);
+            throw new Error(
+                `expect even number of hex digits to convert to bytes`
+            );
         }
 
         const bytes = new Uint8Array(this.hex.length / 2);
         for (let i = 0; i < bytes.length; i++) {
             const highCode = this.hex.charCodeAt(i * 2);
             const lowCode = this.hex.charCodeAt(i * 2 + 1);
-            bytes[i] = highCode << 4 + lowCode;
+            bytes[i] = highCode << (4 + lowCode);
         }
         return bytes;
     }
@@ -100,7 +101,9 @@ export class CharacterString {
      * @returns
      */
     pack(buf: Writer): number {
-        return buf.writeUint8(this.str.length) + buf.writeString(this.str, "ascii");
+        return (
+            buf.writeUint8(this.str.length) + buf.writeString(this.str, "ascii")
+        );
     }
 
     static unpack(s: Slice): CharacterString {
@@ -109,7 +112,6 @@ export class CharacterString {
         return new CharacterString(str);
     }
 }
-
 
 /**
  * A slice of fixed-length sequence of bytes.
@@ -122,7 +124,10 @@ export class Slice {
     private offset: number;
     private cur: number;
     private len: number;
-    private lookupLabels?: (offset: Uint16, pointers: number) => [string[], Uint16];
+    private lookupLabels?: (
+        offset: Uint16,
+        pointers: number
+    ) => [string[], Uint16];
 
     /**
      * Creates a new slice from passed data.
@@ -141,7 +146,12 @@ export class Slice {
      * @param length
      * @param lookupLabels A method to lookup domain labels in the message buffer.
      */
-    protected constructor(buf: Reader, bytesOffset = 0, length?: number, lookupLabels?: (offset: Uint16, pointers: number) => [string[], Uint16]) {
+    protected constructor(
+        buf: Reader,
+        bytesOffset = 0,
+        length?: number,
+        lookupLabels?: (offset: Uint16, pointers: number) => [string[], Uint16]
+    ) {
         this.buf = buf;
         this.offset = bytesOffset;
         this.len = length === undefined ? buf.byteLength() : length;
@@ -157,7 +167,11 @@ export class Slice {
      */
     private check(len: number): void {
         if (this.cur + len > this.len) {
-            throw new ParseError(`insufficient bytes remaining for read: needs ${len}, have ${this.len - this.cur}`);
+            throw new ParseError(
+                `insufficient bytes remaining for read: needs ${len}, have ${
+                    this.len - this.cur
+                }`
+            );
         }
     }
 
@@ -299,7 +313,12 @@ export class Slice {
     readSlice(len: number): Slice {
         this.check(len);
 
-        const s = new Slice(this.buf, this.offset + this.cur, len, this.lookupLabels);
+        const s = new Slice(
+            this.buf,
+            this.offset + this.cur,
+            len,
+            this.lookupLabels
+        );
         this.cur += len;
         return s;
     }
@@ -337,10 +356,12 @@ export class Slice {
      * @param limit The total number of bytes to be read.
      * @returns
      */
-    readDomainName(): FQDN {
+    readName(): FQDN {
         const [labels, n] = this.findLabels(this.cur, 0);
         if (n > this.remaining()) {
-            throw new ParseError(`overflow unpacking domain name: needs ${n}, have ${this.remaining()}`);
+            throw new ParseError(
+                `overflow unpacking domain name: needs ${n}, have ${this.remaining()}`
+            );
         }
 
         // Advance the cursor
@@ -356,7 +377,10 @@ export class Slice {
      *
      * @throws ParseError
      */
-    protected findLabels(startPos: Uint16, pointers: number): [string[], Uint16] {
+    protected findLabels(
+        startPos: Uint16,
+        pointers: number
+    ): [string[], Uint16] {
         const labels = new Array<string>();
         let labelLen = this.buf.readUint8(this.offset + startPos);
         let cur = startPos + 1;
@@ -370,17 +394,22 @@ export class Slice {
                 // eslint-disable-next-line no-param-reassign
                 pointers++;
                 if (pointers > MAX_COMPRESSION_POINTERS) {
-                    throw new ParseError(`too much domain name compression pointers: ${pointers}`);
+                    throw new ParseError(
+                        `too much domain name compression pointers: ${pointers}`
+                    );
                 }
 
                 // remove the first two ones to get a high byte
                 const high = labelLen - LABEL_POINTER;
                 // the new position to read the name from
-                const newPos = (high << 8) + this.buf.readUint8(this.offset + cur);
+                const newPos =
+                    (high << 8) + this.buf.readUint8(this.offset + cur);
                 cur += 1;
 
                 if (this.lookupLabels === undefined) {
-                    throw new ParseError(`domain name compression is not supported by in this slice of data`);
+                    throw new ParseError(
+                        `domain name compression is not supported by in this slice of data`
+                    );
                 }
 
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -390,17 +419,24 @@ export class Slice {
                 return [labels, cur - startPos];
             }
 
-            const labelData = this.buf.slice(this.offset + cur, this.offset + cur + labelLen);
-            const label = binaryToString(labelData, 'ascii');
+            const labelData = this.buf.slice(
+                this.offset + cur,
+                this.offset + cur + labelLen
+            );
+            const label = binaryToString(labelData, "ascii");
             labels.push(label);
 
             if (labelLen > MAX_DOMAIN_LABEL_WIRE_OCTETS) {
-                throw new ParseError(`label exceeded ${MAX_DOMAIN_LABEL_WIRE_OCTETS} octets: "${label}"`);
+                throw new ParseError(
+                    `label exceeded ${MAX_DOMAIN_LABEL_WIRE_OCTETS} octets: "${label}"`
+                );
             }
 
             cur += labelLen;
-            if ((cur - startPos) >= MAX_DOMAIN_NAME_WIRE_OCTETS) {
-                throw new ParseError(`domain name exceeded ${MAX_DOMAIN_NAME_WIRE_OCTETS} octets`);
+            if (cur - startPos >= MAX_DOMAIN_NAME_WIRE_OCTETS) {
+                throw new ParseError(
+                    `domain name exceeded ${MAX_DOMAIN_NAME_WIRE_OCTETS} octets`
+                );
             }
 
             // ready for reading next label or the null label (0) at the end
@@ -411,7 +447,7 @@ export class Slice {
         // Add the null label as an empty string
         labels.push("");
 
-        return [labels, (cur - startPos)];
+        return [labels, cur - startPos];
     }
 }
 

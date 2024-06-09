@@ -66,7 +66,7 @@ export class Header {
     rdlength: Uint16;
 
     constructor(name: FQDN | string, type: RRType, cls: Class, ttl: Uint32) {
-        this.name = (name instanceof FQDN) ? name : FQDN.parse(name);
+        this.name = name instanceof FQDN ? name : FQDN.parse(name);
         this.type = type;
         this.class = cls;
         this.ttl = ttl;
@@ -74,11 +74,13 @@ export class Header {
     }
 
     toString(): string {
-        return `${this.name}\t\t${this.ttl}\t${Class[this.class]}\t${RRType[this.type]}`;
+        return `${this.name}\t\t${this.ttl}\t${Class[this.class]}\t${
+            RRType[this.type]
+        }`;
     }
 
     pack(buf: Writer): number {
-        let n = this.name.pack(buf);
+        let n = buf.writeName(this.name, true);
         n += buf.writeUint16(this.type);
         n += buf.writeUint16(this.class);
         n += buf.writeUint32(this.ttl);
@@ -90,7 +92,7 @@ export class Header {
 
     static unpack(s: Slice): Header {
         const h = new Header(
-            s.readDomainName(),
+            s.readName(),
             s.readUint16(),
             s.readUint16(),
             s.readUint32()
@@ -168,10 +170,10 @@ export abstract class RR {
      */
     toJsonObject(): object {
         return {
-            "name": this.header.name.toString(),
-            "type": this.header.type,
-            "TTL": this.header.ttl,
-            "data": this.dataString(),
+            name: this.header.name.toString(),
+            type: this.header.type,
+            TTL: this.header.ttl,
+            data: this.dataString(),
         };
     }
 }

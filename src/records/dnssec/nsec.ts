@@ -49,12 +49,14 @@ export class NSEC extends RR {
     typeBitMaps!: TypeBitMaps;
 
     unpackRdata(rdata: Slice): void {
-        this.nextName = rdata.readDomainName();
-        this.typeBitMaps = TypeBitMaps.unpack(rdata.readSlice(rdata.remaining()));
+        this.nextName = rdata.readName();
+        this.typeBitMaps = TypeBitMaps.unpack(
+            rdata.readSlice(rdata.remaining())
+        );
     }
 
     packRdata(buf: Writer): number {
-        return this.nextName.pack(buf) + this.typeBitMaps.pack(buf);
+        return buf.writeName(this.nextName, false) + this.typeBitMaps.pack(buf);
     }
 
     /**

@@ -22,11 +22,11 @@ export class CNAME extends RR {
     target!: FQDN;
 
     unpackRdata(rdata: Slice): void {
-        this.target = rdata.readDomainName();
+        this.target = rdata.readName();
     }
 
     packRdata(buf: Writer): number {
-        return this.target.pack(buf);
+        return buf.writeName(this.target, true);
     }
 
     dataString(): string {

@@ -38,14 +38,17 @@ export class MX extends RR {
      */
     unpackRdata(rdata: Slice): void {
         this.preference = rdata.readUint16();
-        this.exchange = rdata.readDomainName();
+        this.exchange = rdata.readName();
     }
 
     /**
      * @override
      */
     packRdata(buf: Writer): number {
-        return buf.writeUint16(this.preference) + this.exchange.pack(buf);
+        return (
+            buf.writeUint16(this.preference) +
+            buf.writeName(this.exchange, true)
+        );
     }
 
     /**

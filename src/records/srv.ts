@@ -87,7 +87,7 @@ export class SRV extends RR {
             throw new SemanticError("invalid service field");
         }
         this.service = owner.substring(0, firstDot);
-        if (this.service.charAt(0) === '_') {
+        if (this.service.charAt(0) === "_") {
             this.service = this.service.substring(1);
         }
 
@@ -96,7 +96,7 @@ export class SRV extends RR {
             throw new SemanticError("invalid proto field");
         }
         this.proto = owner.substring(firstDot, secondDot);
-        if (this.proto.charAt(0) === '_') {
+        if (this.proto.charAt(0) === "_") {
             this.proto = this.proto.substring(1);
         }
 
@@ -105,14 +105,16 @@ export class SRV extends RR {
         this.priority = rdata.readUint16();
         this.port = rdata.readUint16();
         this.weight = rdata.readUint16();
-        this.target = rdata.readDomainName();
+        this.target = rdata.readName();
     }
 
     packRdata(buf: Writer): number {
-        return buf.writeUint16(this.priority) +
+        return (
+            buf.writeUint16(this.priority) +
             buf.writeUint16(this.port) +
             buf.writeUint16(this.weight) +
-            this.target.pack(buf);
+            buf.writeName(this.target, true)
+        );
     }
 
     /**

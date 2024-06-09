@@ -32,14 +32,14 @@ export class NS extends RR {
      * @override
      */
     unpackRdata(rdata: Slice): void {
-        this.nameserver = rdata.readDomainName();
+        this.nameserver = rdata.readName();
     }
 
     /**
      * @override
      */
     packRdata(buf: Writer): number {
-        return this.nameserver.pack(buf);
+        return buf.writeName(this.nameserver, true);
     }
 
     /**

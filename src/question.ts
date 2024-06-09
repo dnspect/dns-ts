@@ -61,7 +61,9 @@ export class Question {
      * @returns
      */
     toString(): string {
-        return `;${this.qname.toString()}\t\t${qclassAbbr(this.qclass)}\t${RRType[this.qtype].toUpperCase()}`;
+        return `;${this.qname.toString()}\t\t${qclassAbbr(
+            this.qclass
+        )}\t${RRType[this.qtype].toUpperCase()}`;
     }
 
     /**
@@ -71,19 +73,19 @@ export class Question {
      */
     toJsonObject(): object {
         return {
-            "name": this.qname.toString(),
-            "type": this.qtype,
+            name: this.qname.toString(),
+            type: this.qtype,
         };
     }
 
     pack(buf: Writer): number {
-        let n = this.qname.pack(buf);
+        let n = buf.writeName(this.qname, true);
         n += buf.writeUint16(this.qtype);
         n += buf.writeUint16(this.qclass);
         return n;
     }
 
     static unpack(s: Slice): Question {
-        return new Question(s.readDomainName(), s.readUint16(), s.readUint16());
+        return new Question(s.readName(), s.readUint16(), s.readUint16());
     }
 }

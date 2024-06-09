@@ -269,21 +269,6 @@ export class FQDN implements Iterable<string> {
     }
 
     /**
-     * Converts domain name to a sequence of bytes and write to the buffer.
-     *
-     * @param buf
-     * @returns The number of bytes written
-     */
-    pack(buf: Writer): number {
-        let n = 0;
-        for (const label of this.labels) {
-            n += buf.writeUint8(label.length);
-            n += buf.writeString(label, 'ascii');
-        }
-        return n;
-    }
-
-    /**
      * Parses a textual domain name.
      *
      * @param name

@@ -68,7 +68,7 @@ export class TSIG extends RR {
     otherData!: Uint8Array;
 
     unpackRdata(rdata: Slice): void {
-        this.algorithm = rdata.readDomainName();
+        this.algorithm = rdata.readName();
         this.timeSigned = rdata.readUint48();
         this.fudge = rdata.readUint16();
         this.mac = rdata.readUint8Array(rdata.readUint16());
@@ -78,9 +78,9 @@ export class TSIG extends RR {
     }
 
     packRdata(buf: Writer): number {
-        let n = this.algorithm.pack(buf);
+        let n = buf.writeName(this.algorithm, false);
         n += buf.writeUint32(this.timeSigned >> 16);
-        n += buf.writeUint16(this.timeSigned & 0xFFFF);
+        n += buf.writeUint16(this.timeSigned & 0xffff);
         n += buf.writeUint16(this.fudge);
         n += buf.writeUint16(this.mac.length);
         n += buf.write(this.mac);
@@ -97,9 +97,11 @@ export class TSIG extends RR {
      * @returns
      */
     dataString(): string {
-        const mac = binaryToString(this.mac, 'base64');
-        const otherData = binaryToString(this.otherData, 'base64');
-        return `${this.algorithm} ${displayTimeSigned(this.timeSigned)} ${this.fudge} ${mac} ${this.originalID} ${this.error} ${otherData}`;
+        const mac = binaryToString(this.mac, "base64");
+        const otherData = binaryToString(this.otherData, "base64");
+        return `${this.algorithm} ${displayTimeSigned(this.timeSigned)} ${
+            this.fudge
+        } ${mac} ${this.originalID} ${this.error} ${otherData}`;
     }
 }
 
@@ -111,5 +113,13 @@ export class TSIG extends RR {
  */
 function displayTimeSigned(ts: Uint48): string {
     const dt = new Date(ts);
-    return `${dt.getUTCFullYear()}${(dt.getUTCMonth() + 1).toString().padStart(2, "0")}${dt.getUTCDate().toString().padStart(2, "0")}${dt.getUTCHours().toString().padStart(2, "0")}${dt.getUTCMinutes().toString().padStart(2, "0")}${dt.getUTCSeconds().toString().padStart(2, "0")}`;
+    return `${dt.getUTCFullYear()}${(dt.getUTCMonth() + 1)
+        .toString()
+        .padStart(2, "0")}${dt.getUTCDate().toString().padStart(2, "0")}${dt
+        .getUTCHours()
+        .toString()
+        .padStart(2, "0")}${dt.getUTCMinutes().toString().padStart(2, "0")}${dt
+        .getUTCSeconds()
+        .toString()
+        .padStart(2, "0")}`;
 }

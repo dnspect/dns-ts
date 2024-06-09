@@ -24,14 +24,14 @@ export class PTR extends RR {
      * @override
      */
     unpackRdata(rdata: Slice): void {
-        this.domain = rdata.readDomainName();
+        this.domain = rdata.readName();
     }
 
     /**
      * @override
      */
     packRdata(buf: Writer): number {
-        return this.domain.pack(buf);
+        return buf.writeName(this.domain, true);
     }
 
     /**
