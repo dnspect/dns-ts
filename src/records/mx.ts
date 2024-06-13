@@ -3,6 +3,7 @@ import { Slice } from "../packet";
 import { RR } from "../rr";
 import { Uint16 } from "../types";
 import { Writer } from "../buffer";
+import { ParseError } from "../error";
 
 /**
  * A DNS 'mail exchange' (MX) record directs email to a mail server.
@@ -33,17 +34,11 @@ export class MX extends RR {
      */
     exchange!: FQDN;
 
-    /**
-     * @override
-     */
     unpackRdata(rdata: Slice): void {
         this.preference = rdata.readUint16();
         this.exchange = rdata.readName();
     }
 
-    /**
-     * @override
-     */
     packRdata(buf: Writer): number {
         return (
             buf.writeUint16(this.preference) +
@@ -51,10 +46,11 @@ export class MX extends RR {
         );
     }
 
-    /**
-     * @override
-     */
-    dataString(): string {
+    parseRdata(_rdata: string): void {
+        throw new ParseError(`unimplemented!`);
+    }
+
+    rdataString(): string {
         return `${this.preference} ${this.exchange}`;
     }
 }

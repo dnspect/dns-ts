@@ -1,7 +1,7 @@
 import { A, AAAA, CNAME, OPT, OptHeader, TXT } from "./records";
 import { Address4, Address6 } from "@dnspect/ip-address-ts";
 import { CharacterString } from "./packet";
-import { Class, Opcode, QType, RRType, Rcode, Uint32 } from "./types";
+import { Class, Opcode, QType, RRType, Rcode, Uint16, Uint32 } from "./types";
 import { FQDN } from "./fqdn";
 import { Message, Header } from "./message";
 import { Question } from "./question";
@@ -125,6 +125,13 @@ class HeaderBuilder {
      */
     randomId(): void {
         this.header.id = Math.floor(Math.random() * 0xFFFE + 1);
+    }
+
+    /**
+     * Generates a random message identifier using built-in Math.random().
+     */
+    setId(id: Uint16): void {
+        this.header.id = id;
     }
 
     /**

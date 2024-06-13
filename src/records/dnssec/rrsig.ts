@@ -1,5 +1,6 @@
 import { Writer } from "../../buffer";
 import { binaryToString } from "../../encoding";
+import { ParseError } from "../../error";
 import { FQDN } from "../../fqdn";
 import { Slice } from "../../packet";
 import { RR } from "../../rr";
@@ -75,13 +76,17 @@ export class RRSIG extends RR {
         );
     }
 
+    parseRdata(_rdata: string): void {
+        throw new ParseError(`unimplemented!`);
+    }
+
     /**
      * Returns a dig-like output of the RRSIG record.
      *
      * {@link https://datatracker.ietf.org/doc/html/rfc4034#autoid-24 | RRSIG RR Presentation Format}
      * @returns
      */
-    dataString(): string {
+    rdataString(): string {
         const signature = binaryToString(this.signature, "base64");
         return `${RRType[this.typeCovered]} ${this.algorithm} ${this.labels} ${
             this.originalTTL

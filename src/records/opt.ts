@@ -4,6 +4,7 @@ import * as edns from "../edns";
 import { RRType, Uint16, Uint32, Uint8 } from "../types";
 import { ROOT_ZONE } from "../fqdn";
 import { Writer } from "../buffer";
+import { ParseError } from "../error";
 
 /**
  * OPT pseudo-RR (sometimes called a meta-RR). Refer to {@link https://datatracker.ietf.org/doc/html/rfc6891#section-6 | RFC 6891}.
@@ -42,16 +43,10 @@ export class OPT extends RR {
      */
     options!: edns.Option[];
 
-    /**
-     * @override
-     */
     unpackRdata(rdata: Slice): void {
         this.options = edns.unpack(rdata);
     }
 
-    /**
-     * @override
-     */
     packRdata(buf: Writer): number {
         let n = 0;
         for (const option of this.options) {
@@ -72,10 +67,11 @@ export class OPT extends RR {
         return this.opth;
     }
 
-    /**
-     * @override
-     */
-    dataString(): string {
+    parseRdata(_rdata: string): void {
+        throw new ParseError(`unimplemented!`);
+    }
+
+    rdataString(): string {
         const flags = [];
         if (this.optHeader().dnssecOk()) {
             flags.push(" do");

@@ -44,7 +44,7 @@ export abstract class Option {
         // Add a 2-bytes opt length placeholder
         n += buf.writeUint16(0x0);
 
-        const pos = buf.byteLength();
+        const pos = buf.byteOffset();
         const optLength = this.packOptionData(buf);
 
         // Set the actual opt length

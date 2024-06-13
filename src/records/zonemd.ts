@@ -65,9 +65,6 @@ export class ZONEMD extends RR {
      */
     digest!: Uint8Array;
 
-    /**
-     * @override
-     */
     unpackRdata(rdata: Slice): void {
         this.serial = rdata.readUint32();
         this.scheme = rdata.readUint8();
@@ -82,9 +79,6 @@ export class ZONEMD extends RR {
         this.digest = rdata.readUint8Array(len);
     }
 
-    /**
-     * @override
-     */
     packRdata(buf: Writer): number {
         return (
             buf.writeUint32(this.serial) +
@@ -94,10 +88,14 @@ export class ZONEMD extends RR {
         );
     }
 
+    parseRdata(_rdata: string): void {
+        throw new ParseError(`unimplemented!`);
+    }
+
     /**
      * @override
      */
-    dataString(): string {
+    rdataString(): string {
         const digest = binaryToString(this.digest, "hex").toUpperCase();
         return `${this.serial} ${this.scheme} ${this.algorithm} ${digest}`;
     }

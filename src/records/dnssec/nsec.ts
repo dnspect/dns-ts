@@ -1,4 +1,5 @@
 import { Writer } from "../../buffer";
+import { ParseError } from "../../error";
 import { FQDN } from "../../fqdn";
 import { Slice } from "../../packet";
 import { RR } from "../../rr";
@@ -59,13 +60,17 @@ export class NSEC extends RR {
         return buf.writeName(this.nextName, false) + this.typeBitMaps.pack(buf);
     }
 
+    parseRdata(_rdata: string): void {
+        throw new ParseError(`unimplemented!`);
+    }
+
     /**
      * Returns a dig-like output of the NSEC record.
      *
      * {@link https://datatracker.ietf.org/doc/html/rfc4034#section-4.2 | NSEC RR Presentation Format}
      * @returns
      */
-    dataString(): string {
+    rdataString(): string {
         return `${this.nextName} ${this.typeBitMaps}`;
     }
 }

@@ -91,14 +91,80 @@ export class CharacterString {
         this.str = str;
     }
 
+    /**
+     * Returns the raw character string.
+     *
+     * Note that, in order to get the textual representation, call `present()` instead.
+     *
+     * @returns The raw character string
+     */
     toString(): string {
         return this.str;
     }
 
     /**
+     * Returns the presentation format (ASCII representation) of the character
+     * string to be used in zonefile and/or dig-like output.
      *
-     * @param buf
-     * @returns
+     * ```txt
+     * <character-string> is expressed in one or two ways: as a contiguous set
+     * of characters without interior spaces, or as a string beginning with a "
+     * and ending with a ".  Inside a " delimited string any character can
+     * occur, except for a " itself, which must be quoted using \ (back slash).
+     * ```
+     *
+     * @see https://datatracker.ietf.org/doc/html/rfc1035#section-5.1
+     *
+     *
+     * @returns The textual representation.
+     */
+    present(): string {
+        const out = new Array<string>(this.str.length + 2);
+        let hasWS = false;
+
+        for (const ch of this.str) {
+            if (ch === ' ') {
+                hasWS = true;
+                out.push(ch);
+                continue;
+            }
+
+            if (ch === '"' || ch === '\\') {
+                // \X escape the " and \ char.
+                out.push('\\');
+                out.push(ch);
+            } else if (ch < ' ' || ch > '~') {
+                // \DDD escaping of char that is not visible.
+                out.push('\\');
+                const code = ch.charCodeAt(0);
+                if (code < 10) {
+                    out.push("00");
+                } else if (code < 100) {
+                    out.push("0");
+                }
+                out.push(code.toString());
+            } else {
+                out.push(ch);
+            }
+        }
+
+        // Quote the string when it has interior spaces.
+        if (hasWS) {
+            return `"${out.join("")}"`;
+        }
+
+        return out.join("");
+    }
+
+    static parse(s: string): CharacterString {
+
+    }
+
+    /**
+     * Packs the character string into buffer.
+     *
+     * @param buf The destination buffer.
+     * @returns Number of bytes written.
      */
     pack(buf: Writer): number {
         return (
@@ -106,6 +172,12 @@ export class CharacterString {
         );
     }
 
+    /**
+     * Unpacks a character string from a slice of bytes.
+     *
+     * @param s A slice of bytes
+     * @returns A character string
+     */
     static unpack(s: Slice): CharacterString {
         const len = s.readUint8();
         const str = s.readString("ascii", len);
@@ -123,6 +195,7 @@ export class Slice {
     protected buf: Reader;
     private offset: number;
     private cur: number;
+    // Valid data length in the buffer.
     private len: number;
     private lookupLabels?: (
         offset: Uint16,
@@ -154,7 +227,7 @@ export class Slice {
     ) {
         this.buf = buf;
         this.offset = bytesOffset;
-        this.len = length === undefined ? buf.byteLength() : length;
+        this.len = length === undefined ? buf.dataLength() : length;
         this.cur = 0;
         this.lookupLabels = lookupLabels;
     }
@@ -364,9 +437,9 @@ export class Slice {
             );
         }
 
-        // Advance the cursor
-        this.seek(this.cur + n);
-        return new FQDN(labels);
+        const fqdn = new FQDN(labels);
+        this.seek(this.cur + n); // Advance the cursor
+        return fqdn;
     }
 
     /**
@@ -460,7 +533,7 @@ export class Packet extends Slice {
      * @param buf A DNS message buffer
      */
     constructor(buf: Reader) {
-        super(buf, 0, buf.byteLength(), (startPos, pointer) => {
+        super(buf, 0, buf.dataLength(), (startPos, pointer) => {
             // The domain name pointer is an absolute position in the whole message buffer, so
             // always lookup the pointing labels in whole buffer.
             return this.findLabels(startPos, pointer);

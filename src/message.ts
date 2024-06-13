@@ -155,14 +155,14 @@ export class Header {
     private packFlags(buf: Writer): number {
         const high = (this.flags.qr ? 0b10000000 : 0b0) |
             (this.flags.opcode << 3) |
-            (this.flags.aa ? 0b100 : 0b0) |
-            (this.flags.tc ? 0b10 : 0b0) |
-            (this.flags.rd ? 0b1 : 0b0);
+            (this.flags.aa ? 0b00000100 : 0b0) |
+            (this.flags.tc ? 0b00000010 : 0b0) |
+            (this.flags.rd ? 0b00000001 : 0b0);
         const low = (this.flags.ra ? 0b10000000 : 0b0) |
-            (this.flags.z ? 0b1000000 : 0b0) |
-            (this.flags.ad ? 0b10000 : 0b0) |
-            (this.flags.cd ? 0b1000 : 0b0) |
-            this.flags.rcode;
+            (this.flags.z  ? 0b010000000 : 0b0) |
+            (this.flags.ad ? 0b00100000 : 0b0) |
+            (this.flags.cd ? 0b00010000 : 0b0) |
+            (this.flags.rcode & 0b00001111);
 
         return buf.writeUint8(high) + buf.writeUint8(low);
     }

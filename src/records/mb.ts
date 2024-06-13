@@ -2,6 +2,7 @@ import { FQDN } from "../fqdn";
 import { Slice } from "../packet";
 import { RR } from "../rr";
 import { Writer } from "../buffer";
+import { ParseError } from "../error";
 
 /**
  *
@@ -22,24 +23,19 @@ export class MB extends RR {
      */
     madname!: FQDN;
 
-    /**
-     * @override
-     */
     unpackRdata(rdata: Slice): void {
         this.madname = rdata.readName();
     }
 
-    /**
-     * @override
-     */
     packRdata(buf: Writer): number {
         return buf.writeName(this.madname, false);
     }
 
-    /**
-     * @override
-     */
-    dataString(): string {
+    parseRdata(rdata: string): void {
+        this.madname = FQDN.parse(rdata);
+    }
+
+    rdataString(): string {
         return `${this.madname}`;
     }
 }

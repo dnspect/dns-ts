@@ -3,6 +3,7 @@ import { MessageBuilder } from "./message-builder";
 import { Opcode, RRType, Rcode } from "./types";
 import { Address4, Address6 } from "@dnspect/ip-address-ts";
 import { NSID } from "./edns";
+import { PacketBuffer } from "./buffer";
 
 describe("test build message header", () => {
     const mb = new MessageBuilder();
@@ -141,4 +142,49 @@ describe("test build additional", () => {
         expect(msg.additional.length()).to.equal(3);
         expect(msg.additional.last()?.toString()).to.equal(`; EDNS: version: 0, flags: do; udp: 1232\n; NSID: 61 62 63 ("abc")`);
     });
+});
+
+describe("test build full message", () => {
+    const mb = new MessageBuilder();
+
+    const header = mb.header();
+    header.setId(26584);
+    header.setQR(true);
+    header.setRD(true);
+    header.setRA(true);
+    header.setAD(true);
+    header.setRcode(Rcode.NOERROR);
+
+    const question = mb.question();
+    question.push_in("example.com.", RRType.TXT);
+
+    const answer = mb.answer();
+    answer.push_txt("example.com.", 78033, ["v=spf1 -all"]);
+    answer.push_txt("example.com.", 78033, ["wgyf8z8cgvm2qmxpnbnldrcltvk4xqfn"]);
+
+    const additional = mb.additional();
+    additional.opt((ob) => {
+        ob.setDnssecOk(false);
+        ob.setUdpPayloadSize(1232);
+    });
+
+    const msg = mb.build();
+
+    it("should build message", () => {
+        const buf = PacketBuffer.alloc(512);
+        const n = msg.pack(buf);
+        expect(n).to.equals(131);
+        expect(buf.freeze(n).dump("hex")).to.be.equals("67d881a00001000200000001076578616d706c6503636f6d0000100001076578616d706c6503636f6d0000100001000130d1000c0b763d73706631202d616c6c076578616d706c6503636f6d0000100001000130d100212077677966387a386367766d32716d78706e626e6c6472636c74766b347871666e00002904d0000000000000");
+    });
+
+    it("should build message (compressed)", () => {
+        const msg = mb.build();
+        const buf = PacketBuffer.alloc(512).withCompressor();
+        const n = msg.pack(buf);
+        expect(n).to.equals(109);
+        expect(buf.freeze(n).dump("hex")).to.be.equals("67d881a00001000200000001076578616d706c6503636f6d0000100001c00c00100001000130d1000c0b763d73706631202d616c6cc00c00100001000130d100212077677966387a386367766d32716d78706e626e6c6472636c74766b347871666e00002904d0000000000000");
+    });
+
+    // 2904d0000000000000
+    // 2904d0000080000000
 });

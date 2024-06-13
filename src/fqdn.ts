@@ -1,15 +1,12 @@
 import { ParseError } from "./error";
 
 /**
- * Current rules:
- * - Only root label can be zero length
- * - Max length 63
- * - MUST not start or end with hyphen
+ * The length of any one label is limited to between 1 and 63 octets.
  *
- * @todo follow https://datatracker.ietf.org/doc/html/rfc2181#autoid-30 ?
+ * @see https://datatracker.ietf.org/doc/html/rfc2181#section-11 ?
  *
  */
-const LABEL_RE = /^([0-9a-zA-Z_]|[0-9a-zA-Z_][0-9a-zA-Z-]{0,61}[0-9a-zA-Z_])$/;
+const MAX_LABEL_SIZE = 63;
 
 /**
  * The null label representing the root name.
@@ -29,15 +26,27 @@ export class FQDN implements Iterable<string> {
     private readonly labels: string[];
     private str?: string;
 
+    /**
+     *
+     * @param labels
+     *
+     * @throws ParseError
+     */
     constructor(labels: string[]) {
         if (labels.length === 0) {
-            this.labels = [NULL_LABEL];
+            labels = [NULL_LABEL];
         } else if (labels[labels.length - 1] !== NULL_LABEL) {
-            this.labels = labels;
-            this.labels.push(NULL_LABEL);
-        } else {
-            this.labels = labels;
+            labels.push(NULL_LABEL);
         }
+
+        for (let i = 0; i < labels.length - 1; i++) {
+            // The length of any one label is limited to between 1 and 63 octets.
+            if (labels[i].length === 0 || labels[i].length > MAX_LABEL_SIZE) {
+                throw new ParseError(`label "${labels[i]}" is invalid`);
+            }
+        }
+
+        this.labels = labels;
     }
 
     /**
@@ -56,6 +65,15 @@ export class FQDN implements Iterable<string> {
      */
     labelLength(): number {
         return this.labels.length;
+    }
+
+    /**
+     * Returns true if the domain is the root name ".".
+     *
+     * @returns
+     */
+    isRoot(): boolean {
+        return this.labels.length <= 1;
     }
 
     /**
@@ -289,14 +307,6 @@ export class FQDN implements Iterable<string> {
         const labels = name.split(".");
         if (!endsWithDot) {
             labels.push(NULL_LABEL);
-        }
-
-        for (let i = 0; i < labels.length - 1; i++) {
-            if (!LABEL_RE.test(labels[i])) {
-                throw new ParseError(
-                    `invalid domain name: label "${labels[i]}" is invalid`
-                );
-            }
         }
 
         return new FQDN(labels);

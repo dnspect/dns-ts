@@ -43,8 +43,17 @@ export { TSIG } from "./tsig";
 export { TXT } from "./txt";
 export { ZONEMD } from "./zonemd";
 
-export function unpackRecord(s: Slice): RR {
-    const h = Header.unpack(s);
+/**
+ * Initialize a resource record with header data.
+ *
+ * Note that the RDATA portion is left to the caller to fulfill.
+ *
+ * @param h Header RR header.
+ * @returns A initialized resource record.
+ *
+ * @throws ParseError
+ */
+function initRecord(h: Header): RR {
     let record: RR;
 
     switch (h.type) {
@@ -154,7 +163,32 @@ export function unpackRecord(s: Slice): RR {
             );
     }
 
-    record.unpackRdata(s.readSlice(h.rdlength));
-
     return record;
+}
+
+/**
+ * Unpacks resource record from a sequence of bytes.
+ *
+ * @param s A slice of bytes.
+ * @returns Resource record
+ *
+ * @throws ParseError
+ */
+export function unpackRecord(s: Slice): RR {
+    const h = Header.unpack(s);
+    const record = initRecord(h);
+    record.unpackRdata(s.readSlice(h.rdlength));
+    return record;
+}
+
+/**
+ * Parses resource record from a textual representation.
+ *
+ * @param s A slice of bytes.
+ * @returns Resource record
+ *
+ * @throws ParseError
+ */
+export function parseRecord(_s: string): RR {
+    throw new ParseError(`unimplemented`);
 }

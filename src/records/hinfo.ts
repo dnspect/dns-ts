@@ -1,6 +1,7 @@
 import { CharacterString, Slice } from "../packet";
 import { RR } from "../rr";
 import { Writer } from "../buffer";
+import { ParseError } from "../error";
 
 /**
  * HINFO records are used to acquire general information about a host.
@@ -28,26 +29,21 @@ export class HINFO extends RR {
      */
     os!: CharacterString;
 
-    /**
-     * @override
-     */
     unpackRdata(rdata: Slice): void {
         const s = rdata.readSlice(this.header.rdlength);
         this.cpu = CharacterString.unpack(s);
         this.os = CharacterString.unpack(s);
     }
 
-    /**
-     * @override
-     */
     packRdata(buf: Writer): number {
         return this.cpu.pack(buf) + this.os.pack(buf);
     }
 
-    /**
-     * @override
-     */
-    dataString(): string {
-        return `${this.cpu} ${this.os}`;
+    parseRdata(_rdata: string): void {
+        throw new ParseError(`unimplemented!`);
+    }
+
+    rdataString(): string {
+        return `${this.cpu.present()} ${this.os.present()}`;
     }
 }

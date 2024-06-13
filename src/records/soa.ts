@@ -1,4 +1,5 @@
 import { Writer } from "../buffer";
+import { ParseError } from "../error";
 import { FQDN } from "../fqdn";
 import { Slice } from "../packet";
 import { RR } from "../rr";
@@ -102,10 +103,11 @@ export class SOA extends RR {
         );
     }
 
-    /**
-     * @override
-     */
-    dataString(): string {
+    parseRdata(_rdata: string): void {
+        throw new ParseError(`unimplemented!`);
+    }
+
+    rdataString(): string {
         return `${this.mname} ${this.rname} ${this.serial} ${this.refresh} ${this.retry} ${this.expire} ${this.minimum}`;
     }
 }

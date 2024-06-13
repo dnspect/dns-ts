@@ -28,24 +28,19 @@ export class NS extends RR {
      */
     nameserver!: FQDN;
 
-    /**
-     * @override
-     */
     unpackRdata(rdata: Slice): void {
         this.nameserver = rdata.readName();
     }
 
-    /**
-     * @override
-     */
     packRdata(buf: Writer): number {
         return buf.writeName(this.nameserver, true);
     }
 
-    /**
-     * @override
-     */
-    dataString(): string {
+    parseRdata(rdata: string): void {
+        this.nameserver = FQDN.parse(rdata);
+    }
+
+    rdataString(): string {
         return `${this.nameserver}`;
     }
 }

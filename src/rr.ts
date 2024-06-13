@@ -120,19 +120,24 @@ export abstract class RR {
     /**
      * Unpacks RDATA from a sequence of bytes to field(s).
      *
-     * @param rdata
+     * @param rdata Slice
+     *
+     * @throws ParseError
      */
     abstract unpackRdata(rdata: Slice): void;
 
     /**
      * Converts resource record to a sequence of bytes and write to the buffer.
      *
-     * @param buf
-     * @returns
+     * @param buf The destination buffer.
+     * @returns number of bytes written.
+     *
+     * @throws Error
      */
     pack(buf: Writer): number {
         const n = this.header.pack(buf);
-        const pos = buf.byteLength();
+        // The position before rdata is written.
+        const pos = buf.byteOffset();
         const rdlength = this.packRdata(buf);
 
         // Update the rdlength in header
@@ -147,22 +152,33 @@ export abstract class RR {
      * Converts RDATA to a sequence of bytes and write to the buffer.
      *
      * @param buf
+     *
+     * @throws Error
      */
     abstract packRdata(buf: Writer): number;
 
     /**
-     * Return the rr data in it's textual form.
+     * Parses the RFC1035 compliant textual format of RDATA.
+     *
+     * @param rdata string
+     *
+     * @throws ParseError
      */
-    abstract dataString(): string;
+    abstract parseRdata(rdata: string): void;
 
     /**
-     * Returns textual representation of the RR in dig-like format.
+     * Expresses the RDATA in it's RFC1035 compliant textual representation.
+     */
+    abstract rdataString(): string;
+
+    /**
+     * Returns RFC1035 compliant textual representation of the resource record.
      */
     toString(): string {
         if (this.header.type === RRType.OPT) {
-            return this.dataString();
+            return this.rdataString();
         }
-        return `${this.header}\t${this.dataString()}`;
+        return `${this.header}\t${this.rdataString()}`;
     }
 
     /**
@@ -173,7 +189,7 @@ export abstract class RR {
             name: this.header.name.toString(),
             type: this.header.type,
             TTL: this.header.ttl,
-            data: this.dataString(),
+            data: this.rdataString(),
         };
     }
 }

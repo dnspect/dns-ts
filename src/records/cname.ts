@@ -29,7 +29,11 @@ export class CNAME extends RR {
         return buf.writeName(this.target, true);
     }
 
-    dataString(): string {
+    parseRdata(rdata: string): void {
+        this.target = FQDN.parse(rdata);
+    }
+
+    rdataString(): string {
         return `${this.target}`;
     }
 }

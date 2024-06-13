@@ -2,6 +2,7 @@ import { Slice } from "../packet";
 import { RR } from "../rr";
 import { Uint32, Uint8 } from "../types";
 import { Writer } from "../buffer";
+import { ParseError } from "../error";
 
 const LOC_EQUATOR = 1 << 31; // RFC 1876, Section 2.
 const LOC_PRIMEMERIDIAN = 1 << 31; // RFC 1876, Section 2.
@@ -120,6 +121,10 @@ export class LOC extends RR {
             buf.writeUint32(this.altitude);
     }
 
+    parseRdata(_rdata: string): void {
+        throw new ParseError(`unimplemented!`);
+    }
+
     /**
      * LOC ( d1 [m1 [s1]] {"N"|"S"} d2 [m2 [s2]]
      *       {"E"|"W"} alt["m"] [siz["m"] [hp["m"]
@@ -141,7 +146,7 @@ export class LOC extends RR {
      *  statdns.net.   IN LOC   52 22 23.000 N 4 53 32.000 E -2.00m 0.00m 10000m 10m
      *  ```
      */
-    dataString(): string {
+    rdataString(): string {
         const [nOrS, lat] = this.latitude > LOC_EQUATOR ? ["N", this.latitude - LOC_EQUATOR] : ["S", LOC_EQUATOR - this.latitude];
         const [eOrW, lon] = this.longitude > LOC_PRIMEMERIDIAN ? ["E", this.longitude - LOC_PRIMEMERIDIAN] : ["W", LOC_PRIMEMERIDIAN - this.longitude];
         const latStr = displayLatLon(lat, nOrS);

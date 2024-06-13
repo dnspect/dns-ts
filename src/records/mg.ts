@@ -2,6 +2,7 @@ import { FQDN } from "../fqdn";
 import { Slice } from "../packet";
 import { RR } from "../rr";
 import { Writer } from "../buffer";
+import { ParseError } from "../error";
 
 /**
  *
@@ -23,24 +24,19 @@ export class MG extends RR {
      */
     mgmname!: FQDN;
 
-    /**
-     * @override
-     */
     unpackRdata(rdata: Slice): void {
         this.mgmname = rdata.readName();
     }
 
-    /**
-     * @override
-     */
     packRdata(buf: Writer): number {
         return buf.writeName(this.mgmname, false);
     }
 
-    /**
-     * @override
-     */
-    dataString(): string {
+    parseRdata(rdata: string): void {
+        this.mgmname = FQDN.parse(rdata);
+    }
+
+    rdataString(): string {
         return `${this.mgmname}`;
     }
 }

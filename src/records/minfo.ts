@@ -2,6 +2,7 @@ import { FQDN } from "../fqdn";
 import { Slice } from "../packet";
 import { RR } from "../rr";
 import { Writer } from "../buffer";
+import { ParseError } from "../error";
 
 /**
  *
@@ -33,17 +34,11 @@ export class MINFO extends RR {
      */
     emailbx!: FQDN;
 
-    /**
-     * @override
-     */
     unpackRdata(rdata: Slice): void {
         this.rmailbx = rdata.readName();
         this.emailbx = rdata.readName();
     }
 
-    /**
-     * @override
-     */
     packRdata(buf: Writer): number {
         return (
             buf.writeName(this.rmailbx, true) +
@@ -51,10 +46,11 @@ export class MINFO extends RR {
         );
     }
 
-    /**
-     * @override
-     */
-    dataString(): string {
+    parseRdata(_rdata: string): void {
+        throw new ParseError(`unimplemented!`);
+    }
+
+    rdataString(): string {
         return `${this.rmailbx} ${this.emailbx}`;
     }
 }

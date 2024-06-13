@@ -1,6 +1,7 @@
-import { stringToBinary, EncodingScheme } from "./encoding";
+import { stringToBinary, EncodingScheme, binaryToString } from "./encoding";
 import { FQDN } from "./fqdn";
 import { Uint16, Uint8, Uint32 } from "./types";
+import { Compressor } from "./compression";
 
 /**
  * Maximum size of a DNS packet is 64K (65535 bytes) because the payload length field is a 16-bit.
@@ -16,7 +17,7 @@ export interface Reader {
     /**
      * Returns the length of the buffer in bytes.
      */
-    byteLength(): number;
+    dataLength(): number;
 
     /**
      * Reads an unsigned 8-bit integer from this source at the specified `offset`.
@@ -52,6 +53,29 @@ export interface Reader {
     slice(offset?: number, end?: number): Uint8Array;
 }
 
+export interface NameWriter {
+    /**
+     * Writes one byte to the underlying data stream or buffer.
+     *
+     * @param n
+     */
+    writeUint8(n: Uint8): number;
+
+    /**
+     * Writes two-bytes or 16-bits to the underlying data stream or buffer in network byte order.
+     *
+     * @param n
+     */
+    writeUint16(n: Uint16): number;
+
+    /**
+     * Writes a domain name label in ascii encoding.
+     *
+     * @param label The ascii encoded label string.
+     */
+    writeLabel(label: string): number;
+}
+
 /**
  * Writer is the interface that wraps the basic Write methods.
  *
@@ -61,7 +85,7 @@ export interface Writer {
     /**
      * Returns the length of the already assembled data in bytes.
      */
-    byteLength(): number;
+    byteOffset(): number;
 
     /**
      * Writes bytes from data to the underlying data stream or buffer. It returns the number of
@@ -135,10 +159,11 @@ export interface Writer {
  *
  * It is able to grow exponentially when it is writable.
  */
-export class PacketBuffer implements Reader, Writer {
+export class PacketBuffer implements Reader, Writer, NameWriter {
     buf!: Uint8Array;
     private offset = 0;
     private writable = false;
+    private compressor?: Compressor;
 
     /**
      * Initializes a writable PacketBuffer object with default 1232 bytes that are zero-filled.
@@ -172,7 +197,22 @@ export class PacketBuffer implements Reader, Writer {
         return new PacketBuffer(new Uint8Array(buf), false);
     }
 
-    checkWrite(offset: number, extra: number): void {
+    /**
+     * Enable message compression.
+     */
+    withCompressor(): PacketBuffer {
+        this.compressor = new Compressor(this);
+        return this;
+    }
+
+    /**
+     *
+     * @param offset
+     * @param extra
+     *
+     * @throws Error
+     */
+    private checkWrite(offset: number, extra: number): void {
         if (!this.writable) {
             throw new Error("buffer not writable");
         }
@@ -213,8 +253,12 @@ export class PacketBuffer implements Reader, Writer {
         }
     }
 
-    byteLength(): number {
+    dataLength(): number {
         return this.buf.byteLength;
+    }
+
+    byteOffset(): number {
+        return this.offset;
     }
 
     readUint8(offset?: number): Uint8 {
@@ -261,7 +305,7 @@ export class PacketBuffer implements Reader, Writer {
 
     writeUint16(n: Uint16): number {
         this.checkWrite(this.offset, 2);
-        this.buf[this.offset] = n >>> 8;
+        this.buf[this.offset] = (n >>> 8) & 0xff;
         this.buf[this.offset + 1] = n & 0xff;
         this.offset += 2;
         return 2;
@@ -269,9 +313,9 @@ export class PacketBuffer implements Reader, Writer {
 
     writeUint16At(n: Uint16, pos: number): number {
         this.checkWrite(pos, 2);
-        this.buf[pos] = n & 0xff;
-        this.buf[pos + 1] = n >>> 8;
-        if (pos >= this.offset) {
+        this.buf[pos] = (n >>> 8) & 0xff;
+        this.buf[pos + 1] = n & 0xff;
+        if (pos + 2 > this.offset) {
             this.offset = pos + 2;
         }
         return 2;
@@ -279,9 +323,9 @@ export class PacketBuffer implements Reader, Writer {
 
     writeUint32(n: Uint32): number {
         this.checkWrite(this.offset, 4);
-        this.buf[this.offset] = n >>> 24;
-        this.buf[this.offset + 1] = n >>> 16;
-        this.buf[this.offset + 2] = n >>> 8;
+        this.buf[this.offset] = (n >>> 24) & 0xff;
+        this.buf[this.offset + 1] = (n >>> 16) & 0xff;
+        this.buf[this.offset + 2] = (n >>> 8) & 0xff;
         this.buf[this.offset + 3] = n & 0xff;
         this.offset += 4;
         return 4;
@@ -292,11 +336,23 @@ export class PacketBuffer implements Reader, Writer {
         return this.write(data);
     }
 
-    writeName(name: FQDN, _compress: boolean): number {
+    writeLabel(label: string): number {
+        if (label.length === 0) {
+            return this.writeUint8(0);
+        }
+
+        const data = stringToBinary(label, "ascii");
+        return this.writeUint8(data.length) + this.write(data);
+    }
+
+    writeName(name: FQDN, compress: boolean): number {
+        if (compress && !!this.compressor) {
+            return this.compressor.writeName(name, this.offset);
+        }
+
         let n = 0;
         for (const label of name) {
-            n += this.writeUint8(label.length);
-            n += this.writeString(label, "ascii");
+            n += this.writeLabel(label);
         }
         return n;
     }
@@ -305,5 +361,9 @@ export class PacketBuffer implements Reader, Writer {
         this.buf = this.buf.subarray(0, len);
         this.writable = false;
         return this;
+    }
+
+    dump(encoding: EncodingScheme): string {
+        return binaryToString(this.buf, encoding);
     }
 }

@@ -17,24 +17,19 @@ import { Writer } from "../buffer";
 export class AAAA extends RR implements AddressRR {
     address!: Address6;
 
-    /**
-     * @override
-     */
     unpackRdata(rdata: Slice): void {
         this.address = Address6.fromBytes(rdata.readUint8Array(this.header.rdlength));
     }
 
-    /**
-     * @override
-     */
     packRdata(buf: Writer): number {
         return buf.write(this.address.bytes());
     }
 
-    /**
-     * @override
-     */
-    dataString(): string {
+    parseRdata(rdata: string): void {
+        this.address = Address6.parse(rdata);
+    }
+
+    rdataString(): string {
         return `${this.address}`;
     }
 }

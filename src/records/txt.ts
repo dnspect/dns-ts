@@ -1,4 +1,5 @@
 import { Writer } from "../buffer";
+import { ParseError } from "../error";
 import { CharacterString, Slice } from "../packet";
 import { RR } from "../rr";
 
@@ -27,6 +28,7 @@ export class TXT extends RR {
         }
     }
 
+
     packRdata(buf: Writer): number {
         let n = 0;
         for (const cs of this.content) {
@@ -35,10 +37,14 @@ export class TXT extends RR {
         return n;
     }
 
+    parseRdata(_rdata: string): void {
+        throw new ParseError(`unimplemented!`);
+    }
+
     /**
      * @override
      */
-    dataString(): string {
+    rdataString(): string {
         return `${this.content.map((cs) => `"${cs}"`).join(" ")}`;
     }
 }
