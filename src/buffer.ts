@@ -9,13 +9,30 @@ import { Compressor } from "./compression";
 export const MAX_MESSAGE_SIZE = 0xffff;
 
 /**
+ * ByteReader reads and returns the byte at offset in the underlying input source.
+ */
+export interface ByteReader {
+    /**
+     * Returns the length of the underlying input source in bytes.
+     */
+    dataLength(): number;
+
+    /**
+     * Reads an unsigned 8-bit integer from this source at the specified `offset`.
+     *
+     * @param offset Number of bytes to skip before starting to read. Must satisfy `0 <= offset <= buf.length - 1`.
+     */
+    readUint8(offset?: number): Uint8;
+}
+
+/**
  * Allows for reading bytes from a source.
  *
  * Implementors of this Reader interface are called "readers".
  */
-export interface Reader {
+export interface Reader extends ByteReader {
     /**
-     * Returns the length of the buffer in bytes.
+     * Returns the length of the underlying input source in bytes.
      */
     dataLength(): number;
 
@@ -42,7 +59,6 @@ export interface Reader {
 
     /**
      * Returns a section of an buffer.
-     *
      *
      * @param offset The beginning of the specified portion of the buffer. Defaults to the start of
      *        the source if not specified.
@@ -154,6 +170,37 @@ export interface Writer {
     freeze(len: number): ThisType<this>;
 }
 
+export class CharReader implements ByteReader {
+    private buf!: Uint8Array;
+
+    private constructor(buf: Uint8Array) {
+        this.buf = buf;
+    }
+
+    /**
+     * Creates a new CharReader from an ASCII string.
+     *
+     * @param str The ASCII string.
+     * @returns CharReader
+     */
+    static from(str: string): CharReader {
+        const buf = stringToBinary(str, "ascii");
+        return new CharReader(buf);
+    }
+
+    dataLength(): number {
+        return this.buf.byteLength;
+    }
+
+    readUint8(offset?: number): Uint8 {
+        const pos = offset ?? 0;
+        if (pos < 0 || pos >= this.buf.length) {
+            throw new RangeError(`try to access beyond buffer length: read 1 start from ${pos}`);
+        }
+        return this.buf[pos];
+    }
+}
+
 /**
  * A buffer helps read/write DNS message in wireformat.
  *
@@ -247,9 +294,7 @@ export class PacketBuffer implements Reader, Writer, NameWriter {
         }
 
         if (offset + extra > this.buf.length) {
-            throw new RangeError(
-                `try to access beyond buffer length: read ${extra} start from ${offset}`
-            );
+            throw new RangeError(`try to access beyond buffer length: read ${extra} start from ${offset}`);
         }
     }
 
@@ -276,12 +321,7 @@ export class PacketBuffer implements Reader, Writer, NameWriter {
     readUint32BE(offset?: number): Uint32 {
         const pos = offset ?? 0;
         this.checkRead(pos, 4);
-        return (
-            this.buf[pos] * 0x1000000 +
-            ((this.buf[pos + 1] << 16) |
-                (this.buf[pos + 2] << 8) |
-                this.buf[pos + 3])
-        );
+        return this.buf[pos] * 0x1000000 + ((this.buf[pos + 1] << 16) | (this.buf[pos + 2] << 8) | this.buf[pos + 3]);
     }
 
     slice(offset = 0, end = this.buf.length): Uint8Array {

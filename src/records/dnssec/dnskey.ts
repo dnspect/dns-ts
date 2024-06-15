@@ -1,6 +1,7 @@
 import { Writer } from "../../buffer";
 import { binaryToString } from "../../encoding";
 import { ParseError } from "../../error";
+import { CharacterString } from "../../char";
 import { Slice } from "../../packet";
 import { RR } from "../../rr";
 import { Uint16, Uint8 } from "../../types";
@@ -71,7 +72,7 @@ export class DNSKEY extends RR {
             buf.write(this.publicKey);
     }
 
-    parseRdata(_rdata: string): void {
+    parseRdata(_rdata: CharacterString[]): void {
         throw new ParseError(`unimplemented!`);
     }
 
@@ -81,7 +82,7 @@ export class DNSKEY extends RR {
      * {@link https://datatracker.ietf.org/doc/html/rfc4034#section-2.2 | DNSKEY RR Presentation Format}
      * @returns
      */
-    rdataString(): string {
+    presentRdata(): string {
         const key = binaryToString(this.publicKey, 'base64');
         return `${this.flags} ${this.protocol} ${this.algorithm} ${key}`;
     }

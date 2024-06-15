@@ -1,4 +1,5 @@
 import { Header, RR } from "../rr";
+import { CharacterString } from "../char";
 import { Slice } from "../packet";
 import * as edns from "../edns";
 import { RRType, Uint16, Uint32, Uint8 } from "../types";
@@ -67,11 +68,11 @@ export class OPT extends RR {
         return this.opth;
     }
 
-    parseRdata(_rdata: string): void {
+    parseRdata(_rdata: CharacterString[]): void {
         throw new ParseError(`unimplemented!`);
     }
 
-    rdataString(): string {
+    presentRdata(): string {
         const flags = [];
         if (this.optHeader().dnssecOk()) {
             flags.push(" do");

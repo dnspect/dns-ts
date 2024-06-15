@@ -1,4 +1,5 @@
 import { FQDN } from "../fqdn";
+import { CharacterString } from "../char";
 import { Slice } from "../packet";
 import { RR } from "../rr";
 import { Uint16 } from "../types";
@@ -46,11 +47,11 @@ export class MX extends RR {
         );
     }
 
-    parseRdata(_rdata: string): void {
+    parseRdata(_rdata: CharacterString[]): void {
         throw new ParseError(`unimplemented!`);
     }
 
-    rdataString(): string {
+    presentRdata(): string {
         return `${this.preference} ${this.exchange}`;
     }
 }

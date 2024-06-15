@@ -1,6 +1,7 @@
 import { Writer } from "../../buffer";
 import { binaryToString } from "../../encoding";
 import { ParseError } from "../../error";
+import { CharacterString } from "../../char";
 import { Slice } from "../../packet";
 import { RR } from "../../rr";
 import { Uint16, Uint8 } from "../../types";
@@ -82,7 +83,7 @@ export class NSEC3PARAM extends RR {
             buf.write(this.salt);
     }
 
-    parseRdata(_rdata: string): void {
+    parseRdata(_rdata: CharacterString[]): void {
         throw new ParseError(`unimplemented!`);
     }
 
@@ -92,7 +93,7 @@ export class NSEC3PARAM extends RR {
      * {@link https://datatracker.ietf.org/doc/html/rfc5155#section-4.3 | NSEC3PARAM RR Presentation Format}
      * @returns
      */
-    rdataString(): string {
+    presentRdata(): string {
         const salt = this.salt.length === 0 ? "-" : binaryToString(this.salt, "hex");
         return `${this.hashAlg} ${this.flags} ${this.iterations} ${salt}`;
     }

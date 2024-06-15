@@ -1,8 +1,8 @@
 import { FQDN } from "../fqdn";
+import { CharacterString } from "../char";
 import { Slice } from "../packet";
 import { RR } from "../rr";
 import { Writer } from "../buffer";
-import { ParseError } from "../error";
 
 /**
  *
@@ -31,11 +31,11 @@ export class MB extends RR {
         return buf.writeName(this.madname, false);
     }
 
-    parseRdata(rdata: string): void {
-        this.madname = FQDN.parse(rdata);
+    parseRdata(rdata: CharacterString[]): void {
+        this.madname = FQDN.parse(rdata[0].raw());
     }
 
-    rdataString(): string {
+    presentRdata(): string {
         return `${this.madname}`;
     }
 }

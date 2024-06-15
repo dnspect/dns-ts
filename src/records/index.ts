@@ -1,6 +1,7 @@
 import { A } from "./a";
 import { AAAA } from "./aaaa";
 import { CNAME } from "./cname";
+import { DNAME } from "./dname";
 import { DS, DNSKEY, NSEC, RRSIG, NSEC3, NSEC3PARAM } from "./dnssec";
 import { Header, RR } from "../rr";
 import { HINFO } from "./hinfo";
@@ -22,10 +23,13 @@ import { SSHFP } from "./sshfp";
 import { TSIG } from "./tsig";
 import { TXT } from "./txt";
 import { ZONEMD } from "./zonemd";
+import { Lexer, scanHeader, scanRdata } from "../scan";
+import { CharReader } from "../buffer";
 
 export { A, isA } from "./a";
 export { AAAA, isAAAA } from "./aaaa";
 export { CNAME, isCNAME } from "./cname";
+export { DNAME, isDNAME } from "./dname";
 export { HINFO } from "./hinfo";
 export { LOC } from "./loc";
 export { MB } from "./mb";
@@ -42,6 +46,7 @@ export { SSHFP } from "./sshfp";
 export { TSIG } from "./tsig";
 export { TXT } from "./txt";
 export { ZONEMD } from "./zonemd";
+export * as dnssec from "./dnssec";
 
 /**
  * Initialize a resource record with header data.
@@ -67,6 +72,10 @@ function initRecord(h: Header): RR {
         }
         case RRType.CNAME: {
             record = new CNAME(h);
+            break;
+        }
+        case RRType.DNAME: {
+            record = new DNAME(h);
             break;
         }
         case RRType.DNSKEY: {
@@ -158,9 +167,7 @@ function initRecord(h: Header): RR {
             break;
         }
         default:
-            throw new ParseError(
-                `unsupported resource record type: TYPE${h.type}`
-            );
+            throw new ParseError(`unsupported resource record type: TYPE${h.type}`);
     }
 
     return record;
@@ -182,13 +189,42 @@ export function unpackRecord(s: Slice): RR {
 }
 
 /**
- * Parses resource record from a textual representation.
+ * Scans a resource record using a lexer.
  *
- * @param s A slice of bytes.
+ * @param l A lexer and an optional started header (from zonefile).
+ *
  * @returns Resource record
  *
  * @throws ParseError
  */
-export function parseRecord(_s: string): RR {
-    throw new ParseError(`unimplemented`);
+export function scanRecord(lexer: Lexer, startedHeader: Header | null): RR {
+    const header =
+        startedHeader === null
+            ? scanHeader(lexer)
+            : scanHeader(lexer, startedHeader.name, startedHeader.class, startedHeader.ttl);
+
+    const rr = initRecord(header);
+
+    const rdata = scanRdata(lexer);
+    if (rdata.length === 0) {
+        throw new ParseError(`missing RDATA`);
+    }
+
+    rr.parseRdata(rdata);
+    return rr;
+}
+
+/**
+ * Parses resource record from a textual representation.
+ *
+ * @param input RFC 1035 compliant ASCII string describe the resource record.
+ *
+ * @returns Resource record
+ *
+ * @throws ParseError
+ */
+export function parseRecord(input: string): RR {
+    const reader = CharReader.from(input);
+    const lexer = new Lexer(reader);
+    return scanRecord(lexer, null);
 }

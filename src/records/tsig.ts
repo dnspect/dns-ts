@@ -2,6 +2,7 @@ import { Writer } from "../buffer";
 import { binaryToString } from "../encoding";
 import { ParseError } from "../error";
 import { FQDN } from "../fqdn";
+import { CharacterString } from "../char";
 import { Slice } from "../packet";
 import { RR } from "../rr";
 import { Uint16, Uint48 } from "../types";
@@ -92,7 +93,7 @@ export class TSIG extends RR {
         return n;
     }
 
-    parseRdata(_rdata: string): void {
+    parseRdata(_rdata: CharacterString[]): void {
         throw new ParseError(`unimplemented!`);
     }
 
@@ -101,7 +102,7 @@ export class TSIG extends RR {
      *
      * @returns
      */
-    rdataString(): string {
+    presentRdata(): string {
         const mac = binaryToString(this.mac, "base64");
         const otherData = binaryToString(this.otherData, "base64");
         return `${this.algorithm} ${displayTimeSigned(this.timeSigned)} ${

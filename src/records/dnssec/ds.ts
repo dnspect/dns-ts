@@ -1,6 +1,7 @@
 import { Writer } from "../../buffer";
 import { binaryToString } from "../../encoding";
 import { ParseError } from "../../error";
+import { CharacterString } from "../../char";
 import { Slice } from "../../packet";
 import { RR } from "../../rr";
 import { Uint16, Uint8 } from "../../types";
@@ -89,7 +90,7 @@ export class DS extends RR {
             buf.write(this.digest);
     }
 
-    parseRdata(_rdata: string): void {
+    parseRdata(_rdata: CharacterString[]): void {
         throw new ParseError(`unimplemented!`);
     }
 
@@ -99,7 +100,7 @@ export class DS extends RR {
      * {@link https://datatracker.ietf.org/doc/html/rfc4034#section-5.3 | DS RR Presentation Format}
      * @returns
      */
-    rdataString(): string {
+    presentRdata(): string {
         const key = binaryToString(this.digest, 'hex').toUpperCase();
         return `${this.keyTag} ${this.algorithm} ${this.digestType} ${key}`;
     }

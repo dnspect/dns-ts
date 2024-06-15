@@ -1,6 +1,6 @@
 import { A, AAAA, CNAME, OPT, OptHeader, TXT } from "./records";
 import { Address4, Address6 } from "@dnspect/ip-address-ts";
-import { CharacterString } from "./packet";
+import { CharacterString } from "./char";
 import { Class, Opcode, QType, RRType, Rcode, Uint16, Uint32 } from "./types";
 import { FQDN } from "./fqdn";
 import { Message, Header } from "./message";

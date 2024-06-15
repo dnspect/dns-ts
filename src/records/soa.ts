@@ -1,6 +1,7 @@
 import { Writer } from "../buffer";
 import { ParseError } from "../error";
 import { FQDN } from "../fqdn";
+import { CharacterString } from "../char";
 import { Slice } from "../packet";
 import { RR } from "../rr";
 import { Uint32 } from "../types";
@@ -103,11 +104,11 @@ export class SOA extends RR {
         );
     }
 
-    parseRdata(_rdata: string): void {
+    parseRdata(_rdata: CharacterString[]): void {
         throw new ParseError(`unimplemented!`);
     }
 
-    rdataString(): string {
+    presentRdata(): string {
         return `${this.mname} ${this.rname} ${this.serial} ${this.refresh} ${this.retry} ${this.expire} ${this.minimum}`;
     }
 }

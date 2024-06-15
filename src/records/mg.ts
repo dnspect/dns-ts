@@ -1,8 +1,8 @@
 import { FQDN } from "../fqdn";
+import { CharacterString } from "../char";
 import { Slice } from "../packet";
 import { RR } from "../rr";
 import { Writer } from "../buffer";
-import { ParseError } from "../error";
 
 /**
  *
@@ -32,11 +32,11 @@ export class MG extends RR {
         return buf.writeName(this.mgmname, false);
     }
 
-    parseRdata(rdata: string): void {
-        this.mgmname = FQDN.parse(rdata);
+    parseRdata(rdata: CharacterString[]): void {
+        this.mgmname = FQDN.parse(rdata[0].raw());
     }
 
-    rdataString(): string {
+    presentRdata(): string {
         return `${this.mgmname}`;
     }
 }

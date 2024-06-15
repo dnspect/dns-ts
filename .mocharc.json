@@ -1,13 +1,7 @@
 {
     "loader": "ts-node/esm",
     "es-module-specifier-resolution": "node",
-    "extensions": [
-        "ts"
-    ],
-    "spec": [
-        "src/**/*.test.ts"
-    ],
-    "watch-files": [
-        "src"
-    ]
+    "extensions": ["ts"],
+    "spec": ["src/**/*.test.ts"],
+    "watch-files": ["src"]
 }

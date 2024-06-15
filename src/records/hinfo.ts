@@ -1,4 +1,5 @@
-import { CharacterString, Slice } from "../packet";
+import { CharacterString } from "../char";
+import { Slice } from "../packet";
 import { RR } from "../rr";
 import { Writer } from "../buffer";
 import { ParseError } from "../error";
@@ -39,11 +40,11 @@ export class HINFO extends RR {
         return this.cpu.pack(buf) + this.os.pack(buf);
     }
 
-    parseRdata(_rdata: string): void {
+    parseRdata(_rdata: CharacterString[]): void {
         throw new ParseError(`unimplemented!`);
     }
 
-    rdataString(): string {
+    presentRdata(): string {
         return `${this.cpu.present()} ${this.os.present()}`;
     }
 }

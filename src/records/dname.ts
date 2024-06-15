@@ -6,16 +6,16 @@ import { RRType } from "../types";
 import { Writer } from "../buffer";
 
 /**
- * CNAME RDATA format:
+ * DNAME RDATA format:
  *
  * ```
  *  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
- *  /                     CNAME                     /
+ *  /                     DNAME                     /
  *  /                                               /
  *  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
  * ```
  */
-export class CNAME extends RR {
+export class DNAME extends RR {
     /**
      * A <domain-name> which specifies the canonical or primary name for the owner. The owner name
      * is an alias.
@@ -40,9 +40,9 @@ export class CNAME extends RR {
 }
 
 /**
- * Type guard for `CNAME`.
+ * Type guard for `DNAME`.
  *
- * @param rr
+ * @param rr RR
  * @returns
  */
-export const isCNAME = (rr: RR): rr is CNAME => rr.header.type === RRType.CNAME;
+export const isDNAME = (rr: RR): rr is DNAME => rr.header.type === RRType.DNAME;

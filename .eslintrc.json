@@ -5,14 +5,9 @@
         "commonjs": true,
         "es2020": true
     },
-    "extends": [
-        "eslint:recommended",
-        "plugin:@typescript-eslint/recommended"
-    ],
+    "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
     "parser": "@typescript-eslint/parser",
-    "plugins": [
-        "@typescript-eslint"
-    ],
+    "plugins": ["@typescript-eslint"],
     "rules": {
         "indent": "off",
         "quotes": "off",
@@ -64,7 +59,7 @@
         "new-cap": "off",
         "no-empty-function": "warn",
         "dot-notation": "warn",
-        "no-unused-vars": "off", // Rule "@typescript-eslint/no-unused-vars" is used instead 
+        "no-unused-vars": "off", // Rule "@typescript-eslint/no-unused-vars" is used instead
         "no-param-reassign": "off",
         "no-useless-concat": "warn",
         "array-callback-return": "warn",
@@ -72,11 +67,7 @@
         "import/no-useless-path-segments": "off",
         "no-mixed-operators": "off",
         "guard-for-in": "off",
-        "curly": [
-            "off",
-            "multi-or-nest",
-            "consistent"
-        ],
+        "curly": ["off", "multi-or-nest", "consistent"],
         "prefer-template": "error", // makes string use `xx`;
         "quote-props": "off", // Will change let a= { "foo": bar } into { foo: bar }
         "prefer-const": "error",

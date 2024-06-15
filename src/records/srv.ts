@@ -1,6 +1,7 @@
 import { Writer } from "../buffer";
 import { ParseError, SemanticError } from "../error";
 import { FQDN } from "../fqdn";
+import { CharacterString } from "../char";
 import { Slice } from "../packet";
 import { RR } from "../rr";
 import { Uint16 } from "../types";
@@ -117,11 +118,11 @@ export class SRV extends RR {
         );
     }
 
-    parseRdata(_rdata: string): void {
+    parseRdata(_rdata: CharacterString[]): void {
         throw new ParseError(`unimplemented!`);
     }
 
-    rdataString(): string {
+    presentRdata(): string {
         return `${this.priority} ${this.port} ${this.weight} ${this.target}`;
     }
 }

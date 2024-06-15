@@ -1,3 +1,4 @@
+import { CharacterString } from "../char";
 import { Slice } from "../packet";
 import { RR } from "../rr";
 import { Uint32, Uint8 } from "../types";
@@ -121,7 +122,7 @@ export class LOC extends RR {
             buf.writeUint32(this.altitude);
     }
 
-    parseRdata(_rdata: string): void {
+    parseRdata(_rdata: CharacterString[]): void {
         throw new ParseError(`unimplemented!`);
     }
 
@@ -146,7 +147,7 @@ export class LOC extends RR {
      *  statdns.net.   IN LOC   52 22 23.000 N 4 53 32.000 E -2.00m 0.00m 10000m 10m
      *  ```
      */
-    rdataString(): string {
+    presentRdata(): string {
         const [nOrS, lat] = this.latitude > LOC_EQUATOR ? ["N", this.latitude - LOC_EQUATOR] : ["S", LOC_EQUATOR - this.latitude];
         const [eOrW, lon] = this.longitude > LOC_PRIMEMERIDIAN ? ["E", this.longitude - LOC_PRIMEMERIDIAN] : ["W", LOC_PRIMEMERIDIAN - this.longitude];
         const latStr = displayLatLon(lat, nOrS);

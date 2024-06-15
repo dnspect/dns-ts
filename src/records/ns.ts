@@ -1,4 +1,5 @@
 import { FQDN } from "../fqdn";
+import { CharacterString } from "../char";
 import { Slice } from "../packet";
 import { RR } from "../rr";
 import { RRType } from "../types";
@@ -36,11 +37,11 @@ export class NS extends RR {
         return buf.writeName(this.nameserver, true);
     }
 
-    parseRdata(rdata: string): void {
-        this.nameserver = FQDN.parse(rdata);
+    parseRdata(rdata: CharacterString[]): void {
+        this.nameserver = FQDN.parse(rdata[0].raw());
     }
 
-    rdataString(): string {
+    presentRdata(): string {
         return `${this.nameserver}`;
     }
 }

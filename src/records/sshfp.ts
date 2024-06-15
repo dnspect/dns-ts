@@ -1,6 +1,7 @@
 import { Writer } from "../buffer";
 import { binaryToString } from "../encoding";
 import { ParseError } from "../error";
+import { CharacterString } from "../char";
 import { Slice } from "../packet";
 import { RR } from "../rr";
 import { Uint8 } from "../types";
@@ -65,7 +66,7 @@ export class SSHFP extends RR {
         return buf.writeUint8(this.algorithm) + buf.writeUint8(this.fpType) + buf.write(this.fingerprint);
     }
 
-    parseRdata(_rdata: string): void {
+    parseRdata(_rdata: CharacterString[]): void {
         throw new ParseError(`unimplemented!`);
     }
 
@@ -83,7 +84,7 @@ export class SSHFP extends RR {
      *
      * @returns
      */
-    rdataString(): string {
+    presentRdata(): string {
         const hex = binaryToString(this.fingerprint, 'hex');
         return `${this.algorithm} ${this.fpType} ${hex}`;
     }

@@ -1,4 +1,5 @@
 import { ParseError } from "./error";
+import { CharacterString, QuoteMode } from "./char";
 
 /**
  * The length of any one label is limited to between 1 and 63 octets.
@@ -14,17 +15,19 @@ const MAX_LABEL_SIZE = 63;
 const NULL_LABEL = "";
 
 /**
- * Full-qualified domain name.
+ * Fully-qualified domain name.
  *
  * A domain name (aka <domain-name in RFCs) is represented as a sequence of labels, where each label
  * consists of a length octet followed by that number of octets. The domain name terminates with the
  * zero length octet for the null label of the root.
  *
  * Note that this field may be an odd number of octets; no padding is used.
+ *
+ * @see https://datatracker.ietf.org/doc/html/rfc3696#section-2
  */
 export class FQDN implements Iterable<string> {
     private readonly labels: string[];
-    private str?: string;
+    private cached?: string;
 
     /**
      *
@@ -42,7 +45,17 @@ export class FQDN implements Iterable<string> {
         for (let i = 0; i < labels.length - 1; i++) {
             // The length of any one label is limited to between 1 and 63 octets.
             if (labels[i].length === 0 || labels[i].length > MAX_LABEL_SIZE) {
-                throw new ParseError(`label "${labels[i]}" is invalid`);
+                throw new ParseError(`label must be 63 characters or less`);
+            }
+
+            if (/[\\]+/.test(labels[i])) {
+                throw new ParseError(`label must not contain backslash`);
+            }
+
+            // TLD should not be all-numeric.
+            // See https://datatracker.ietf.org/doc/html/rfc3696#section-2
+            if (i === labels.length - 2 && /^-?\d+$/.test(labels[i])) {
+                throw new ParseError(`top-level domain label "${labels[i]}" should not be numeric`);
             }
         }
 
@@ -179,10 +192,7 @@ export class FQDN implements Iterable<string> {
      */
     startWith(base: FQDN, excludeSelf = false): boolean {
         const baseLen = base.labelLength();
-        if (
-            this.labels.length < baseLen ||
-            (excludeSelf && this.labels.length === baseLen)
-        ) {
+        if (this.labels.length < baseLen || (excludeSelf && this.labels.length === baseLen)) {
             return false;
         }
 
@@ -210,10 +220,7 @@ export class FQDN implements Iterable<string> {
      */
     endsWith(base: FQDN, excludeSelf = false): boolean {
         const baseLen = base.labelLength();
-        if (
-            this.labels.length < baseLen ||
-            (excludeSelf && this.labels.length === baseLen)
-        ) {
+        if (this.labels.length < baseLen || (excludeSelf && this.labels.length === baseLen)) {
             return false;
         }
 
@@ -275,21 +282,33 @@ export class FQDN implements Iterable<string> {
     }
 
     /**
-     * Returns the textual form of this fully-qualified domain name.
+     * Returns the textual form of this fully-qualified domain name (no escaping).
      *
      * @returns
      */
     toString(): string {
-        if (this.str === undefined) {
-            this.str = this.labels.length <= 1 ? "." : this.labels.join(".");
+        if (this.cached === undefined) {
+            this.cached = this.labels.length <= 1 ? "." : this.labels.join(".");
         }
-        return this.str;
+        return this.cached;
+    }
+
+    /**
+     * Returns the RFC 1035 compliant textual form of this fully-qualified domain name.
+     *
+     * @returns
+     */
+    present(): string {
+        if (this.labels.length <= 1) {
+            return ".";
+        }
+        return this.labels.map((label) => new CharacterString(label).present(QuoteMode.Never)).join(".");
     }
 
     /**
      * Parses a textual domain name.
      *
-     * @param name
+     * @param name The name to be parsed.
      * @returns
      *
      * @throws ParseError
@@ -301,15 +320,10 @@ export class FQDN implements Iterable<string> {
 
         const endsWithDot = name[name.length - 1] === ".";
         if (name.length > 255 - (endsWithDot ? 0 : 1)) {
-            throw new ParseError(`invalid domain name: length exceeds 255`);
+            throw new ParseError(`domain name must be 255 characters or less`);
         }
 
-        const labels = name.split(".");
-        if (!endsWithDot) {
-            labels.push(NULL_LABEL);
-        }
-
-        return new FQDN(labels);
+        return new FQDN(name.split("."));
     }
 }
 

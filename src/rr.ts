@@ -2,7 +2,8 @@
 
 import { Address } from "@dnspect/ip-address-ts";
 import { FQDN } from "./fqdn";
-import { Slice } from "./packet";
+import { CharacterString } from "./char";
+import {  Slice } from "./packet";
 import { Class, RRType, Uint16, Uint32 } from "./types";
 import { Writer } from "./buffer";
 
@@ -71,6 +72,18 @@ export class Header {
         this.class = cls;
         this.ttl = ttl;
         this.rdlength = 0;
+    }
+
+    /**
+     * Checks if the header is same with another one.
+     *
+     * Note that this check ignores TTL difference.
+     *
+     * @param other Other header.
+     * @returns True if class, type, and name are same.
+     */
+    same(other: Header): boolean {
+        return this.class === other.class && this.type === other.type && this.name.equal(other.name);
     }
 
     toString(): string {
@@ -158,27 +171,27 @@ export abstract class RR {
     abstract packRdata(buf: Writer): number;
 
     /**
-     * Parses the RFC1035 compliant textual format of RDATA.
+     * Parses the RFC 1035 compliant textual format of RDATA.
      *
-     * @param rdata string
+     * @param rdata A non-empty slice of character strings.
      *
      * @throws ParseError
      */
-    abstract parseRdata(rdata: string): void;
+    abstract parseRdata(rdata: CharacterString[]): void;
 
     /**
-     * Expresses the RDATA in it's RFC1035 compliant textual representation.
+     * Expresses the RDATA in it's RFC 1035 compliant textual representation.
      */
-    abstract rdataString(): string;
+    abstract presentRdata(): string;
 
     /**
-     * Returns RFC1035 compliant textual representation of the resource record.
+     * Returns RFC 1035 compliant textual representation of the resource record.
      */
     toString(): string {
         if (this.header.type === RRType.OPT) {
-            return this.rdataString();
+            return this.presentRdata();
         }
-        return `${this.header}\t${this.rdataString()}`;
+        return `${this.header}\t${this.presentRdata()}`;
     }
 
     /**
@@ -189,7 +202,7 @@ export abstract class RR {
             name: this.header.name.toString(),
             type: this.header.type,
             TTL: this.header.ttl,
-            data: this.rdataString(),
+            data: this.presentRdata(),
         };
     }
 }

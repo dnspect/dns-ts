@@ -1,5 +1,6 @@
 import { Address4 } from "@dnspect/ip-address-ts";
 import { AddressRR, RR } from "../rr";
+import { CharacterString } from "../char";
 import { Slice } from "../packet";
 import { RRType } from "../types";
 import { Writer } from "../buffer";
@@ -29,11 +30,11 @@ export class A extends RR implements AddressRR {
         return buf.write(this.address.bytes());
     }
 
-    parseRdata(rdata: string): void {
-        this.address = Address4.parse(rdata);
+    parseRdata(rdata: CharacterString[]): void {
+        this.address = Address4.parse(rdata[0].toString());
     }
 
-    rdataString(): string {
+    presentRdata(): string {
         return `${this.address}`;
     }
 }

@@ -183,7 +183,7 @@ export enum Rcode {
 }
 
 /**
- * Resrouce record type.
+ * Resource record type.
  */
 export enum RRType {
     A = 1,

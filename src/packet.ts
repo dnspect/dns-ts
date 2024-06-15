@@ -2,7 +2,7 @@ import { Uint16, Uint32, Uint48, Uint8 } from "./types";
 import { ParseError } from "./error";
 import { FQDN } from "./fqdn";
 import { EncodingScheme, binaryToString } from "./encoding";
-import { Writer, Reader, PacketBuffer } from "./buffer";
+import { Reader, PacketBuffer } from "./buffer";
 
 /**
  * Max domain label octets
@@ -56,9 +56,7 @@ export class HexString {
      */
     toBytes(): Uint8Array {
         if (this.hex.length % 2 !== 0) {
-            throw new Error(
-                `expect even number of hex digits to convert to bytes`
-            );
+            throw new Error(`expect even number of hex digits to convert to bytes`);
         }
 
         const bytes = new Uint8Array(this.hex.length / 2);
@@ -80,112 +78,6 @@ export class HexString {
 }
 
 /**
- * CharacterString (aka <character-string> in the RFCs) is a single length octet followed by that
- * number of characters. CharacterString is treated as binary information, and can be up to 256
- * characters in length (including the length octet).
- */
-export class CharacterString {
-    private str: string;
-
-    constructor(str: string) {
-        this.str = str;
-    }
-
-    /**
-     * Returns the raw character string.
-     *
-     * Note that, in order to get the textual representation, call `present()` instead.
-     *
-     * @returns The raw character string
-     */
-    toString(): string {
-        return this.str;
-    }
-
-    /**
-     * Returns the presentation format (ASCII representation) of the character
-     * string to be used in zonefile and/or dig-like output.
-     *
-     * ```txt
-     * <character-string> is expressed in one or two ways: as a contiguous set
-     * of characters without interior spaces, or as a string beginning with a "
-     * and ending with a ".  Inside a " delimited string any character can
-     * occur, except for a " itself, which must be quoted using \ (back slash).
-     * ```
-     *
-     * @see https://datatracker.ietf.org/doc/html/rfc1035#section-5.1
-     *
-     *
-     * @returns The textual representation.
-     */
-    present(): string {
-        const out = new Array<string>(this.str.length + 2);
-        let hasWS = false;
-
-        for (const ch of this.str) {
-            if (ch === ' ') {
-                hasWS = true;
-                out.push(ch);
-                continue;
-            }
-
-            if (ch === '"' || ch === '\\') {
-                // \X escape the " and \ char.
-                out.push('\\');
-                out.push(ch);
-            } else if (ch < ' ' || ch > '~') {
-                // \DDD escaping of char that is not visible.
-                out.push('\\');
-                const code = ch.charCodeAt(0);
-                if (code < 10) {
-                    out.push("00");
-                } else if (code < 100) {
-                    out.push("0");
-                }
-                out.push(code.toString());
-            } else {
-                out.push(ch);
-            }
-        }
-
-        // Quote the string when it has interior spaces.
-        if (hasWS) {
-            return `"${out.join("")}"`;
-        }
-
-        return out.join("");
-    }
-
-    static parse(s: string): CharacterString {
-
-    }
-
-    /**
-     * Packs the character string into buffer.
-     *
-     * @param buf The destination buffer.
-     * @returns Number of bytes written.
-     */
-    pack(buf: Writer): number {
-        return (
-            buf.writeUint8(this.str.length) + buf.writeString(this.str, "ascii")
-        );
-    }
-
-    /**
-     * Unpacks a character string from a slice of bytes.
-     *
-     * @param s A slice of bytes
-     * @returns A character string
-     */
-    static unpack(s: Slice): CharacterString {
-        const len = s.readUint8();
-        const str = s.readString("ascii", len);
-        return new CharacterString(str);
-    }
-}
-
-/**
  * A slice of fixed-length sequence of bytes.
  *
  * It provides functions to read data from the slice and tracks how many bytes have been read. The
@@ -197,10 +89,7 @@ export class Slice {
     private cur: number;
     // Valid data length in the buffer.
     private len: number;
-    private lookupLabels?: (
-        offset: Uint16,
-        pointers: number
-    ) => [string[], Uint16];
+    private lookupLabels?: (offset: Uint16, pointers: number) => [string[], Uint16];
 
     /**
      * Creates a new slice from passed data.
@@ -240,11 +129,7 @@ export class Slice {
      */
     private check(len: number): void {
         if (this.cur + len > this.len) {
-            throw new ParseError(
-                `insufficient bytes remaining for read: needs ${len}, have ${
-                    this.len - this.cur
-                }`
-            );
+            throw new ParseError(`insufficient bytes remaining for read: needs ${len}, have ${this.len - this.cur}`);
         }
     }
 
@@ -386,12 +271,7 @@ export class Slice {
     readSlice(len: number): Slice {
         this.check(len);
 
-        const s = new Slice(
-            this.buf,
-            this.offset + this.cur,
-            len,
-            this.lookupLabels
-        );
+        const s = new Slice(this.buf, this.offset + this.cur, len, this.lookupLabels);
         this.cur += len;
         return s;
     }
@@ -424,7 +304,7 @@ export class Slice {
     }
 
     /**
-     * Reads a full-qualified domain name and advances the read cursor.
+     * Reads a fully-qualified domain name and advances the read cursor.
      *
      * @param limit The total number of bytes to be read.
      * @returns
@@ -432,9 +312,7 @@ export class Slice {
     readName(): FQDN {
         const [labels, n] = this.findLabels(this.cur, 0);
         if (n > this.remaining()) {
-            throw new ParseError(
-                `overflow unpacking domain name: needs ${n}, have ${this.remaining()}`
-            );
+            throw new ParseError(`overflow unpacking domain name: needs ${n}, have ${this.remaining()}`);
         }
 
         const fqdn = new FQDN(labels);
@@ -450,10 +328,7 @@ export class Slice {
      *
      * @throws ParseError
      */
-    protected findLabels(
-        startPos: Uint16,
-        pointers: number
-    ): [string[], Uint16] {
+    protected findLabels(startPos: Uint16, pointers: number): [string[], Uint16] {
         const labels = new Array<string>();
         let labelLen = this.buf.readUint8(this.offset + startPos);
         let cur = startPos + 1;
@@ -467,22 +342,17 @@ export class Slice {
                 // eslint-disable-next-line no-param-reassign
                 pointers++;
                 if (pointers > MAX_COMPRESSION_POINTERS) {
-                    throw new ParseError(
-                        `too much domain name compression pointers: ${pointers}`
-                    );
+                    throw new ParseError(`too much domain name compression pointers: ${pointers}`);
                 }
 
                 // remove the first two ones to get a high byte
                 const high = labelLen - LABEL_POINTER;
                 // the new position to read the name from
-                const newPos =
-                    (high << 8) + this.buf.readUint8(this.offset + cur);
+                const newPos = (high << 8) + this.buf.readUint8(this.offset + cur);
                 cur += 1;
 
                 if (this.lookupLabels === undefined) {
-                    throw new ParseError(
-                        `domain name compression is not supported by in this slice of data`
-                    );
+                    throw new ParseError(`domain name compression is not supported by in this slice of data`);
                 }
 
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -492,24 +362,17 @@ export class Slice {
                 return [labels, cur - startPos];
             }
 
-            const labelData = this.buf.slice(
-                this.offset + cur,
-                this.offset + cur + labelLen
-            );
+            const labelData = this.buf.slice(this.offset + cur, this.offset + cur + labelLen);
             const label = binaryToString(labelData, "ascii");
             labels.push(label);
 
             if (labelLen > MAX_DOMAIN_LABEL_WIRE_OCTETS) {
-                throw new ParseError(
-                    `label exceeded ${MAX_DOMAIN_LABEL_WIRE_OCTETS} octets: "${label}"`
-                );
+                throw new ParseError(`label exceeded ${MAX_DOMAIN_LABEL_WIRE_OCTETS} octets: "${label}"`);
             }
 
             cur += labelLen;
             if (cur - startPos >= MAX_DOMAIN_NAME_WIRE_OCTETS) {
-                throw new ParseError(
-                    `domain name exceeded ${MAX_DOMAIN_NAME_WIRE_OCTETS} octets`
-                );
+                throw new ParseError(`domain name exceeded ${MAX_DOMAIN_NAME_WIRE_OCTETS} octets`);
             }
 
             // ready for reading next label or the null label (0) at the end

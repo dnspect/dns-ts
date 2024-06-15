@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { TXT } from "./txt";
 import { Header } from "../rr";
 import { Class, RRType } from "../types";
-import { CharacterString } from "../packet";
+import { CharacterString } from "../char";
 
 describe("test stringify", () => {
     const txt = new TXT(new Header('example.com', RRType.TXT, Class.IN, 300));
@@ -13,11 +13,11 @@ describe("test stringify", () => {
             "name": "example.com.",
             "type": 16,
             "TTL": 300,
-            "data": "\"abc\" \"d \"hi\" e\"",
+            "data": String.raw`"abc" "d \"hi\" e"`,
         }));
     });
 
     it("should generate dig-like text", () => {
-        expect(txt.toString()).to.be.equal('example.com.\t\t300\tIN\tTXT\t"abc" "d "hi" e"');
+        expect(txt.toString()).to.be.equal('example.com.\t\t300\tIN\tTXT\t"abc" "d \\"hi\\" e"');
     });
 });

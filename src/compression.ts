@@ -64,7 +64,7 @@ export class Compressor {
         let n = 0;
         let pointer = this.findEntry(labels);
 
-        // Because the full-qualified domain name is not a root, there will be
+        // Because the fully-qualified domain name is not a root, there will be
         // two or more labels to work with.
         while (pointer === undefined) {
             // Cache non-root name

@@ -1,4 +1,5 @@
 import { FQDN } from "../fqdn";
+import { CharacterString } from "../char";
 import { Slice } from "../packet";
 import { RR } from "../rr";
 import { Writer } from "../buffer";
@@ -46,11 +47,16 @@ export class MINFO extends RR {
         );
     }
 
-    parseRdata(_rdata: string): void {
-        throw new ParseError(`unimplemented!`);
+    parseRdata(rdata: CharacterString[]): void {
+        if (rdata.length < 2) {
+            throw new ParseError(`missing <RMAILBX> or <EMAILBX>`);
+        }
+
+        this.rmailbx = FQDN.parse(rdata[0].raw());
+        this.emailbx = FQDN.parse(rdata[1].raw());
     }
 
-    rdataString(): string {
+    presentRdata(): string {
         return `${this.rmailbx} ${this.emailbx}`;
     }
 }

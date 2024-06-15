@@ -1,6 +1,7 @@
 import { Writer } from "../buffer";
 import { binaryToString } from "../encoding";
 import { ParseError } from "../error";
+import { CharacterString } from "../char";
 import { Slice } from "../packet";
 import { RR } from "../rr";
 import { Uint32, Uint8 } from "../types";
@@ -88,14 +89,14 @@ export class ZONEMD extends RR {
         );
     }
 
-    parseRdata(_rdata: string): void {
+    parseRdata(_rdata: CharacterString[]): void {
         throw new ParseError(`unimplemented!`);
     }
 
     /**
      * @override
      */
-    rdataString(): string {
+    presentRdata(): string {
         const digest = binaryToString(this.digest, "hex").toUpperCase();
         return `${this.serial} ${this.scheme} ${this.algorithm} ${digest}`;
     }

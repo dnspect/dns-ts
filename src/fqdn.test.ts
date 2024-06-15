@@ -7,6 +7,7 @@ import {
     IP6_ARPA_ZONE,
     ROOT_ZONE,
 } from "./fqdn";
+import { ParseError } from "./error";
 
 describe("test FQDN()", () => {
     it("should construct", () => {
@@ -29,6 +30,13 @@ describe("test FQDN()", () => {
         expect(FQDN.parse("com.").toString()).to.equal("com.");
         expect(FQDN.parse("example.com").toString()).to.equal("example.com.");
         expect(FQDN.parse("example.com.").toString()).to.equal("example.com.");
+    });
+
+    it("should not parse", () => {
+        expect(() => FQDN.parse("\\.")).to.throw(ParseError, `label must not contain backslash`);
+        expect(() => FQDN.parse("\n.1.")).to.throw(ParseError, `top-level domain label "1" should not be numeric`);
+        expect(() => FQDN.parse("a".repeat(64))).to.throw(ParseError, "label must be 63 characters or less");
+        expect(() => FQDN.parse("a".repeat(256))).to.throw(ParseError, "domain name must be 255 characters or less");
     });
 
     it("should iter", () => {
@@ -147,5 +155,11 @@ describe("test FQDN()", () => {
         expect(
             EXAMPLE_ZONE.subdomain("www").equal(FQDN.parse("www.example.com"))
         ).to.true;
+    });
+
+    it("should present", () => {
+        expect(FQDN.parse("").present()).to.be.equal(".");
+        expect(FQDN.parse(".").present()).to.be.equal(".");
+        expect(FQDN.parse(`a-b\t\nk@#( )".test.`).present()).to.be.equal(String.raw`a-b\009\010k\@#\(\032\)\".test.`);
     });
 });

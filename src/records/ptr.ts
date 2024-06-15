@@ -1,5 +1,6 @@
 import { Writer } from "../buffer";
 import { FQDN } from "../fqdn";
+import { CharacterString } from "../char";
 import { Slice } from "../packet";
 import { RR } from "../rr";
 
@@ -28,11 +29,11 @@ export class PTR extends RR {
         return buf.writeName(this.domain, true);
     }
 
-    parseRdata(rdata: string): void {
-        this.domain = FQDN.parse(rdata);
+    parseRdata(rdata: CharacterString[]): void {
+        this.domain = FQDN.parse(rdata[0].raw());
     }
 
-    rdataString(): string {
+    presentRdata(): string {
         return `${this.domain}`;
     }
 }

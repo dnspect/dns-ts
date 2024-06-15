@@ -1,6 +1,7 @@
 import { Writer } from "../../buffer";
 import { ParseError } from "../../error";
 import { FQDN } from "../../fqdn";
+import { CharacterString } from "../../char";
 import { Slice } from "../../packet";
 import { RR } from "../../rr";
 import { TypeBitMaps } from "./type-bitmaps";
@@ -60,7 +61,7 @@ export class NSEC extends RR {
         return buf.writeName(this.nextName, false) + this.typeBitMaps.pack(buf);
     }
 
-    parseRdata(_rdata: string): void {
+    parseRdata(_rdata: CharacterString[]): void {
         throw new ParseError(`unimplemented!`);
     }
 
@@ -70,7 +71,7 @@ export class NSEC extends RR {
      * {@link https://datatracker.ietf.org/doc/html/rfc4034#section-4.2 | NSEC RR Presentation Format}
      * @returns
      */
-    rdataString(): string {
+    presentRdata(): string {
         return `${this.nextName} ${this.typeBitMaps}`;
     }
 }

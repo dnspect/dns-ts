@@ -2,6 +2,7 @@ import { Base32Spec, Decoder } from "../../base32";
 import { Writer } from "../../buffer";
 import { binaryToString } from "../../encoding";
 import { ParseError } from "../../error";
+import { CharacterString } from "../../char";
 import { Slice } from "../../packet";
 import { RR } from "../../rr";
 import { Uint16, Uint8 } from "../../types";
@@ -90,7 +91,7 @@ export class NSEC3 extends RR {
             this.typeBitMaps.pack(buf);
     }
 
-    parseRdata(_rdata: string): void {
+    parseRdata(_rdata: CharacterString[]): void {
         throw new ParseError(`unimplemented!`);
     }
 
@@ -100,7 +101,7 @@ export class NSEC3 extends RR {
      * {@link https://datatracker.ietf.org/doc/html/rfc5155#section-3.3 | NSEC3 RR Presentation Format}
      * @returns
      */
-    rdataString(): string {
+    presentRdata(): string {
         const salt = this.salt.length === 0 ? "-" : binaryToString(this.salt, "hex");
         const decoder = new Decoder(Base32Spec.ExtendedHex);
         const nextHashedOwnerName = this.nexHashedOwnerName.length === 0 ? "" : decoder.decode(this.salt);
