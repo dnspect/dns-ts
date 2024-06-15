@@ -42,7 +42,7 @@ export class NS extends RR {
     }
 
     presentRdata(): string {
-        return `${this.nameserver}`;
+        return this.nameserver.present();
     }
 }
 

@@ -37,6 +37,6 @@ export class MG extends RR {
     }
 
     presentRdata(): string {
-        return `${this.mgmname}`;
+        return this.mgmname.present();
     }
 }

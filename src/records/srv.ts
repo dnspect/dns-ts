@@ -118,11 +118,38 @@ export class SRV extends RR {
         );
     }
 
-    parseRdata(_rdata: CharacterString[]): void {
-        throw new ParseError(`unimplemented!`);
+    parseRdata(rdata: CharacterString[]): void {
+        switch (rdata.length) {
+            case 0:
+                throw new ParseError(`missing RDATA`);
+            case 1:
+                throw new ParseError(`missing <fp type> in RDATA`);
+            case 2:
+                throw new ParseError(`missing <fingerprint> in RDATA`);
+        }
+
+        this.priority =
+            rdata[0].toUint16() ??
+            (() => {
+                throw new ParseError("invalid <priority> in RDATA");
+            })();
+
+        this.weight =
+            rdata[1].toUint16() ??
+            (() => {
+                throw new ParseError("invalid <weight> in RDATA");
+            })();
+
+        this.port =
+            rdata[2].toUint16() ??
+            (() => {
+                throw new ParseError("invalid <port> in RDATA");
+            })();
+
+        this.target = FQDN.parse(rdata[3].raw());
     }
 
     presentRdata(): string {
-        return `${this.priority} ${this.port} ${this.weight} ${this.target}`;
+        return `${this.priority} ${this.weight} ${this.port} ${this.target.present()}`;
     }
 }

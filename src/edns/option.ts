@@ -63,7 +63,11 @@ export abstract class Option {
     /**
      * Outputs dig-like textual representation.
      */
-    abstract toString(): string;
+    abstract present(): string;
+
+    toString(): string {
+        return this.present();
+    }
 }
 
 /**

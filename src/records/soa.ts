@@ -104,11 +104,56 @@ export class SOA extends RR {
         );
     }
 
-    parseRdata(_rdata: CharacterString[]): void {
-        throw new ParseError(`unimplemented!`);
+    parseRdata(rdata: CharacterString[]): void {
+        switch (rdata.length) {
+            case 0:
+                throw new ParseError(`missing RDATA`);
+            case 1:
+                throw new ParseError(`missing <RNAME> in RDATA`);
+            case 2:
+                throw new ParseError(`missing <SERIAL> in RDATA`);
+            case 3:
+                throw new ParseError(`missing <REFRESH> in RDATA`);
+            case 4:
+                throw new ParseError(`missing <RETRY> in RDATA`);
+            case 5:
+                throw new ParseError(`missing <EXPIRE> in RDATA`);
+            case 6:
+                throw new ParseError(`missing <MINIMUM> in RDATA`);
+        }
+
+        this.mname = FQDN.parse(rdata[0].raw());
+        this.rname = FQDN.parse(rdata[1].raw());
+        this.serial =
+            rdata[2].toUint32() ??
+            (() => {
+                throw new ParseError(`invalid <SERIAL> in RDATA`);
+            })();
+        this.refresh =
+            rdata[3].toUint32() ??
+            (() => {
+                throw new ParseError(`invalid <REFRESH> in RDATA`);
+            })();
+        this.retry =
+            rdata[4].toUint32() ??
+            (() => {
+                throw new ParseError(`invalid <RETRY> in RDATA`);
+            })();
+        this.expire =
+            rdata[5].toUint32() ??
+            (() => {
+                throw new ParseError(`invalid <EXPIRE> in RDATA`);
+            })();
+        this.minimum =
+            rdata[6].toUint32() ??
+            (() => {
+                throw new ParseError(`invalid <MINIMUM> in RDATA`);
+            })();
     }
 
     presentRdata(): string {
-        return `${this.mname} ${this.rname} ${this.serial} ${this.refresh} ${this.retry} ${this.expire} ${this.minimum}`;
+        return `${this.mname.present()} ${this.rname.present()} ${this.serial} ${this.refresh} ${this.retry} ${
+            this.expire
+        } ${this.minimum}`;
     }
 }

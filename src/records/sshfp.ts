@@ -1,5 +1,5 @@
 import { Writer } from "../buffer";
-import { binaryToString } from "../encoding";
+import { binaryToString, stringToBinary } from "../encoding";
 import { ParseError } from "../error";
 import { CharacterString } from "../char";
 import { Slice } from "../packet";
@@ -66,8 +66,35 @@ export class SSHFP extends RR {
         return buf.writeUint8(this.algorithm) + buf.writeUint8(this.fpType) + buf.write(this.fingerprint);
     }
 
-    parseRdata(_rdata: CharacterString[]): void {
-        throw new ParseError(`unimplemented!`);
+    parseRdata(rdata: CharacterString[]): void {
+        switch (rdata.length) {
+            case 0:
+                throw new ParseError(`missing RDATA`);
+            case 1:
+                throw new ParseError(`missing <fp type> in RDATA`);
+            case 2:
+                throw new ParseError(`missing <fingerprint> in RDATA`);
+        }
+
+        this.algorithm =
+            rdata[0].toUint8() ??
+            (() => {
+                throw new ParseError("invalid <algorithm> in RDATA");
+            })();
+
+        this.fpType =
+            rdata[1].toUint8() ??
+            (() => {
+                throw new ParseError("invalid <fp type> in RDATA");
+            })();
+
+        this.fingerprint = stringToBinary(
+            rdata
+                .slice(2)
+                .map((s) => s.raw())
+                .join(""),
+            "hex"
+        );
     }
 
     /**
@@ -85,7 +112,7 @@ export class SSHFP extends RR {
      * @returns
      */
     presentRdata(): string {
-        const hex = binaryToString(this.fingerprint, 'hex');
+        const hex = binaryToString(this.fingerprint, "hex");
         return `${this.algorithm} ${this.fpType} ${hex}`;
     }
 }

@@ -1,11 +1,11 @@
-import { Base32Spec, Decoder } from "../../base32";
+import { encodeExtendedHex, decodeExtendedHex } from "../../base32";
 import { Writer } from "../../buffer";
 import { binaryToString } from "../../encoding";
 import { ParseError } from "../../error";
 import { CharacterString } from "../../char";
 import { Slice } from "../../packet";
 import { RR } from "../../rr";
-import { Uint16, Uint8 } from "../../types";
+import { rrtypeFrom, Uint16, Uint8 } from "../../types";
 import { NSEC3HashAlgorithm } from "./algorithm";
 import { TypeBitMaps } from "./type-bitmaps";
 
@@ -81,18 +81,67 @@ export class NSEC3 extends RR {
     }
 
     packRdata(buf: Writer): number {
-        return buf.writeUint8(this.hashAlg) +
+        return (
+            buf.writeUint8(this.hashAlg) +
             buf.writeUint8(this.flags) +
             buf.writeUint16(this.iterations) +
             buf.writeUint8(this.salt.length) +
             buf.write(this.salt) +
             buf.writeUint8(this.nexHashedOwnerName.length) +
             buf.write(this.nexHashedOwnerName) +
-            this.typeBitMaps.pack(buf);
+            this.typeBitMaps.pack(buf)
+        );
     }
 
-    parseRdata(_rdata: CharacterString[]): void {
-        throw new ParseError(`unimplemented!`);
+    parseRdata(rdata: CharacterString[]): void {
+        switch (rdata.length) {
+            case 0:
+                throw new ParseError(`missing RDATA`);
+            case 1:
+                throw new ParseError(`missing <Flags> in RDATA`);
+            case 2:
+                throw new ParseError(`missing <Iterations> in RDATA`);
+            case 3:
+                throw new ParseError(`missing <Salt> in RDATA`);
+            case 4:
+                throw new ParseError(`missing <Next Hashed Owner Name> in RDATA`);
+            case 5:
+                throw new ParseError(`missing <Type Bit Maps> in RDATA`);
+        }
+
+        this.hashAlg =
+            rdata[0].toUint8() ??
+            (() => {
+                throw new ParseError("invalid <Hash Alg> in RDATA");
+            })();
+
+        this.flags =
+            rdata[1].toUint8() ??
+            (() => {
+                throw new ParseError("invalid <Flags> in RDATA");
+            })();
+
+        this.iterations =
+            rdata[2].toUint16() ??
+            (() => {
+                throw new ParseError("invalid <Iterations> in RDATA");
+            })();
+
+        this.salt = rdata[3].raw() === "-" ? new Uint8Array(0) : rdata[3].toBinary("hex");
+
+        // The Next Hashed Owner Name field is represented as an unpadded
+        // sequence of case-insensitive base32 digits, without whitespace.
+        this.nexHashedOwnerName = encodeExtendedHex(rdata[4].raw());
+
+        const types = [];
+        for (let i = 5; i < rdata.length; i++) {
+            const rrt = rrtypeFrom(rdata[i].raw());
+            if (rrt === null) {
+                throw new ParseError(`invalid type "${rdata[i]}" in Type Bit Maps`);
+            }
+            types.push(rrt);
+        }
+        this.typeBitMaps = new TypeBitMaps(types);
     }
 
     /**
@@ -103,8 +152,7 @@ export class NSEC3 extends RR {
      */
     presentRdata(): string {
         const salt = this.salt.length === 0 ? "-" : binaryToString(this.salt, "hex");
-        const decoder = new Decoder(Base32Spec.ExtendedHex);
-        const nextHashedOwnerName = this.nexHashedOwnerName.length === 0 ? "" : decoder.decode(this.salt);
+        const nextHashedOwnerName = decodeExtendedHex(this.nexHashedOwnerName);
         return `${this.hashAlg} ${this.flags} ${this.iterations} ${salt} ${nextHashedOwnerName} ${this.typeBitMaps}`;
     }
 }

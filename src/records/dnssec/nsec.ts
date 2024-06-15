@@ -5,6 +5,7 @@ import { CharacterString } from "../../char";
 import { Slice } from "../../packet";
 import { RR } from "../../rr";
 import { TypeBitMaps } from "./type-bitmaps";
+import { rrtypeFrom } from "../../types";
 
 /**
  * The NSEC resource record lists two separate things: the next owner name (in the canonical ordering
@@ -52,17 +53,30 @@ export class NSEC extends RR {
 
     unpackRdata(rdata: Slice): void {
         this.nextName = rdata.readName();
-        this.typeBitMaps = TypeBitMaps.unpack(
-            rdata.readSlice(rdata.remaining())
-        );
+        this.typeBitMaps = TypeBitMaps.unpack(rdata.readSlice(rdata.remaining()));
     }
 
     packRdata(buf: Writer): number {
         return buf.writeName(this.nextName, false) + this.typeBitMaps.pack(buf);
     }
 
-    parseRdata(_rdata: CharacterString[]): void {
-        throw new ParseError(`unimplemented!`);
+    parseRdata(rdata: CharacterString[]): void {
+        switch (rdata.length) {
+            case 0:
+                throw new ParseError(`missing <Next Domain Name>`);
+        }
+
+        this.nextName = FQDN.parse(rdata[0].raw());
+
+        const types = [];
+        for (let i = 1; i < rdata.length; i++) {
+            const rrt = rrtypeFrom(rdata[i].raw());
+            if (rrt === null) {
+                throw new ParseError(`invalid type "${rdata[i]}" in Type Bit Maps`);
+            }
+            types.push(rrt);
+        }
+        this.typeBitMaps = new TypeBitMaps(types);
     }
 
     /**
@@ -72,6 +86,6 @@ export class NSEC extends RR {
      * @returns
      */
     presentRdata(): string {
-        return `${this.nextName} ${this.typeBitMaps}`;
+        return `${this.nextName.present()} ${this.typeBitMaps}`;
     }
 }

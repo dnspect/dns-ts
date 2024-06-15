@@ -36,6 +36,6 @@ export class MB extends RR {
     }
 
     presentRdata(): string {
-        return `${this.madname}`;
+        return this.madname.present();
     }
 }

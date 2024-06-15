@@ -2,6 +2,7 @@ import { OptCode, Option } from "./option";
 import { Slice } from "../packet";
 import { Uint16 } from "../types";
 import { Writer } from "../buffer";
+import { ParseError } from "../error";
 
 /**
  * Start of the private range for EDE codes.
@@ -25,7 +26,7 @@ export class ExtendedError extends Option {
             this.extraText = data.readUTF8String();
         } else {
             this.infoCode = data;
-            this.extraText = text ?? '';
+            this.extraText = text ?? "";
         }
     }
 
@@ -39,14 +40,16 @@ export class ExtendedError extends Option {
     /**
      * @override
      */
-    toString(): string {
+    present(): string {
         let output = `; EDE: ${this.infoCode}`;
 
-        let errorName = ExtendedErrorCode[this.infoCode];
-        if (errorName !== undefined) {
-            errorName = errorName.replace(/([a-z])([A-Z])/g, "$1 $2");
-            errorName = errorName.replace(/([A-Z])([A-Z][a-z])/g, "$1 $2");
-            output += ` (${errorName})`;
+        let name = ExtendedErrorCode[this.infoCode];
+        if (name !== undefined) {
+            name = name.replace(/([a-z])([A-Z])/g, "$1 $2");
+            name = name.replace(/([A-Z])([A-Z][a-z])/g, "$1 $2");
+            output += ` (${name})`;
+        } else {
+            output += ` (Unknown Code)`;
         }
 
         if (this.extraText.length > 0) {
@@ -74,6 +77,30 @@ export class ExtendedError extends Option {
      */
     static fromCode(infoCode: ExtendedErrorCode, extraText?: string): ExtendedError {
         return new ExtendedError(infoCode, extraText);
+    }
+
+    /**
+     * Parses ExtendedError from a textual representation.
+     *
+     * @param input A regular comment string that has stripped out "EDE: "
+     *
+     * @example
+     * ```
+     * ; EDE: 0 (other): (blabla. https://foo.bar/)  // dig
+     * ;; EDE: 49152 (Unknown Code): 'blabla. https://foo.bar/' // kdig
+     * ```
+     *
+     * Note that the prefix "; EDE:\s+" should has been stripped from caller.
+     */
+    static parse(input: string): ExtendedError {
+        const found = input.match(/^(\d+)[^:]+(:\s*[('](.+)[)'])?/i);
+        if (found === null) {
+            throw new ParseError(`unrecognized EDE text: "${input}"`);
+        }
+
+        const code = parseInt(found[1]);
+        const text = found.length >= 4 ? found[3].trim() : "";
+        return new ExtendedError(code, text);
     }
 }
 

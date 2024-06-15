@@ -41,17 +41,19 @@ export class MX extends RR {
     }
 
     packRdata(buf: Writer): number {
-        return (
-            buf.writeUint16(this.preference) +
-            buf.writeName(this.exchange, true)
-        );
+        return buf.writeUint16(this.preference) + buf.writeName(this.exchange, true);
     }
 
-    parseRdata(_rdata: CharacterString[]): void {
-        throw new ParseError(`unimplemented!`);
+    parseRdata(rdata: CharacterString[]): void {
+        switch (rdata.length) {
+            case 0:
+                throw new ParseError("missing RDATA");
+            case 1:
+                throw new ParseError("missing <EXCHANGE> in RDATA");
+        }
     }
 
     presentRdata(): string {
-        return `${this.preference} ${this.exchange}`;
+        return `${this.preference} ${this.exchange.present()}`;
     }
 }

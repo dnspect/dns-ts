@@ -49,11 +49,15 @@ export class ClientSubnet extends Option {
             }
 
             if (this.address.bits() < this.sourcePrefixLength) {
-                throw new ParseError(`invalid source prefix length ${this.sourcePrefixLength} for address family ${family}`);
+                throw new ParseError(
+                    `invalid source prefix length ${this.sourcePrefixLength} for address family ${family}`
+                );
             }
 
             if (this.address.bits() < this.scopePrefixLength) {
-                throw new ParseError(`invalid scope prefix length ${this.scopePrefixLength} for address family ${family}`);
+                throw new ParseError(
+                    `invalid scope prefix length ${this.scopePrefixLength} for address family ${family}`
+                );
             }
         } else {
             this.address = data.ip();
@@ -74,7 +78,7 @@ export class ClientSubnet extends Option {
      * Refer to {@link https://datatracker.ietf.org/doc/html/rfc5001#section-2.4 | Presentation Format}.
      * @returns
      */
-    toString(): string {
+    present(): string {
         return `; CLIENT-SUBNET: ${this.address.toString()}/${this.sourcePrefixLength}/${this.scopePrefixLength}`;
     }
 
@@ -97,5 +101,31 @@ export class ClientSubnet extends Option {
      */
     static from(data: ArrayLike<number> | ArrayBufferLike): ClientSubnet {
         return new ClientSubnet(Slice.from(data));
+    }
+
+    /**
+     * Parses ClientSubnet from a textual representation.
+     *
+     * @param input A regular comment string that has stripped out "CLIENT-SUBNET: "
+     *
+     * @example
+     * ```
+     * ; CLIENT-SUBNET: 1.2.3.4/32/0 // dig
+     * ;; CLIENT-SUBNET: 1.2.3.4/32/0 // kdig
+     * ```
+     *
+     * Note that the prefix "; CLIENT-SUBNET:\s+" should has been stripped from caller.
+     */
+    static parse(input: string): ClientSubnet {
+        const found = input.match(/^([^/]+\/[0-9]+)\/([0-9]+)/i);
+        if (found === null) {
+            throw new ParseError(`unrecognized CLIENT-SUBNET text: "${input}"`);
+        }
+
+        const prefix = Prefix.parse(found[1]);
+        const scope = parseInt(found[2]);
+        const cs = new ClientSubnet(prefix);
+        cs.scopePrefixLength = scope;
+        return cs;
     }
 }

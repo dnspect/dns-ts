@@ -76,15 +76,46 @@ export class NSEC3PARAM extends RR {
     }
 
     packRdata(buf: Writer): number {
-        return buf.writeUint8(this.hashAlg) +
+        return (
+            buf.writeUint8(this.hashAlg) +
             buf.writeUint8(this.flags) +
             buf.writeUint16(this.iterations) +
             buf.writeUint8(this.salt.length) +
-            buf.write(this.salt);
+            buf.write(this.salt)
+        );
     }
 
-    parseRdata(_rdata: CharacterString[]): void {
-        throw new ParseError(`unimplemented!`);
+    parseRdata(rdata: CharacterString[]): void {
+        switch (rdata.length) {
+            case 0:
+                throw new ParseError(`missing RDATA`);
+            case 1:
+                throw new ParseError(`missing <Flags> in RDATA`);
+            case 2:
+                throw new ParseError(`missing <Iterations> in RDATA`);
+            case 3:
+                throw new ParseError(`missing <Salt> in RDATA`);
+        }
+
+        this.hashAlg =
+            rdata[0].toUint8() ??
+            (() => {
+                throw new ParseError("invalid <Hash Alg> in RDATA");
+            })();
+
+        this.flags =
+            rdata[1].toUint8() ??
+            (() => {
+                throw new ParseError("invalid <Flags> in RDATA");
+            })();
+
+        this.iterations =
+            rdata[2].toUint16() ??
+            (() => {
+                throw new ParseError("invalid <Iterations> in RDATA");
+            })();
+
+        this.salt = rdata[3].raw() === "-" ? new Uint8Array(0) : rdata[3].toBinary("hex");
     }
 
     /**

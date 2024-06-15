@@ -183,6 +183,59 @@ export enum Rcode {
 }
 
 /**
+ * Converts a string to Rcode.
+ *
+ * @param name The response code name.
+ * @returns
+ */
+export function rcodeFrom(name: string): Rcode | null {
+    switch (name.toUpperCase()) {
+        case "NOERROR":
+            return Rcode.NOERROR;
+        case "FORMERR":
+            return Rcode.FORMERR;
+        case "SERVFAIL":
+            return Rcode.SERVFAIL;
+        case "NXDOMAIN":
+            return Rcode.NXDOMAIN;
+        case "NOTIMP":
+            return Rcode.NOTIMP;
+        case "REFUSED":
+            return Rcode.REFUSED;
+        case "YXDOMAIN":
+            return Rcode.YXDOMAIN;
+        case "YXRRSET":
+            return Rcode.YXRRSET;
+        case "NXRRSET":
+            return Rcode.NXRRSET;
+        case "NOTAUTH":
+            return Rcode.NOTAUTH;
+        case "NOTZONE":
+            return Rcode.NOTZONE;
+        case "BADSIG":
+            return Rcode.BADSIG;
+        case "BADVERS":
+            return Rcode.BADVERS;
+        case "BADKEY":
+            return Rcode.BADKEY;
+        case "BADTIME":
+            return Rcode.BADTIME;
+        case "BADMODE":
+            return Rcode.BADMODE;
+        case "BADNAME":
+            return Rcode.BADNAME;
+        case "BADALG":
+            return Rcode.BADALG;
+        case "BADTRUNC":
+            return Rcode.BADTRUNC;
+        case "BADCOOKIE":
+            return Rcode.BADCOOKIE;
+        default:
+            return null;
+    }
+}
+
+/**
  * Resource record type.
  */
 export enum RRType {
@@ -278,88 +331,165 @@ export type RRTypes = keyof typeof RRType;
  * @returns
  */
 export function rrtypeFrom(name: string): RRType | null {
-    name = name.toUpperCase();
-
-    switch (name) {
-        case 'A': return RRType.A;
-        case 'NS': return RRType.NS;
-        case 'MD': return RRType.MD;
-        case 'MF': return RRType.MF;
-        case 'CNAME': return RRType.CNAME;
-        case 'SOA': return RRType.SOA;
-        case 'MB': return RRType.MB;
-        case 'MG': return RRType.MG;
-        case 'MR': return RRType.MR;
-        case 'NULL': return RRType.NULL;
-        case 'PTR': return RRType.PTR;
-        case 'HINFO': return RRType.HINFO;
-        case 'MINFO': return RRType.MINFO;
-        case 'MX': return RRType.MX;
-        case 'TXT': return RRType.TXT;
-        case 'RP': return RRType.RP;
-        case 'AFSDB': return RRType.AFSDB;
-        case 'X25': return RRType.X25;
-        case 'ISDN': return RRType.ISDN;
-        case 'RT': return RRType.RT;
-        case 'NSAPPTR': return RRType.NSAPPTR;
-        case 'SIG': return RRType.SIG;
-        case 'KEY': return RRType.KEY;
-        case 'PX': return RRType.PX;
-        case 'GPOS': return RRType.GPOS;
-        case 'AAAA': return RRType.AAAA;
-        case 'LOC': return RRType.LOC;
-        case 'NXT': return RRType.NXT;
-        case 'EID': return RRType.EID;
-        case 'NIMLOC': return RRType.NIMLOC;
-        case 'SRV': return RRType.SRV;
-        case 'ATMA': return RRType.ATMA;
-        case 'NAPTR': return RRType.NAPTR;
-        case 'KX': return RRType.KX;
-        case 'CERT': return RRType.CERT;
-        case 'DNAME': return RRType.DNAME;
-        case 'OPT': return RRType.OPT; // EDNS
-        case 'APL': return RRType.APL;
-        case 'DS': return RRType.DS;
-        case 'SSHFP': return RRType.SSHFP;
-        case 'RRSIG': return RRType.RRSIG;
-        case 'NSEC': return RRType.NSEC;
-        case 'DNSKEY': return RRType.DNSKEY;
-        case 'DHCID': return RRType.DHCID;
-        case 'NSEC3': return RRType.NSEC3;
-        case 'NSEC3PARAM': return RRType.NSEC3PARAM;
-        case 'TLSA': return RRType.TLSA;
-        case 'SMIMEA': return RRType.SMIMEA;
-        case 'HIP': return RRType.HIP;
-        case 'NINFO': return RRType.NINFO;
-        case 'RKEY': return RRType.RKEY;
-        case 'TALINK': return RRType.TALINK;
-        case 'CDS': return RRType.CDS;
-        case 'CDNSKEY': return RRType.CDNSKEY;
-        case 'OPENPGPKEY': return RRType.OPENPGPKEY;
-        case 'CSYNC': return RRType.CSYNC;
-        case 'ZONEMD': return RRType.ZONEMD;
-        case 'SVCB': return RRType.SVCB;
-        case 'HTTPS': return RRType.HTTPS;
-        case 'SPF': return RRType.SPF;
-        case 'UINFO': return RRType.UINFO;
-        case 'UID': return RRType.UID;
-        case 'GID': return RRType.GID;
-        case 'UNSPEC': return RRType.UNSPEC;
-        case 'NID': return RRType.NID;
-        case 'L32': return RRType.L32;
-        case 'L64': return RRType.L64;
-        case 'LP': return RRType.LP;
-        case 'EUI48': return RRType.EUI48;
-        case 'EUI64': return RRType.EUI64;
-        case 'URI': return RRType.URI;
-        case 'CAA': return RRType.CAA;
-        case 'AVC': return RRType.AVC;
-        case 'TKEY': return RRType.TKEY;
-        case 'TSIG': return RRType.TSIG;
-        case 'TA': return RRType.TA;
-        case 'DLV': return RRType.DLV;
-        case 'RESERVED': return RRType.RESERVED;
-        default: return null;
+    switch (name.toUpperCase()) {
+        case "A":
+            return RRType.A;
+        case "NS":
+            return RRType.NS;
+        case "MD":
+            return RRType.MD;
+        case "MF":
+            return RRType.MF;
+        case "CNAME":
+            return RRType.CNAME;
+        case "SOA":
+            return RRType.SOA;
+        case "MB":
+            return RRType.MB;
+        case "MG":
+            return RRType.MG;
+        case "MR":
+            return RRType.MR;
+        case "NULL":
+            return RRType.NULL;
+        case "PTR":
+            return RRType.PTR;
+        case "HINFO":
+            return RRType.HINFO;
+        case "MINFO":
+            return RRType.MINFO;
+        case "MX":
+            return RRType.MX;
+        case "TXT":
+            return RRType.TXT;
+        case "RP":
+            return RRType.RP;
+        case "AFSDB":
+            return RRType.AFSDB;
+        case "X25":
+            return RRType.X25;
+        case "ISDN":
+            return RRType.ISDN;
+        case "RT":
+            return RRType.RT;
+        case "NSAPPTR":
+            return RRType.NSAPPTR;
+        case "SIG":
+            return RRType.SIG;
+        case "KEY":
+            return RRType.KEY;
+        case "PX":
+            return RRType.PX;
+        case "GPOS":
+            return RRType.GPOS;
+        case "AAAA":
+            return RRType.AAAA;
+        case "LOC":
+            return RRType.LOC;
+        case "NXT":
+            return RRType.NXT;
+        case "EID":
+            return RRType.EID;
+        case "NIMLOC":
+            return RRType.NIMLOC;
+        case "SRV":
+            return RRType.SRV;
+        case "ATMA":
+            return RRType.ATMA;
+        case "NAPTR":
+            return RRType.NAPTR;
+        case "KX":
+            return RRType.KX;
+        case "CERT":
+            return RRType.CERT;
+        case "DNAME":
+            return RRType.DNAME;
+        case "OPT":
+            return RRType.OPT; // EDNS
+        case "APL":
+            return RRType.APL;
+        case "DS":
+            return RRType.DS;
+        case "SSHFP":
+            return RRType.SSHFP;
+        case "RRSIG":
+            return RRType.RRSIG;
+        case "NSEC":
+            return RRType.NSEC;
+        case "DNSKEY":
+            return RRType.DNSKEY;
+        case "DHCID":
+            return RRType.DHCID;
+        case "NSEC3":
+            return RRType.NSEC3;
+        case "NSEC3PARAM":
+            return RRType.NSEC3PARAM;
+        case "TLSA":
+            return RRType.TLSA;
+        case "SMIMEA":
+            return RRType.SMIMEA;
+        case "HIP":
+            return RRType.HIP;
+        case "NINFO":
+            return RRType.NINFO;
+        case "RKEY":
+            return RRType.RKEY;
+        case "TALINK":
+            return RRType.TALINK;
+        case "CDS":
+            return RRType.CDS;
+        case "CDNSKEY":
+            return RRType.CDNSKEY;
+        case "OPENPGPKEY":
+            return RRType.OPENPGPKEY;
+        case "CSYNC":
+            return RRType.CSYNC;
+        case "ZONEMD":
+            return RRType.ZONEMD;
+        case "SVCB":
+            return RRType.SVCB;
+        case "HTTPS":
+            return RRType.HTTPS;
+        case "SPF":
+            return RRType.SPF;
+        case "UINFO":
+            return RRType.UINFO;
+        case "UID":
+            return RRType.UID;
+        case "GID":
+            return RRType.GID;
+        case "UNSPEC":
+            return RRType.UNSPEC;
+        case "NID":
+            return RRType.NID;
+        case "L32":
+            return RRType.L32;
+        case "L64":
+            return RRType.L64;
+        case "LP":
+            return RRType.LP;
+        case "EUI48":
+            return RRType.EUI48;
+        case "EUI64":
+            return RRType.EUI64;
+        case "URI":
+            return RRType.URI;
+        case "CAA":
+            return RRType.CAA;
+        case "AVC":
+            return RRType.AVC;
+        case "TKEY":
+            return RRType.TKEY;
+        case "TSIG":
+            return RRType.TSIG;
+        case "TA":
+            return RRType.TA;
+        case "DLV":
+            return RRType.DLV;
+        case "RESERVED":
+            return RRType.RESERVED;
+        default:
+            return null;
     }
 }
 

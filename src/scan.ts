@@ -286,6 +286,11 @@ export class Lexer {
      * Comments won't cross line and should not have invisible characters.
      */
     private parseComment(): string {
+        // Ignore consecutive ';' or blank at the beginning.
+        while (this.charCode !== null && (this.charCode === CHAR_CODE_SEMICOLON || this.isWhitespace(this.charCode))) {
+            this.advance();
+        }
+
         let str = "";
         while (this.charCode !== null && this.charCode !== CHAR_CODE_LF) {
             if (!this.isVisible(this.charCode) && !this.isWhitespace(this.charCode)) {
@@ -298,7 +303,7 @@ export class Lexer {
             str += String.fromCharCode(this.charCode);
             this.advance();
         }
-        return str.trim();
+        return str.trimEnd();
     }
 
     /**

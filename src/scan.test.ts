@@ -26,15 +26,16 @@ describe("test Lexer", () => {
     });
 
     it("should get token", () => {
-        const lexer = Lexer.from(` "abc def"(;note    \n   "z")`);
+        const lexer = Lexer.from(` "abc def"(;note1    \n   "z");;;   note2`);
         expect(lexer.next().toString()).to.be.equal("Blank");
         expect(lexer.next().toString()).to.be.equal("String(abc def)");
         expect(lexer.next().toString()).to.be.equal("OpenParen");
-        expect(lexer.next().toString()).to.be.equal("Comment(note)");
+        expect(lexer.next().toString()).to.be.equal("Comment(note1)");
         expect(lexer.next().toString()).to.be.equal("Newline");
         expect(lexer.next().toString()).to.be.equal("Blank");
         expect(lexer.next().toString()).to.be.equal("String(z)");
         expect(lexer.next().toString()).to.be.equal("CloseParen");
+        expect(lexer.next().toString()).to.be.equal("Comment(note2)");
         expect(lexer.next().toString()).to.be.equal("EOF");
         expect(lexer.next().toString()).to.be.equal("EOF");
     });

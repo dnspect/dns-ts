@@ -1,9 +1,9 @@
 import { Packet, Slice } from "./packet";
 import { Question } from "./question";
 import { RR } from "./rr";
-import { Opcode, RRType, Rcode, Uint16 } from "./types";
+import { Opcode, Rcode, Uint16 } from "./types";
 import { unpackRecord } from "./records";
-import { OPT } from "./records/opt";
+import { isOPT, OPT } from "./records/opt";
 import { Writer, PacketBuffer } from "./buffer";
 import { ClientSubnet } from "./edns";
 
@@ -121,14 +121,7 @@ export class Header {
      */
     arCount: Uint16;
 
-    constructor(
-        id: Uint16,
-        flags: Uint16,
-        qdCount: Uint16,
-        anCount: Uint16,
-        nsCount: Uint16,
-        arCount: Uint16
-    ) {
+    constructor(id: Uint16, flags: Uint16, qdCount: Uint16, anCount: Uint16, nsCount: Uint16, arCount: Uint16) {
         this.id = id;
         this.flags = this.unpackFlags(flags);
         this.qdCount = qdCount;
@@ -153,13 +146,15 @@ export class Header {
     }
 
     private packFlags(buf: Writer): number {
-        const high = (this.flags.qr ? 0b10000000 : 0b0) |
+        const high =
+            (this.flags.qr ? 0b10000000 : 0b0) |
             (this.flags.opcode << 3) |
             (this.flags.aa ? 0b00000100 : 0b0) |
             (this.flags.tc ? 0b00000010 : 0b0) |
             (this.flags.rd ? 0b00000001 : 0b0);
-        const low = (this.flags.ra ? 0b10000000 : 0b0) |
-            (this.flags.z  ? 0b010000000 : 0b0) |
+        const low =
+            (this.flags.ra ? 0b10000000 : 0b0) |
+            (this.flags.z ? 0b010000000 : 0b0) |
             (this.flags.ad ? 0b00100000 : 0b0) |
             (this.flags.cd ? 0b00010000 : 0b0) |
             (this.flags.rcode & 0b00001111);
@@ -227,8 +222,12 @@ export class Header {
         if (this.flags.ad) flags.push("ad");
         if (this.flags.cd) flags.push("cd");
 
-        return `;; ->>HEADER<<- opcode: ${Opcode[this.flags.opcode].toUpperCase()}, status: ${Rcode[this.flags.rcode].toUpperCase()}, id: ${this.id}
-;; flags: ${flags.join(" ")}; QUERY: ${this.qdCount}, ANSWER: ${this.anCount}, AUTHORITY: ${this.nsCount}, ADDITIONAL: ${this.arCount}`;
+        return `;; ->>HEADER<<- opcode: ${Opcode[this.flags.opcode].toUpperCase()}, status: ${Rcode[
+            this.flags.rcode
+        ].toUpperCase()}, id: ${this.id}
+;; flags: ${flags.join(" ")}; QUERY: ${this.qdCount}, ANSWER: ${this.anCount}, AUTHORITY: ${
+            this.nsCount
+        }, ADDITIONAL: ${this.arCount}`;
     }
 
     pack(buf: Writer): number {
@@ -348,10 +347,10 @@ export class RecordSection {
     toString(includeOPT = false): string {
         const lines = [`\n;; ${this.section.toUpperCase()} SECTION:`];
         for (const rr of this.records) {
-            if (!includeOPT && rr.header.type === RRType.OPT) {
+            if (!includeOPT && isOPT(rr)) {
                 continue;
             }
-            lines.push(rr.toString());
+            lines.push(rr.present());
         }
         return lines.join("\n");
     }
@@ -514,7 +513,7 @@ export class Message {
         const opt = this.opt();
         if (opt !== null) {
             sections.push("\n;; OPT PSEUDOSECTION:");
-            sections.push(opt.toString());
+            sections.push(opt.present());
             sections.push(";; QUESTION SECTION:");
         } else {
             sections.push("\n;; QUESTION SECTION:");
@@ -597,7 +596,7 @@ export class Message {
      * @throws ParseError
      */
     static unpack(buf: ArrayLike<number> | ArrayBufferLike | PacketBuffer): Message {
-        const pb = (buf instanceof PacketBuffer) ? buf : PacketBuffer.from(buf);
+        const pb = buf instanceof PacketBuffer ? buf : PacketBuffer.from(buf);
         const packet = new Packet(pb);
         const header = Header.unpack(packet.readSlice(12));
         const msg = new Message(header);

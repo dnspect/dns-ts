@@ -15,3 +15,14 @@ describe("test properties", () => {
         expect(NSID.fromString("abc").optCode).to.equal(OptCode.NSID);
     });
 });
+
+describe("test parse", () => {
+    const dig = `67 70 64 6e 73 2d 73 65 61 ("gpdns-sea")`;
+    it("should parse dig", () => {
+        expect(NSID.parse(dig).present()).to.equal(`; NSID: ${dig}`);
+    });
+    it("should parse kdig", () => {
+        const kdig = `6770646E732D736561 "gpdns-sea"`;
+        expect(NSID.parse(kdig).present()).to.equal(`; NSID: ${dig}`);
+    });
+});

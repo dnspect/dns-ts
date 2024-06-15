@@ -2,6 +2,7 @@ import { OptCode, Option } from "./option";
 import { Slice } from "../packet";
 import { Writer } from "../buffer";
 import { Uint16 } from "../types";
+import { ParseError } from "../error";
 
 /**
  * Padding option is used to allow DNS clients and servers to artificially increase the size of a
@@ -29,7 +30,7 @@ export class Padding extends Option {
     /**
      * @returns
      */
-    toString(): string {
+    present(): string {
         return `; PADDING: ${this.padding.length}`;
     }
 
@@ -41,5 +42,25 @@ export class Padding extends Option {
      */
     static fromSize(size: Uint16): Padding {
         return new Padding(new Uint8Array(size));
+    }
+
+    /**
+     * Parses Padding from a textual representation.
+     *
+     * @param input A regular comment string that has stripped out "PADDING: "
+     *
+     * @example
+     * ```
+     * ; PADDING: 370 // dig
+     * ;; PADDING: 370 B // kdig
+     * ```
+     */
+    static parse(input: string): Padding {
+        const found = input.match(/^(\d+)/i);
+        if (found === null) {
+            throw new ParseError(`unrecognized PADDING text: "${input}"`);
+        }
+
+        return new Padding(new Uint8Array(parseInt(found[1])));
     }
 }

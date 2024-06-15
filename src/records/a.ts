@@ -35,7 +35,7 @@ export class A extends RR implements AddressRR {
     }
 
     presentRdata(): string {
-        return `${this.address}`;
+        return this.address.toString();
     }
 }
 

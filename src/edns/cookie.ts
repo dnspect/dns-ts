@@ -1,7 +1,7 @@
 import { OptCode, Option } from "./option";
 import { Slice } from "../packet";
 import { ParseError } from "../error";
-import { binaryToString } from "../encoding";
+import { binaryToString, stringToBinary } from "../encoding";
 import { Writer } from "../buffer";
 
 /**
@@ -67,7 +67,7 @@ export class Cookie extends Option {
      * Refer to {@link https://datatracker.ietf.org/doc/html/rfc5001#section-2.4 | Presentation Format}.
      * @returns
      */
-    toString(): string {
+    present(): string {
         const hex = binaryToString(this.cookie, "hex");
         return `; Cookie: ${hex}`;
     }
@@ -80,5 +80,28 @@ export class Cookie extends Option {
      */
     static from(data: ArrayLike<number> | ArrayBufferLike): Cookie {
         return new Cookie(Slice.from(data));
+    }
+
+    /**
+     * Parses Cookie from a textual representation.
+     *
+     * @param input A regular comment string that has stripped out "Cookie: "
+     *
+     * @example
+     * ```
+     * ; Cookie: 5f798fcd227baee1    // dig
+     * ;; Cookie: 6770646E732D736561 // kdig
+     * ```
+     *
+     * Note that the prefix "; Cookie:\s+" should has been stripped from caller.
+     */
+    static parse(input: string): Cookie {
+        const found = input.match(/^([0-9a-f]+)/i);
+        if (found === null) {
+            throw new ParseError(`unrecognized cookie text: "${input}"`);
+        }
+
+        const data = stringToBinary(found[1], "hex");
+        return this.from(data);
     }
 }

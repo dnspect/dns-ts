@@ -1,5 +1,5 @@
 import { Writer } from "../../buffer";
-import { binaryToString } from "../../encoding";
+import { binaryToString, stringToBinary } from "../../encoding";
 import { ParseError } from "../../error";
 import { CharacterString } from "../../char";
 import { Slice } from "../../packet";
@@ -84,14 +84,51 @@ export class DS extends RR {
     }
 
     packRdata(buf: Writer): number {
-        return buf.writeUint16(this.keyTag) +
+        return (
+            buf.writeUint16(this.keyTag) +
             buf.writeUint8(this.algorithm) +
             buf.writeUint8(this.digestType) +
-            buf.write(this.digest);
+            buf.write(this.digest)
+        );
     }
 
-    parseRdata(_rdata: CharacterString[]): void {
-        throw new ParseError(`unimplemented!`);
+    parseRdata(rdata: CharacterString[]): void {
+        switch (rdata.length) {
+            case 0:
+                throw new ParseError(`missing RDATA`);
+            case 1:
+                throw new ParseError(`missing <Algorithm> in RDATA`);
+            case 2:
+                throw new ParseError(`missing <Digest Type> in RDATA`);
+            case 3:
+                throw new ParseError(`missing <Digest> in RDATA`);
+        }
+
+        this.keyTag =
+            rdata[0].toUint16() ??
+            (() => {
+                throw new ParseError(`invalid <Key Tag> in RDATA`);
+            })();
+
+        this.algorithm =
+            rdata[1].toUint8() ??
+            (() => {
+                throw new ParseError(`invalid <Algorithm> in RDATA`);
+            })();
+
+        this.digestType =
+            rdata[2].toUint8() ??
+            (() => {
+                throw new ParseError(`invalid <Digest Type> in RDATA`);
+            })();
+
+        this.digest = stringToBinary(
+            rdata
+                .slice(3)
+                .map((s) => s.raw())
+                .join(""),
+            "hex"
+        );
     }
 
     /**
@@ -101,7 +138,7 @@ export class DS extends RR {
      * @returns
      */
     presentRdata(): string {
-        const key = binaryToString(this.digest, 'hex').toUpperCase();
+        const key = binaryToString(this.digest, "hex").toUpperCase();
         return `${this.keyTag} ${this.algorithm} ${this.digestType} ${key}`;
     }
 }

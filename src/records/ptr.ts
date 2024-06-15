@@ -34,6 +34,6 @@ export class PTR extends RR {
     }
 
     presentRdata(): string {
-        return `${this.domain}`;
+        return this.domain.present();
     }
 }

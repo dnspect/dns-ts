@@ -40,8 +40,16 @@ export class HINFO extends RR {
         return this.cpu.pack(buf) + this.os.pack(buf);
     }
 
-    parseRdata(_rdata: CharacterString[]): void {
-        throw new ParseError(`unimplemented!`);
+    parseRdata(rdata: CharacterString[]): void {
+        switch (rdata.length) {
+            case 0:
+                throw new ParseError("missing RDATA");
+            case 1:
+                throw new ParseError("missing <OS> in RDATA");
+        }
+
+        this.cpu = rdata[0];
+        this.os = rdata[1];
     }
 
     presentRdata(): string {

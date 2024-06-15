@@ -1,5 +1,5 @@
 import { Writer } from "../../buffer";
-import { binaryToString } from "../../encoding";
+import { binaryToString, stringToBinary } from "../../encoding";
 import { ParseError } from "../../error";
 import { CharacterString } from "../../char";
 import { Slice } from "../../packet";
@@ -66,14 +66,51 @@ export class DNSKEY extends RR {
     }
 
     packRdata(buf: Writer): number {
-        return buf.writeUint16(this.flags) +
+        return (
+            buf.writeUint16(this.flags) +
             buf.writeUint8(this.protocol) +
             buf.writeUint8(this.algorithm) +
-            buf.write(this.publicKey);
+            buf.write(this.publicKey)
+        );
     }
 
-    parseRdata(_rdata: CharacterString[]): void {
-        throw new ParseError(`unimplemented!`);
+    parseRdata(rdata: CharacterString[]): void {
+        switch (rdata.length) {
+            case 0:
+                throw new ParseError(`missing RDATA`);
+            case 1:
+                throw new ParseError(`missing <Protocol> in RDATA`);
+            case 2:
+                throw new ParseError(`missing <Algorithm> in RDATA`);
+            case 3:
+                throw new ParseError(`missing <Public Key> in RDATA`);
+        }
+
+        this.flags =
+            rdata[0].toUint16() ??
+            (() => {
+                throw new ParseError("invalid <Flags> in RDATA");
+            })();
+
+        this.protocol =
+            rdata[1].toUint8() ??
+            (() => {
+                throw new ParseError("invalid <Protocol> in RDATA");
+            })();
+
+        this.algorithm =
+            rdata[2].toUint8() ??
+            (() => {
+                throw new ParseError("invalid <Algorithm> in RDATA");
+            })();
+
+        this.publicKey = stringToBinary(
+            rdata
+                .slice(3)
+                .map((s) => s.raw())
+                .join(""),
+            "base64"
+        );
     }
 
     /**
@@ -83,7 +120,7 @@ export class DNSKEY extends RR {
      * @returns
      */
     presentRdata(): string {
-        const key = binaryToString(this.publicKey, 'base64');
+        const key = binaryToString(this.publicKey, "base64");
         return `${this.flags} ${this.protocol} ${this.algorithm} ${key}`;
     }
 }

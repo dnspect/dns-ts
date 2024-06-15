@@ -105,9 +105,9 @@ export class TSIG extends RR {
     presentRdata(): string {
         const mac = binaryToString(this.mac, "base64");
         const otherData = binaryToString(this.otherData, "base64");
-        return `${this.algorithm} ${displayTimeSigned(this.timeSigned)} ${
-            this.fudge
-        } ${mac} ${this.originalID} ${this.error} ${otherData}`;
+        return `${this.algorithm} ${displayTimeSigned(this.timeSigned)} ${this.fudge} ${mac} ${this.originalID} ${
+            this.error
+        } ${otherData}`;
     }
 }
 
@@ -119,13 +119,11 @@ export class TSIG extends RR {
  */
 function displayTimeSigned(ts: Uint48): string {
     const dt = new Date(ts);
-    return `${dt.getUTCFullYear()}${(dt.getUTCMonth() + 1)
+    return `${dt.getUTCFullYear()}${(dt.getUTCMonth() + 1).toString().padStart(2, "0")}${dt
+        .getUTCDate()
         .toString()
-        .padStart(2, "0")}${dt.getUTCDate().toString().padStart(2, "0")}${dt
-        .getUTCHours()
+        .padStart(2, "0")}${dt.getUTCHours().toString().padStart(2, "0")}${dt
+        .getUTCMinutes()
         .toString()
-        .padStart(2, "0")}${dt.getUTCMinutes().toString().padStart(2, "0")}${dt
-        .getUTCSeconds()
-        .toString()
-        .padStart(2, "0")}`;
+        .padStart(2, "0")}${dt.getUTCSeconds().toString().padStart(2, "0")}`;
 }

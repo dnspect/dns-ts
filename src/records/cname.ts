@@ -35,7 +35,7 @@ export class CNAME extends RR {
     }
 
     presentRdata(): string {
-        return `${this.target}`;
+        return this.target.present();
     }
 }
 

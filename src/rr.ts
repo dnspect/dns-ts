@@ -3,9 +3,10 @@
 import { Address } from "@dnspect/ip-address-ts";
 import { FQDN } from "./fqdn";
 import { CharacterString } from "./char";
-import {  Slice } from "./packet";
+import { Slice } from "./packet";
 import { Class, RRType, Uint16, Uint32 } from "./types";
 import { Writer } from "./buffer";
+import { isOPT } from "./records";
 
 /**
  * Header represents the fields before the record data.
@@ -86,10 +87,12 @@ export class Header {
         return this.class === other.class && this.type === other.type && this.name.equal(other.name);
     }
 
+    present(): string {
+        return `${this.name.present()}\t\t${this.ttl}\t${Class[this.class]}\t${RRType[this.type]}`;
+    }
+
     toString(): string {
-        return `${this.name}\t\t${this.ttl}\t${Class[this.class]}\t${
-            RRType[this.type]
-        }`;
+        return this.present();
     }
 
     pack(buf: Writer): number {
@@ -104,12 +107,7 @@ export class Header {
     }
 
     static unpack(s: Slice): Header {
-        const h = new Header(
-            s.readName(),
-            s.readUint16(),
-            s.readUint16(),
-            s.readUint32()
-        );
+        const h = new Header(s.readName(), s.readUint16(), s.readUint16(), s.readUint32());
         h.rdlength = s.readUint16();
         return h;
     }
@@ -187,11 +185,20 @@ export abstract class RR {
     /**
      * Returns RFC 1035 compliant textual representation of the resource record.
      */
-    toString(): string {
-        if (this.header.type === RRType.OPT) {
-            return this.presentRdata();
+    present(): string {
+        if (isOPT(this)) {
+            const header = this.optHeader().present();
+            const rdata = this.presentRdata();
+            if (rdata === "") {
+                return `${header}`;
+            }
+            return `${header}\n${rdata}`;
         }
-        return `${this.header}\t${this.presentRdata()}`;
+        return `${this.header.present()}\t${this.presentRdata()}`;
+    }
+
+    toString(): string {
+        return this.present();
     }
 
     /**

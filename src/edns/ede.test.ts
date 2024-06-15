@@ -13,6 +13,19 @@ describe("test construction", () => {
 
     it("should create EDE from code", () => {
         expect(ExtendedError.fromCode(ExtendedErrorCode.OtherError).toString()).to.equal(`; EDE: 0 (Other Error)`);
-        expect(ExtendedError.fromCode(ExtendedErrorCode.OtherError, "custom").toString()).to.equal(`; EDE: 0 (Other Error): (custom)`);
+        expect(ExtendedError.fromCode(ExtendedErrorCode.OtherError, "custom").toString()).to.equal(
+            `; EDE: 0 (Other Error): (custom)`
+        );
+    });
+});
+
+describe("test parse", () => {
+    const dig = `49152 (Unknown Code): (blabla. https://foo.bar/)`;
+    it("should parse dig", () => {
+        expect(ExtendedError.parse(dig).present()).to.equal(`; EDE: ${dig}`);
+    });
+    it("should parse kdig", () => {
+        const kdig = `49152 (Unknown Code): 'blabla. https://foo.bar/'`;
+        expect(ExtendedError.parse(kdig).present()).to.equal(`; EDE: ${dig}`);
     });
 });

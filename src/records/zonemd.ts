@@ -1,5 +1,5 @@
 import { Writer } from "../buffer";
-import { binaryToString } from "../encoding";
+import { binaryToString, stringToBinary } from "../encoding";
 import { ParseError } from "../error";
 import { CharacterString } from "../char";
 import { Slice } from "../packet";
@@ -73,9 +73,7 @@ export class ZONEMD extends RR {
 
         const len = this.header.rdlength - 6;
         if (len < DIGEST_MIN_LEN) {
-            throw new ParseError(
-                `digest field MUST NOT be shorter than 12 octets, got ${len}`
-            );
+            throw new ParseError(`digest field MUST NOT be shorter than 12 octets, got ${len}`);
         }
         this.digest = rdata.readUint8Array(len);
     }
@@ -89,8 +87,43 @@ export class ZONEMD extends RR {
         );
     }
 
-    parseRdata(_rdata: CharacterString[]): void {
-        throw new ParseError(`unimplemented!`);
+    parseRdata(rdata: CharacterString[]): void {
+        switch (rdata.length) {
+            case 0:
+                throw new ParseError(`missing RDATA`);
+            case 1:
+                throw new ParseError(`missing <Scheme> in RDATA`);
+            case 2:
+                throw new ParseError(`missing <Hash Algorithm> in RDATA`);
+            case 3:
+                throw new ParseError(`missing <Digest> in RDATA`);
+        }
+
+        this.serial =
+            rdata[0].toUint32() ??
+            (() => {
+                throw new ParseError("invalid <Serial> in RDATA");
+            })();
+
+        this.scheme =
+            rdata[1].toUint8() ??
+            (() => {
+                throw new ParseError("invalid <Scheme> in RDATA");
+            })();
+
+        this.algorithm =
+            rdata[2].toUint8() ??
+            (() => {
+                throw new ParseError("invalid <Hash Algorithm> in RDATA");
+            })();
+
+        this.digest = stringToBinary(
+            rdata
+                .slice(3)
+                .map((s) => s.raw())
+                .join(""),
+            "hex"
+        );
     }
 
     /**

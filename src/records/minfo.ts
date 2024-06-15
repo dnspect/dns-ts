@@ -41,15 +41,15 @@ export class MINFO extends RR {
     }
 
     packRdata(buf: Writer): number {
-        return (
-            buf.writeName(this.rmailbx, true) +
-            buf.writeName(this.emailbx, true)
-        );
+        return buf.writeName(this.rmailbx, true) + buf.writeName(this.emailbx, true);
     }
 
     parseRdata(rdata: CharacterString[]): void {
-        if (rdata.length < 2) {
-            throw new ParseError(`missing <RMAILBX> or <EMAILBX>`);
+        switch (rdata.length) {
+            case 0:
+                throw new ParseError("missing RDATA");
+            case 1:
+                throw new ParseError("missing <EMAILBX> in RDATA");
         }
 
         this.rmailbx = FQDN.parse(rdata[0].raw());
@@ -57,6 +57,6 @@ export class MINFO extends RR {
     }
 
     presentRdata(): string {
-        return `${this.rmailbx} ${this.emailbx}`;
+        return `${this.rmailbx.present()} ${this.emailbx.present()}`;
     }
 }
