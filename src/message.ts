@@ -520,7 +520,7 @@ export class Message {
         }
 
         for (const q of this.question) {
-            sections.push(q.toString());
+            sections.push(q.present());
         }
 
         if (!this.header.isQuery()) {

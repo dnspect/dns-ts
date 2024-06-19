@@ -1,7 +1,8 @@
 import { Writer } from "./buffer";
+import { ParseError } from "./error";
 import { FQDN } from "./fqdn";
 import { Slice } from "./packet";
-import { QClass, qclassAbbr, QType, RRType } from "./types";
+import { classFrom, QClass, qclassAbbr, QType, qtypeFrom, RRType } from "./types";
 
 /**
  *
@@ -60,10 +61,12 @@ export class Question {
      *
      * @returns
      */
+    present(): string {
+        return `;${this.toString()}`;
+    }
+
     toString(): string {
-        return `;${this.qname.toString()}\t\t${qclassAbbr(
-            this.qclass
-        )}\t${RRType[this.qtype].toUpperCase()}`;
+        return `${this.qname.present()}\t\t${qclassAbbr(this.qclass)}\t${RRType[this.qtype].toUpperCase()}`;
     }
 
     /**
@@ -87,5 +90,35 @@ export class Question {
 
     static unpack(s: Slice): Question {
         return new Question(s.readName(), s.readUint16(), s.readUint16());
+    }
+
+    /**
+     * Parses question from a textual representation.
+     *
+     * @param text RFC 1035 compliant ASCII string describe the question.
+     *
+     * @returns Question
+     *
+     * @throws ParseError
+     */
+    static parse(text: string): Question {
+        const found = text.match(/^[;\s]*([^\s]+)\s+([^\s+]+)\s+(\w+)\s*$/i);
+        if (found === null) {
+            throw new ParseError(`invalid question: ${text}`);
+        }
+
+        const qname = FQDN.parse(found[1]);
+
+        const cls = classFrom(found[2]);
+        if (cls === null) {
+            throw new ParseError(`invalid QCLASS: ${found[2]}`);
+        }
+
+        const qtype = qtypeFrom(found[3]);
+        if (qtype === null) {
+            throw new ParseError(`invalid QTYPE: ${found[3]}`);
+        }
+
+        return new Question(qname, qtype, cls);
     }
 }

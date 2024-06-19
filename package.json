@@ -1,6 +1,6 @@
 {
     "name": "@dnspect/dns-ts",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "description": "DNS library in TypeScript",
     "author": "Minghang Chen <chen@minghang.dev> (https://minghang.dev)",
     "license": "MIT",
@@ -13,7 +13,8 @@
         "./edns": "./dist/edns/index.js",
         "./records": "./dist/records/index.js",
         "./records/dnssec": "./dist/records/dnssec/index.js",
-        "./rr": "./dist/rr.js"
+        "./rr": "./dist/rr.js",
+        "./scan": "./dist/scan.js"
     },
     "typesVersions": {
         "*": {
@@ -31,6 +32,9 @@
             ],
             "rr": [
                 "./dist/rr.d.ts"
+            ],
+            "scan": [
+                "./dist/scan.d.ts"
             ]
         }
     },

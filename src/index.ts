@@ -20,12 +20,10 @@ export {
     QClassExtend,
     qclassAbbr,
     Rcode,
+    rcodeFrom,
     RRType,
     rrtypeFrom,
     QType,
     QTypeExtend,
     qtypeFrom,
 } from "./types";
-export * as records from "./records";
-export * as scan from "./scan";
-export * as edns from "./edns";

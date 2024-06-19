@@ -46,7 +46,6 @@ export { SSHFP } from "./sshfp";
 export { TSIG } from "./tsig";
 export { TXT } from "./txt";
 export { ZONEMD } from "./zonemd";
-export * as dnssec from "./dnssec";
 
 /**
  * Initialize a resource record with header data.

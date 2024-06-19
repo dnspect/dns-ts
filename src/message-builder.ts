@@ -111,7 +111,7 @@ export class MessageBuilder {
 /**
  * Builder for building header of a DNS message.
  */
-class HeaderBuilder {
+export class HeaderBuilder {
     private header: Header;
 
     constructor(header: Header) {
@@ -124,7 +124,7 @@ class HeaderBuilder {
      * The value range is [1, 65535].
      */
     randomId(): void {
-        this.header.id = Math.floor(Math.random() * 0xFFFE + 1);
+        this.header.id = Math.floor(Math.random() * 0xfffe + 1);
     }
 
     /**
@@ -222,7 +222,7 @@ class HeaderBuilder {
 /**
  * Builder for building question section of a DNS message.
  */
-class QuestionBuilder {
+export class QuestionBuilder {
     /**
      * The message builder we work on.
      */
@@ -248,7 +248,7 @@ class QuestionBuilder {
      * @param queryType The query type
      */
     push_in(queryName: Owner, queryType: QType): void {
-        const qname = (queryName instanceof FQDN) ? queryName : FQDN.parse(queryName);
+        const qname = queryName instanceof FQDN ? queryName : FQDN.parse(queryName);
         this.append(new Question(qname, queryType, Class.IN));
     }
 
@@ -259,7 +259,7 @@ class QuestionBuilder {
      * @param queryType The query type
      */
     push_ch(queryName: Owner, queryType: QType): void {
-        const qname = (queryName instanceof FQDN) ? queryName : FQDN.parse(queryName);
+        const qname = queryName instanceof FQDN ? queryName : FQDN.parse(queryName);
         this.append(new Question(qname, queryType, Class.CH));
     }
 }
@@ -267,7 +267,7 @@ class QuestionBuilder {
 /**
  * Builder for building individual sections of a DNS message.
  */
-class SectionBuilder {
+export class SectionBuilder {
     private append: AppendRR;
 
     constructor(append: AppendRR) {
@@ -286,7 +286,7 @@ class SectionBuilder {
 /**
  * Builder for building the answer section of a DNS message.
  */
-class AnswerBuilder extends SectionBuilder {
+export class AnswerBuilder extends SectionBuilder {
     /**
      * Appends an A record.
      *
@@ -294,7 +294,7 @@ class AnswerBuilder extends SectionBuilder {
      * @param ttl
      * @param address
      */
-    push_a(owner: Owner, ttl: Uint32, address: Address4) {
+    push_a(owner: Owner, ttl: Uint32, address: Address4): void {
         const a = new A(new RRHeader(owner, RRType.A, Class.IN, ttl));
         a.address = address;
         this.push(a);
@@ -307,7 +307,7 @@ class AnswerBuilder extends SectionBuilder {
      * @param ttl
      * @param address
      */
-    push_aaaa(owner: Owner, ttl: Uint32, address: Address6) {
+    push_aaaa(owner: Owner, ttl: Uint32, address: Address6): void {
         const aaaa = new AAAA(new RRHeader(owner, RRType.AAAA, Class.IN, ttl));
         aaaa.address = address;
         this.push(aaaa);
@@ -320,7 +320,7 @@ class AnswerBuilder extends SectionBuilder {
      * @param ttl
      * @param target
      */
-    push_cname(owner: Owner, ttl: Uint32, target: FQDN) {
+    push_cname(owner: Owner, ttl: Uint32, target: FQDN): void {
         const cname = new CNAME(new RRHeader(owner, RRType.CNAME, Class.IN, ttl));
         cname.target = target;
         this.push(cname);
@@ -334,7 +334,7 @@ class AnswerBuilder extends SectionBuilder {
      * @param content
      * @param cls The class of resource record
      */
-    push_txt(owner: Owner, ttl: Uint32, content: string[], cls: Class = Class.IN) {
+    push_txt(owner: Owner, ttl: Uint32, content: string[], cls: Class = Class.IN): void {
         const txt = new TXT(new RRHeader(owner, RRType.TXT, cls, ttl));
         txt.content = content.map((str) => new CharacterString(str));
         this.push(txt);
@@ -344,7 +344,7 @@ class AnswerBuilder extends SectionBuilder {
 /**
  * Builder for building the additional section of a DNS message.
  */
-class AdditionalBuilder extends SectionBuilder {
+export class AdditionalBuilder extends SectionBuilder {
     /**
      * Appends an A record.
      *
@@ -352,7 +352,7 @@ class AdditionalBuilder extends SectionBuilder {
      * @param ttl
      * @param address
      */
-    push_a(owner: Owner, ttl: Uint32, address: Address4) {
+    push_a(owner: Owner, ttl: Uint32, address: Address4): void {
         const a = new A(new RRHeader(owner, RRType.A, Class.IN, ttl));
         a.address = address;
         this.push(a);
@@ -365,7 +365,7 @@ class AdditionalBuilder extends SectionBuilder {
      * @param ttl
      * @param address
      */
-    push_aaaa(owner: Owner, ttl: Uint32, address: Address6) {
+    push_aaaa(owner: Owner, ttl: Uint32, address: Address6): void {
         const aaaa = new AAAA(new RRHeader(owner, RRType.AAAA, Class.IN, ttl));
         aaaa.address = address;
         this.push(aaaa);
