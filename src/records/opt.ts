@@ -284,7 +284,6 @@ export class OptHeader {
         }
 
         const foundUdp = input.match(/udp[^\d]+([\d]+)/i);
-        console.log(`found udp: ${foundUdp}`);
         if (foundUdp !== null) {
             const udpPayloadSize = parseInt(foundUdp[1]);
             if (udpPayloadSize > 0xffff) {

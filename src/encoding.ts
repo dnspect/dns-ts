@@ -31,7 +31,7 @@ export function stringToBinary(str: string, scheme: EncodingScheme): Uint8Array 
         }
         case "hex":
         case "hex-ws": {
-            const chars = str.split(scheme === 'hex' ? '' : ' ');
+            const chars = str.split(/\s*/);
             if (chars.length % 2 !== 0) {
                 throw new Error(`Invalid hex: ${str}`);
             }
