@@ -259,6 +259,7 @@ export enum RRType {
     X25 = 19,
     ISDN = 20,
     RT = 21,
+    NSAP = 22,
     NSAPPTR = 23,
     SIG = 24,
     KEY = 25,
@@ -372,6 +373,8 @@ export function rrtypeFrom(name: string): RRType | null {
             return RRType.ISDN;
         case "RT":
             return RRType.RT;
+        case "NSAP":
+            return RRType.NSAP;
         case "NSAPPTR":
             return RRType.NSAPPTR;
         case "SIG":

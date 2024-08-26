@@ -59,7 +59,7 @@ const msg = Message.unpack(
 This is a list adopted from <https://github.com/miekg/dns/blob/master/README.md>. This library may not be going to support all of them, but should mark the RFCs that it supports.
 
 - [x] 103{4,5} - DNS standard
-- [ ] 1348 - NSAP record (removed the record)
+- [x] 1348 - NSAP record (removed the record)
 - [ ] 1982 - Serial Arithmetic
 - [x] 1876 - LOC record
 - [ ] 1995 - IXFR

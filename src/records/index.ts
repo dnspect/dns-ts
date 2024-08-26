@@ -23,6 +23,7 @@ import { SSHFP } from "./sshfp";
 import { TSIG } from "./tsig";
 import { TXT } from "./txt";
 import { ZONEMD } from "./zonemd";
+import { NSAP, NSAPPTR } from "./nsap";
 import { Lexer, scanHeader, scanRdata } from "../scan";
 import { CharReader } from "../buffer";
 
@@ -46,6 +47,7 @@ export { SSHFP } from "./sshfp";
 export { TSIG } from "./tsig";
 export { TXT } from "./txt";
 export { ZONEMD } from "./zonemd";
+export { NSAP, NSAPPTR } from "./nsap";
 
 /**
  * Initialize a resource record with header data.
@@ -163,6 +165,14 @@ function initRecord(h: Header): RR {
         }
         case RRType.ZONEMD: {
             record = new ZONEMD(h);
+            break;
+        }
+        case RRType.NSAP: {
+            record = new NSAP(h);
+            break;
+        }
+        case RRType.NSAPPTR: {
+            record = new NSAPPTR(h);
             break;
         }
         default:
