@@ -124,3 +124,25 @@ export class DNSKEY extends RR {
         return `${this.flags} ${this.protocol} ${this.algorithm} ${key}`;
     }
 }
+
+/**
+ * The KEY RR uses type 25 and is used as resource record for storing
+   DNSSEC keys.
+ *
+ * KEY RDATA format:
+ *
+ * ```
+ *                      1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3
+ *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ * |              flags            |   protocol    |   algorithm   |
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ * |                                                               /
+ * /                        public key                             /
+ * /                                                               /
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ * ```
+ *
+ * Specified by {@link https://datatracker.ietf.org/doc/html/rfc3445#section-3 | RFC 3445}
+ */
+export class KEY extends DNSKEY { }

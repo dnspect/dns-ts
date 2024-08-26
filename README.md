@@ -65,7 +65,7 @@ This is a list adopted from <https://github.com/miekg/dns/blob/master/README.md>
 - [ ] 1995 - IXFR
 - [ ] 1996 - DNS notify
 - [ ] 2136 - DNS Update (dynamic updates)
-- [ ] 2537 - RSAMD5 DNS keys
+- [ ] 2537 - RSAMD5 DNS keys (obsoleted by 3110)
 - [x] 2065 - DNSSEC (updated in later RFCs)
 - [x] 2671 - EDNS record
 - [x] 2782 - SRV record
@@ -76,7 +76,7 @@ This is a list adopted from <https://github.com/miekg/dns/blob/master/README.md>
 - [ ] 3123 - APL record
 - [x] 3225 - DO bit (DNSSEC OK)
 - [ ] 340{1,2,3} - NAPTR record
-- [ ] 3445 - Limiting the scope of (DNS)KEY
+- [x] 3445 - Limiting the scope of (DNS)KEY
 - [ ] 3597 - Unknown RRs
 - [ ] 4025 - A Method for Storing IPsec Keying Material in DNS
 - [ ] 403{3,4,5} - DNSSEC + validation functions

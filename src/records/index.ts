@@ -2,7 +2,7 @@ import { A } from "./a";
 import { AAAA } from "./aaaa";
 import { CNAME } from "./cname";
 import { DNAME } from "./dname";
-import { DS, DNSKEY, NSEC, RRSIG, NSEC3, NSEC3PARAM } from "./dnssec";
+import { DS, DNSKEY, NSEC, RRSIG, NSEC3, NSEC3PARAM, KEY, SIG, NXT } from "./dnssec";
 import { Header, RR } from "../rr";
 import { HINFO } from "./hinfo";
 import { LOC } from "./loc";
@@ -173,6 +173,18 @@ function initRecord(h: Header): RR {
         }
         case RRType.NSAPPTR: {
             record = new NSAPPTR(h);
+            break;
+        }
+        case RRType.KEY: {
+            record = new KEY(h);
+            break;
+        }
+        case RRType.SIG: {
+            record = new SIG(h);
+            break;
+        }
+        case RRType.NXT: {
+            record = new NXT(h);
             break;
         }
         default:

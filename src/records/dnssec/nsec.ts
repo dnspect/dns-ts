@@ -89,3 +89,24 @@ export class NSEC extends RR {
         return `${this.nextName.present()} ${this.typeBitMaps}`;
     }
 }
+
+/**
+ * The NXT resource record is used to securely indicate that RRs with an
+ * owner name in a certain name interval do not exist in a zone and to
+ * indicate what RR types are present for an existing name.
+ *
+ * RDATA wire format:
+ *
+ *  ```
+ *                  1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3
+ *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ * |                  next domain name                             /
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ * |                    type bit map                               /
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *  ```
+ *
+ * Specified by {@link https://datatracker.ietf.org/doc/html/rfc2535#section-5.2 | RFC 2535}
+ */
+export class NXT extends NSEC { }

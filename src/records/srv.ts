@@ -123,9 +123,11 @@ export class SRV extends RR {
             case 0:
                 throw new ParseError(`missing RDATA`);
             case 1:
-                throw new ParseError(`missing <fp type> in RDATA`);
+                throw new ParseError(`missing <weight> in RDATA`);
             case 2:
-                throw new ParseError(`missing <fingerprint> in RDATA`);
+                throw new ParseError(`missing <port> in RDATA`);
+            case 3:
+                throw new ParseError(`missing <target> in RDATA`);
         }
 
         this.priority =

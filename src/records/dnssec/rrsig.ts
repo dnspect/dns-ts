@@ -164,9 +164,9 @@ function displayUnixTS(ts: Uint32): string {
         .getUTCDate()
         .toString()
         .padStart(2, "0")}${dt.getUTCHours().toString().padStart(2, "0")}${dt
-        .getUTCMinutes()
-        .toString()
-        .padStart(2, "0")}${dt.getUTCSeconds().toString().padStart(2, "0")}`;
+            .getUTCMinutes()
+            .toString()
+            .padStart(2, "0")}${dt.getUTCSeconds().toString().padStart(2, "0")}`;
 }
 
 function parseDateTime(value: string, fieldName: string): Uint32 {
@@ -184,3 +184,34 @@ function parseDateTime(value: string, fieldName: string): Uint32 {
 
     return Date.UTC(year, month - 1, days, hours, minutes, seconds) / 1000;
 }
+
+/**
+ * The signature for an RRset with a particular name, class, and type.
+ *
+ * RDATA wire format:
+ *
+ *  ```
+ *                       1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3
+ *   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+ *  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *  |        Type Covered           |  Algorithm    |     Labels    |
+ *  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *  |                         Original TTL                          |
+ *  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *  |                      Signature Expiration                     |
+ *  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *  |                      Signature Inception                      |
+ *  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *  |            Key Tag            |                               /
+ *  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+         Signer's Name         /
+ *  /                                                               /
+ *  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *  /                                                               /
+ *  /                            Signature                          /
+ *  /                                                               /
+ *  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *  ```
+ *
+ * Specified by {@link https://datatracker.ietf.org/doc/html/rfc2535#section-4.1 | RFC 2535}
+ */
+export class SIG extends RRSIG { }
