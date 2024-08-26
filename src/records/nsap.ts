@@ -10,7 +10,7 @@ import { RR } from "../rr";
  * (decimal) and is used to map from domain names to NSAPs. Name-to-NSAP
  * mapping in the DNS using the NSAP RR operates analogously to IP
  * address lookup.
- * 
+ *
  * @see https://datatracker.ietf.org/doc/html/rfc1706#section-5
  */
 export class NSAP extends RR {

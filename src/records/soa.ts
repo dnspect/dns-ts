@@ -63,7 +63,7 @@ export class SOA extends RR {
      * The unsigned 32 bit version number of the original copy of the zone. Zone transfers preserve
      * this value. This value wraps and should be compared using sequence space arithmetic.
      */
-    serial!: Uint32;
+    serial!: Serial;
     /**
      * A 32 bit time interval before the zone should be refreshed.
      */
@@ -85,7 +85,7 @@ export class SOA extends RR {
     unpackRdata(rdata: Slice): void {
         this.mname = rdata.readName();
         this.rname = rdata.readName();
-        this.serial = rdata.readUint32();
+        this.serial = new Serial(rdata.readUint32());
         this.refresh = rdata.readUint32();
         this.retry = rdata.readUint32();
         this.expire = rdata.readUint32();
@@ -96,7 +96,7 @@ export class SOA extends RR {
         return (
             buf.writeName(this.mname, true) +
             buf.writeName(this.rname, true) +
-            buf.writeUint32(this.serial) +
+            buf.writeUint32(this.serial.toUint32()) +
             buf.writeUint32(this.refresh) +
             buf.writeUint32(this.retry) +
             buf.writeUint32(this.expire) +
@@ -124,11 +124,7 @@ export class SOA extends RR {
 
         this.mname = FQDN.parse(rdata[0].raw());
         this.rname = FQDN.parse(rdata[1].raw());
-        this.serial =
-            rdata[2].toUint32() ??
-            (() => {
-                throw new ParseError(`invalid <SERIAL> in RDATA`);
-            })();
+        this.serial = Serial.parse(rdata[2].raw());
         this.refresh =
             rdata[3].toUint32() ??
             (() => {
@@ -152,8 +148,137 @@ export class SOA extends RR {
     }
 
     presentRdata(): string {
-        return `${this.mname.present()} ${this.rname.present()} ${this.serial} ${this.refresh} ${this.retry} ${
-            this.expire
-        } ${this.minimum}`;
+        return `${this.mname.present()} ${this.rname.present()} ${this.serial} ${this.refresh} ${this.retry} ${this.expire
+            } ${this.minimum}`;
+    }
+}
+
+/**
+ * A serial number.
+ *
+ * The unsigned 32 bit version number of the original copy of the zone. Zone transfers preserve this
+ * value. This value wraps and should be compared using sequence space arithmetic.
+ *
+ * @see https://datatracker.ietf.org/doc/html/rfc1982
+ */
+export class Serial {
+    num!: Uint32;
+
+    /**
+     * Creates a new serial number.
+     *
+     * @param num
+     *
+     * @throws RangeError
+     */
+    constructor(num: Uint32) {
+        if (num < 0 || num > 0xffff_ffff) {
+            throw new RangeError("serial number is out of range");
+        }
+
+        this.num = num;
+    }
+
+    /**
+     * Returns the serial number as a raw integer.
+     */
+    toUint32(): Uint32 {
+        return this.num;
+    }
+
+    /**
+     * Add `other` to self.
+     *
+     * Serial numbers only allow values of up to `2^31 - 1` to be added to
+     * them. Therefore, this method requires `other` to be a `uint32` instead
+     * of a `Serial` to indicate that you cannot simply add two serials
+     * together.
+     *
+     * @throws RangeError
+     *
+     * This method panics if `other` is greater than `2^31 - 1`.
+     *
+     */
+    add(other: Uint32): void {
+        if (other < 0 || other > 0x7fff_ffff) {
+            throw new RangeError("other should not greater than 2^31 - 1");
+        }
+
+        this.num += other;
+        if (this.num > 0xffff_ffff) {
+            this.num -= 0xffff_ffff;
+        }
+    }
+
+    /**
+     * Compares the serial with the other.
+     *
+     * This function return
+     *  - `-1` if this serial number is smaller than the `other`
+     *  - `0` if this serial number is equal to the `other`
+     *  - `1` if this serial number is larger than the `other`
+     *  - `undefined` if the comparision result is undefined
+     *
+     * @param other
+     * @returns
+     */
+    cmp(other: Serial): number | undefined {
+        if (other.num === this.num) {
+            return 0;
+        }
+
+        if (this.num < other.num) {
+            const sub = other.num - this.num;
+            if (sub === 0x8000_0000) {
+                return undefined;
+            }
+
+            if (sub < 0x8000_0000) {
+                return -1;
+            }
+
+            return 1;
+        }
+
+        const sub = this.num - other.num;
+        if (sub === 0x8000_0000) {
+            return undefined;
+        }
+
+        if (sub < 0x8000_0000) {
+            return 1;
+        }
+
+        return -1;
+    }
+
+    toString(): string {
+        return this.num.toString();
+    }
+
+    /**
+     * Returns a serial number for the current Unix time.
+     *
+     * @returns
+     */
+    static now(): Serial {
+        return new Serial(Math.floor(Date.now() / 1000));
+    }
+
+    /**
+     * Parses a textual serial number.
+     *
+     * @param str The number.
+     * @returns
+     *
+     * @throws ParseError
+     * @throws RangeError
+     */
+    static parse(str: string): Serial {
+        const num = parseInt(str);
+        if (isNaN(num)) {
+            throw new ParseError(`"${str}" is not a number`);
+        }
+        return new Serial(num);
     }
 }

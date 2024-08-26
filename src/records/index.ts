@@ -41,7 +41,7 @@ export { MX } from "./mx";
 export { NS, isNS } from "./ns";
 export { OPT, OptHeader, isOPT } from "./opt";
 export { PTR } from "./ptr";
-export { SOA } from "./soa";
+export { SOA, Serial } from "./soa";
 export { SRV } from "./srv";
 export { SSHFP } from "./sshfp";
 export { TSIG } from "./tsig";

@@ -60,7 +60,7 @@ This is a list adopted from <https://github.com/miekg/dns/blob/master/README.md>
 
 - [x] 103{4,5} - DNS standard
 - [x] 1348 - NSAP record (removed the record)
-- [ ] 1982 - Serial Arithmetic
+- [x] 1982 - Serial Arithmetic
 - [x] 1876 - LOC record
 - [ ] 1995 - IXFR
 - [ ] 1996 - DNS notify

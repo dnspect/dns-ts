@@ -1,7 +1,7 @@
 import { Writer } from "./buffer";
 import { EncodingScheme, stringToBinary } from "./encoding";
 import { Slice } from "./packet";
-import { Uint8 } from "./types";
+import { Uint16, Uint32, Uint8 } from "./types";
 
 /**
  * QuoteMode define the ways how to do quoting for the CharacterString.
@@ -154,11 +154,11 @@ export class CharacterString {
         return this.toNumber(0xff);
     }
 
-    toUint16(): Uint8 | null {
+    toUint16(): Uint16 | null {
         return this.toNumber(0xffff);
     }
 
-    toUint32(): Uint8 | null {
+    toUint32(): Uint32 | null {
         return this.toNumber(0xffffffff);
     }
 
