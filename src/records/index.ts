@@ -24,6 +24,7 @@ import { TSIG } from "./tsig";
 import { TXT } from "./txt";
 import { ZONEMD } from "./zonemd";
 import { NSAP, NSAPPTR } from "./nsap";
+import { NAPTR } from "./naptr";
 import { Lexer, scanHeader, scanRdata } from "../scan";
 import { CharReader } from "../buffer";
 
@@ -48,6 +49,7 @@ export { TSIG } from "./tsig";
 export { TXT } from "./txt";
 export { ZONEMD } from "./zonemd";
 export { NSAP, NSAPPTR } from "./nsap";
+export { NAPTR } from "./naptr";
 
 /**
  * Initialize a resource record with header data.
@@ -173,6 +175,10 @@ function initRecord(h: Header): RR {
         }
         case RRType.NSAPPTR: {
             record = new NSAPPTR(h);
+            break;
+        }
+        case RRType.NAPTR: {
+            record = new NAPTR(h);
             break;
         }
         case RRType.KEY: {
