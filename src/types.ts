@@ -16,7 +16,9 @@ export const Uint16Max = 0xffff;
  * - 0               a standard query (QUERY)
  * - 1               an inverse query (IQUERY)
  * - 2               a server status request (STATUS)
- * - 3-15            reserved for future use
+ * - 4               a notify message (NOTIFY)
+ * - 5               a atomic update message (UPDATE)
+ * - 3,6-15          reserved for future use
  *
  * See also https://datatracker.ietf.org/doc/html/rfc1035#section-4.1.1
  */
@@ -24,8 +26,9 @@ export enum Opcode {
     QUERY = 0,
     IQUERY = 1,
     STATUS = 2,
-    // There is no 3 yet.
+    // https://datatracker.ietf.org/doc/html/rfc1996
     NOTIFY = 4,
+    // https://datatracker.ietf.org/doc/html/rfc2136
     UPDATE = 5,
 }
 
@@ -101,7 +104,10 @@ export function classFrom(name: string): Class | null {
  */
 export type QClass = Class | QClassExtend;
 export enum QClassExtend {
-    ANY = 255, // The ANY class
+    // The class in a UPDATE message. See also [RFC2136](https://datatracker.ietf.org/doc/html/rfc2136).
+    NONE = 254,
+    // The ANY class
+    ANY = 255,
 }
 
 /**
@@ -112,6 +118,10 @@ export enum QClassExtend {
  */
 export function qclassFrom(name: string): QClass | null {
     name = name.toUpperCase();
+
+    if (name === "NONE") {
+        return QClassExtend.NONE;
+    }
 
     if (name === "ANY") {
         return QClassExtend.ANY;
@@ -132,6 +142,8 @@ export function qclassAbbr(c: QClass): string {
     }
 
     switch (c) {
+        case QClassExtend.NONE:
+            return "NONE";
         case QClassExtend.ANY:
             return "ANY";
         default:

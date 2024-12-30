@@ -62,9 +62,9 @@ This is a list adopted from <https://github.com/miekg/dns/blob/master/README.md>
 - [x] 1348 - NSAP record (removed the record)
 - [x] 1982 - Serial Arithmetic
 - [x] 1876 - LOC record
-- [ ] 1995 - IXFR
-- [ ] 1996 - DNS notify
-- [ ] 2136 - DNS Update (dynamic updates)
+- [x] 1995 - IXFR
+- [x] 1996 - DNS notify
+- [x] 2136 - DNS Update (dynamic updates)
 - [ ] 2537 - RSAMD5 DNS keys (obsoleted by 3110)
 - [x] 2065 - DNSSEC (updated in later RFCs)
 - [x] 2671 - EDNS record
