@@ -183,6 +183,9 @@ export enum Rcode {
     NXRRSET = 8, // RR Set that should exist does not [DNS Update]
     NOTAUTH = 9, // Server Not Authoritative for zone [DNS Update]
     NOTZONE = 10, // Name not contained in zone       [DNS Update/TSIG]
+
+    // 11-15           available for assignment
+
     BADSIG = 16, // TSIG Signature Failure            [TSIG]
     BADVERS = 16, // Bad OPT Version                  [EDNS0]
     BADKEY = 17, // Key not recognized                [TSIG]
@@ -192,6 +195,9 @@ export enum Rcode {
     BADALG = 21, // Algorithm not supported           [TKEY]
     BADTRUNC = 22, // Bad Truncation                  [TSIG]
     BADCOOKIE = 23, // Bad/missing Server Cookie      [DNS Cookies]
+    // 24-3840         available for assignment
+    // 3841-4095       Private Use
+    // 4096-65535      available for assignment
 }
 
 /**
@@ -322,15 +328,15 @@ export enum RRType {
     LP = 107,
     EUI48 = 108,
     EUI64 = 109,
+    TKEY = 249,
+    TSIG = 250,
     URI = 256,
     CAA = 257,
     AVC = 258,
-
-    TKEY = 249,
-    TSIG = 250,
-
+    // [32768, 65279] - Specification Required as defined in [RFC 2434].
     TA = 32768,
     DLV = 32769,
+    // [65280, 65535] - Private Use.
     RESERVED = 65535,
 }
 
