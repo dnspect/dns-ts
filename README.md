@@ -65,14 +65,14 @@ This is a list adopted from <https://github.com/miekg/dns/blob/master/README.md>
 - [x] 1995 - IXFR
 - [x] 1996 - DNS notify
 - [x] 2136 - DNS Update (dynamic updates)
-- [ ] 2537 - RSAMD5 DNS keys (obsoleted by 3110)
+- [x] 2537 - RSAMD5 DNS keys (obsoleted by 3110)
 - [x] 2065 - DNSSEC (updated in later RFCs)
 - [x] 2671 - EDNS record
 - [x] 2782 - SRV record
 - [x] 2845 - TSIG record
 - [x] 2915 - NAPTR record
 - [ ] 2929 - DNS IANA Considerations
-- [ ] 3110 - RSASHA1 DNS keys
+- [x] 3110 - RSASHA1 DNS keys
 - [ ] 3123 - APL record
 - [x] 3225 - DO bit (DNSSEC OK)
 - [x] 340{1,2,3} - NAPTR record
