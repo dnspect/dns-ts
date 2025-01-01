@@ -27,6 +27,7 @@ import { NSAP, NSAPPTR } from "./nsap";
 import { NAPTR } from "./naptr";
 import { Lexer, scanHeader, scanRdata } from "../scan";
 import { CharReader } from "../buffer";
+import { APL } from "./apl";
 
 export { A, isA } from "./a";
 export { AAAA, isAAAA } from "./aaaa";
@@ -50,6 +51,7 @@ export { TXT } from "./txt";
 export { ZONEMD } from "./zonemd";
 export { NSAP, NSAPPTR } from "./nsap";
 export { NAPTR } from "./naptr";
+export { APL } from "./apl";
 
 /**
  * Initialize a resource record with header data.
@@ -191,6 +193,10 @@ function initRecord(h: Header): RR {
         }
         case RRType.NXT: {
             record = new NXT(h);
+            break;
+        }
+        case RRType.APL: {
+            record = new APL(h);
             break;
         }
         default:
