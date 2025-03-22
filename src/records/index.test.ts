@@ -17,6 +17,7 @@ badInputs.set(`. 3600 IN A """`, `unescaped '"' encountered at ln 1, col 14`);
 
 const goodInputs = new Map();
 goodInputs.set(`. 3600 IN A 203.0.113.1`, ".\t\t3600\tIN\tA\t203.0.113.1");
+goodInputs.set(`. 3600 CLASS1 TYPE1 203.0.113.1`, ".\t\t3600\tIN\tA\t203.0.113.1");
 goodInputs.set(`. 3600 IN A "203.0.113.1"`, ".\t\t3600\tIN\tA\t203.0.113.1");
 goodInputs.set(`. 3600 IN TXT 1.2 "3.4"`, `.\t\t3600\tIN\tTXT\t"1.2" "3.4"`);
 goodInputs.set(`. 3600 IN TXT "1.2 3.4"`, `.\t\t3600\tIN\tTXT\t"1.2 3.4"`);

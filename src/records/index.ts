@@ -28,6 +28,7 @@ import { NAPTR } from "./naptr";
 import { Lexer, scanHeader, scanRdata } from "../scan";
 import { CharReader } from "../buffer";
 import { APL } from "./apl";
+import { Unknown } from "./unknown";
 
 export { A, isA } from "./a";
 export { AAAA, isAAAA } from "./aaaa";
@@ -52,6 +53,7 @@ export { ZONEMD } from "./zonemd";
 export { NSAP, NSAPPTR } from "./nsap";
 export { NAPTR } from "./naptr";
 export { APL } from "./apl";
+export { Unknown } from "./unknown";
 
 /**
  * Initialize a resource record with header data.
@@ -200,7 +202,8 @@ function initRecord(h: Header): RR {
             break;
         }
         default:
-            throw new ParseError(`unsupported resource record type: TYPE${h.type}`);
+            record = new Unknown(h);
+            break;
     }
 
     return record;
@@ -241,6 +244,16 @@ export function scanRecord(lexer: Lexer, startedHeader: Header | null): RR {
     const rdata = scanRdata(lexer);
     if (rdata.length === 0) {
         throw new ParseError(`missing RDATA`);
+    }
+
+    // The non-unknown RR may also having RDATA in the unknown text representation.
+    // Try to parse it into binary for unpacking.
+    if (!(rr instanceof Unknown)) {
+        const data = Unknown.tryParseUnknownRdata(rdata);
+        if (data !== null) {
+            rr.unpackRdata(Slice.from(data));
+            return rr;
+        }
     }
 
     rr.parseRdata(rdata);

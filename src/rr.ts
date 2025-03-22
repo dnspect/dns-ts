@@ -4,7 +4,7 @@ import { Address } from "@dnspect/ip-address-ts";
 import { FQDN } from "./fqdn";
 import { CharacterString } from "./char";
 import { Slice } from "./packet";
-import { Class, RRType, Uint16, Uint32 } from "./types";
+import { Class, classAbbr, RRType, rrtypeText, Uint16, Uint32 } from "./types";
 import { Writer } from "./buffer";
 import { isOPT } from "./records";
 
@@ -88,7 +88,7 @@ export class Header {
     }
 
     present(): string {
-        return `${this.name.present()}\t\t${this.ttl}\t${Class[this.class]}\t${RRType[this.type]}`;
+        return `${this.name.present()}\t\t${this.ttl}\t${classAbbr(this.class)}\t${rrtypeText(this.type)}`;
     }
 
     toString(): string {
@@ -205,8 +205,18 @@ export abstract class RR {
      * Returns JSON object of the RR that will generate textual in application/dns-json format.
      */
     toJsonObject(): object {
+        if (this.header.class === Class.IN) {
+            return {
+                name: this.header.name.toString(),
+                type: this.header.type,
+                TTL: this.header.ttl,
+                data: this.presentRdata(),
+            };
+        }
+
         return {
             name: this.header.name.toString(),
+            class: this.header.class,
             type: this.header.type,
             TTL: this.header.ttl,
             data: this.presentRdata(),

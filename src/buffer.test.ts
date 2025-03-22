@@ -15,8 +15,7 @@ describe("test Reader implementation", () => {
 
 describe("test writeName()", () => {
     it("should compress names", () => {
-        const buf = PacketBuffer.alloc(1024);
-        buf.withCompressor();
+        const buf = PacketBuffer.alloc(1024).withCompressor();
 
         expect(buf.writeName(ROOT_ZONE, false)).to.equals(1);
         expect(buf.writeName(ROOT_ZONE, true)).to.equals(1);

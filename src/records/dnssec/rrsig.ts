@@ -5,7 +5,7 @@ import { FQDN } from "../../fqdn";
 import { CharacterString } from "../../char";
 import { Slice } from "../../packet";
 import { RR } from "../../rr";
-import { RRType, rrtypeFrom, Uint16, Uint32, Uint8 } from "../../types";
+import { RRType, rrtypeFrom, rrtypeText, Uint16, Uint32, Uint8 } from "../../types";
 import { SecurityAlgorithm } from "./algorithm";
 
 /**
@@ -146,7 +146,7 @@ export class RRSIG extends RR {
      */
     presentRdata(): string {
         const signature = binaryToString(this.signature, "base64");
-        return `${RRType[this.typeCovered]} ${this.algorithm} ${this.labels} ${this.originalTTL} ${displayUnixTS(
+        return `${rrtypeText(this.typeCovered)} ${this.algorithm} ${this.labels} ${this.originalTTL} ${displayUnixTS(
             this.expiration
         )} ${displayUnixTS(this.inception)} ${this.keyTag} ${this.signerName} ${signature}`;
     }

@@ -1,7 +1,7 @@
 import { Writer } from "../../buffer";
 import { ParseError } from "../../error";
 import { Slice } from "../../packet";
-import { RRType, rrtypeFrom } from "../../types";
+import { RRType, rrtypeFrom, rrtypeText } from "../../types";
 
 /**
  * The Type Bit Maps field identifies the RRset types that exist at the
@@ -24,7 +24,7 @@ export class TypeBitMaps {
     }
 
     toString(): string {
-        return this.types.map((v) => RRType[v]).join(" ");
+        return this.types.map((v) => rrtypeText(v)).join(" ");
     }
 
     /**

@@ -2,7 +2,7 @@ import { Writer } from "./buffer";
 import { ParseError } from "./error";
 import { FQDN } from "./fqdn";
 import { Slice } from "./packet";
-import { classFrom, QClass, qclassAbbr, QType, qtypeFrom, RRType } from "./types";
+import { classFrom, QClass, qclassAbbr, QType, qtypeFrom, qtypeText } from "./types";
 
 /**
  *
@@ -66,7 +66,7 @@ export class Question {
     }
 
     toString(): string {
-        return `${this.qname.present()}\t\t${qclassAbbr(this.qclass)}\t${RRType[this.qtype].toUpperCase()}`;
+        return `${this.qname.present()}\t\t${qclassAbbr(this.qclass)}\t${qtypeText(this.qtype)}`;
     }
 
     /**

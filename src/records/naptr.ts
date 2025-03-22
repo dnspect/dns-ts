@@ -1,6 +1,6 @@
 import { CharacterString, QuoteMode } from "../char";
 import { FQDN } from "../fqdn";
-import { ParseError, SemanticError } from "../error";
+import { ParseError } from "../error";
 import { RR } from "../rr";
 import { Slice } from "../packet";
 import { Uint16 } from "../types";
@@ -15,7 +15,7 @@ import { Writer } from "../buffer";
  * rewrite a string into a domain name. Regular expressions were chosen
  * for their compactness to expressivity ratio allowing for a great deal
  * of information to be encoded in a rather small DNS packet.
- * 
+ *
  * The function of rewriting a string according to the rules in a record
  * has usefulness in several different applications. This document
  * defines the basic assumptions to which all of those applications must
@@ -23,7 +23,7 @@ import { Writer } from "../buffer";
  * the expected outcomes are, or what they are used for. Those are
  * specified by applications that define how they use the NAPTR record
  * and algorithms within their contexts.
- * 
+ *
  * Flags and other fields are also specified in the RR to control the
  * rewrite procedure in various ways or to provide information on how to
  * communicate with the host at the domain name that was the result of
@@ -49,7 +49,7 @@ export class NAPTR extends RR {
     preference!: Uint16;
     /**
      * A <character-string> which contains various flags.
-     * 
+     *
      * Flags to control aspects of the rewriting and interpretation of the fields in the record.
      * Flags are single characters from the set [A-Z0-9]. The case of the alphabetic characters is
      * not significant.
@@ -57,7 +57,7 @@ export class NAPTR extends RR {
     flags!: CharacterString;
     /**
      * A <character-string> which contains protocol and service identifiers.
-     * 
+     *
      * Specifies the service(s) available down this rewrite path. It may also specify the particular
      * protocol that is used to talk with a service. A protocol MUST be specified if the flags field
      * states that the NAPTR is terminal. If a protocol is specified, but the flags field does not

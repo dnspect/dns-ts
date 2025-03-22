@@ -35,11 +35,11 @@ export enum Opcode {
 /**
  * Converts a string to Opcode.
  *
- * @param name The op name.
+ * @param text The op name.
  * @returns
  */
-export function opcodeFrom(op: string): Opcode | null {
-    switch (op.toUpperCase()) {
+export function opcodeFrom(text: string): Opcode | null {
+    switch (text.toUpperCase()) {
         case "QUERY":
             return Opcode.QUERY;
         case "IQUERY":
@@ -70,11 +70,11 @@ export enum Class {
 /**
  * Converts a string to Class.
  *
- * @param name The resource record class name.
+ * @param text The resource record class name.
  * @returns
  */
-export function classFrom(name: string): Class | null {
-    switch (name.toUpperCase()) {
+export function classFrom(text: string): Class | null {
+    switch (text.toUpperCase()) {
         case "IN":
         case "INET":
             return Class.IN;
@@ -87,8 +87,19 @@ export function classFrom(name: string): Class | null {
         case "HS":
         case "HESIOD":
             return Class.HS;
-        default:
-            return null;
+        default: {
+            const unknown = text.match(/CLASS([0-9]{1,5})/i);
+            if (unknown === null) {
+                return null;
+            }
+
+            const n = parseInt(unknown[1]);
+            if (n > Uint16Max) {
+                return null;
+            }
+
+            return n;
+        }
     }
 }
 
@@ -113,12 +124,11 @@ export enum QClassExtend {
 /**
  * Converts a string to QClass.
  *
- * @param name The query class name.
+ * @param text The query class name.
  * @returns
  */
-export function qclassFrom(name: string): QClass | null {
-    name = name.toUpperCase();
-
+export function qclassFrom(text: string): QClass | null {
+    const name = text.toUpperCase();
     if (name === "NONE") {
         return QClassExtend.NONE;
     }
@@ -128,6 +138,17 @@ export function qclassFrom(name: string): QClass | null {
     }
 
     return classFrom(name);
+}
+
+
+/**
+ * Returns the abbreviation of the query class name.
+ *
+ * @param c
+ * @returns
+ */
+export function classAbbr(c: Class): string {
+    return Class[c] || `CLASS${c}`;
 }
 
 /**
@@ -147,7 +168,7 @@ export function qclassAbbr(c: QClass): string {
         case QClassExtend.ANY:
             return "ANY";
         default:
-            return "";
+            return `CLASS${c}`;
     }
 }
 
@@ -203,11 +224,11 @@ export enum Rcode {
 /**
  * Converts a string to Rcode.
  *
- * @param name The response code name.
+ * @param text The response code name.
  * @returns
  */
-export function rcodeFrom(name: string): Rcode | null {
-    switch (name.toUpperCase()) {
+export function rcodeFrom(text: string): Rcode | null {
+    switch (text.toUpperCase()) {
         case "NOERROR":
             return Rcode.NOERROR;
         case "FORMERR":
@@ -344,13 +365,24 @@ export enum RRType {
 export type RRTypes = keyof typeof RRType;
 
 /**
- * Converts a string to RRType.
+ * Gets textual representation of the RRType.
  *
- * @param name The resource record type name.
+ * @param rrtype
  * @returns
  */
-export function rrtypeFrom(name: string): RRType | null {
-    switch (name.toUpperCase()) {
+export function rrtypeText(rrtype: RRType): string {
+    return RRType[rrtype] || `TYPE${rrtype}`;
+}
+
+/**
+ * Converts a string to RRType.
+ *
+ * @param text The resource record type name.
+ * @returns
+ */
+export function rrtypeFrom(text: string): RRType | null {
+    const name = text.toUpperCase();
+    switch (name) {
         case "A":
             return RRType.A;
         case "NS":
@@ -509,8 +541,19 @@ export function rrtypeFrom(name: string): RRType | null {
             return RRType.DLV;
         case "RESERVED":
             return RRType.RESERVED;
-        default:
-            return null;
+        default: {
+            const unknown = name.match(/TYPE([0-9]{1,5})/i);
+            if (unknown === null) {
+                return null;
+            }
+
+            const n = parseInt(unknown[1]);
+            if (n > Uint16Max) {
+                return null;
+            }
+
+            return n;
+        }
     }
 }
 
@@ -538,14 +581,28 @@ export enum QTypeExtend {
 }
 
 /**
+ * Gets textual representation of the QType.
+ *
+ * @param qtype
+ * @returns
+ */
+export function qtypeText(qtype: QType): string {
+    if (qtype in RRType) {
+        return rrtypeText(qtype as RRType);
+    }
+
+    return QTypeExtend[qtype] || `TYPE${qtype}`;
+}
+
+/**
  * Converts a string to QType.
  *
  * @param name The query type name.
  * @returns
  */
 export function qtypeFrom(name: string): QType | null {
-    name = name.toUpperCase();
-    switch (name) {
+    const tn = name.toUpperCase();
+    switch (tn) {
         case "IXFR":
             return QTypeExtend.IXFR;
         case "AXFR":

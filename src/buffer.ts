@@ -111,7 +111,7 @@ export interface Writer {
      *
      * @param slice
      */
-    write(data: Uint8Array): number;
+    write(slice: Uint8Array): number;
 
     /**
      * Writes one byte to the underlying data stream or buffer.
@@ -201,23 +201,17 @@ export class CharReader implements ByteReader {
     }
 }
 
-/**
- * A buffer helps read/write DNS message in wireformat.
- *
- * It is able to grow exponentially when it is writable.
- */
-export class PacketBuffer implements Reader, Writer, NameWriter {
+export class BufferWriter implements Writer {
     buf!: Uint8Array;
-    private offset = 0;
-    private writable = false;
-    private compressor?: Compressor;
+    protected offset = 0;
+    protected writable = false;
 
     /**
-     * Initializes a writable PacketBuffer object with default 1232 bytes that are zero-filled.
+     * Initializes a writable RdataBuffer object with default 1232 bytes that are zero-filled.
      *
      * @param buf
      */
-    private constructor(buf: Uint8Array, writable: boolean) {
+    protected constructor(buf: Uint8Array, writable: boolean) {
         this.buf = buf;
         this.writable = writable;
     }
@@ -227,29 +221,8 @@ export class PacketBuffer implements Reader, Writer, NameWriter {
      *
      * @param size The initial size of the buffer.
      */
-    static alloc(size: number): PacketBuffer {
-        return new PacketBuffer(new Uint8Array(size), true);
-    }
-
-    /**
-     * Creates a readonly PacketBuffer object using the passed data.
-     *
-     * @param buf
-     * @returns
-     */
-    static from(buf: ArrayLike<number> | ArrayBufferLike): PacketBuffer {
-        if (buf instanceof Uint8Array) {
-            return new PacketBuffer(buf, false);
-        }
-        return new PacketBuffer(new Uint8Array(buf), false);
-    }
-
-    /**
-     * Enable message compression.
-     */
-    withCompressor(): PacketBuffer {
-        this.compressor = new Compressor(this);
-        return this;
+    static alloc(size: number): BufferWriter {
+        return new BufferWriter(new Uint8Array(size), true);
     }
 
     /**
@@ -288,45 +261,8 @@ export class PacketBuffer implements Reader, Writer, NameWriter {
         }
     }
 
-    checkRead(offset: number, extra: number): void {
-        if (offset < 0) {
-            throw new RangeError(`invalid offset: ${offset}`);
-        }
-
-        if (offset + extra > this.buf.length) {
-            throw new RangeError(`try to access beyond buffer length: read ${extra} start from ${offset}`);
-        }
-    }
-
-    dataLength(): number {
-        return this.buf.byteLength;
-    }
-
     byteOffset(): number {
         return this.offset;
-    }
-
-    readUint8(offset?: number): Uint8 {
-        const pos = offset ?? 0;
-        this.checkRead(pos, 1);
-        return this.buf[pos];
-    }
-
-    readUint16BE(offset?: number): Uint16 {
-        const pos = offset ?? 0;
-        this.checkRead(pos, 2);
-        return (this.buf[pos] << 8) | this.buf[pos + 1];
-    }
-
-    readUint32BE(offset?: number): Uint32 {
-        const pos = offset ?? 0;
-        this.checkRead(pos, 4);
-        return this.buf[pos] * 0x1000000 + ((this.buf[pos + 1] << 16) | (this.buf[pos + 2] << 8) | this.buf[pos + 3]);
-    }
-
-    slice(offset = 0, end = this.buf.length): Uint8Array {
-        this.checkRead(offset, end - offset);
-        return this.buf.slice(offset, end);
     }
 
     write(slice: Uint8Array): number {
@@ -385,6 +321,107 @@ export class PacketBuffer implements Reader, Writer, NameWriter {
         return this.writeUint8(data.length) + this.write(data);
     }
 
+    writeName(name: FQDN, _compress: boolean): number {
+        let n = 0;
+        for (const label of name) {
+            n += this.writeLabel(label);
+        }
+        return n;
+    }
+
+    freeze(len: number): this {
+        this.buf = this.buf.subarray(0, len);
+        this.writable = false;
+        return this;
+    }
+}
+
+/**
+ * A buffer helps read/write DNS message in wireformat.
+ *
+ * It is able to grow exponentially when it is writable.
+ */
+export class PacketBuffer extends BufferWriter implements Reader, Writer, NameWriter {
+    private compressor?: Compressor;
+
+    /**
+     * Initializes a writable buffer of size bytes that are zero-filled.
+     *
+     * @param size The initial size of the buffer.
+     */
+    static alloc(size: number): PacketBuffer {
+        return new PacketBuffer(new Uint8Array(size), true);
+    }
+
+    /**
+     * Creates a readonly PacketBuffer object using the passed data.
+     *
+     * @param buf
+     * @returns
+     */
+    static from(buf: ArrayLike<number> | ArrayBufferLike): PacketBuffer {
+        if (buf instanceof Uint8Array) {
+            return new PacketBuffer(buf, false);
+        }
+        return new PacketBuffer(new Uint8Array(buf), false);
+    }
+
+    /**
+     * Enable message compression.
+     */
+    withCompressor(): PacketBuffer {
+        this.compressor = new Compressor(this);
+        return this;
+    }
+
+    checkRead(offset: number, extra: number): void {
+        if (offset < 0) {
+            throw new RangeError(`invalid offset: ${offset}`);
+        }
+
+        if (offset + extra > this.buf.length) {
+            throw new RangeError(`try to access beyond buffer length: read ${extra} start from ${offset}`);
+        }
+    }
+
+    dataLength(): number {
+        return this.buf.byteLength;
+    }
+
+    byteOffset(): number {
+        return this.offset;
+    }
+
+    readUint8(offset?: number): Uint8 {
+        const pos = offset ?? 0;
+        this.checkRead(pos, 1);
+        return this.buf[pos];
+    }
+
+    readUint16BE(offset?: number): Uint16 {
+        const pos = offset ?? 0;
+        this.checkRead(pos, 2);
+        return (this.buf[pos] << 8) | this.buf[pos + 1];
+    }
+
+    readUint32BE(offset?: number): Uint32 {
+        const pos = offset ?? 0;
+        this.checkRead(pos, 4);
+        return this.buf[pos] * 0x1000000 + ((this.buf[pos + 1] << 16) | (this.buf[pos + 2] << 8) | this.buf[pos + 3]);
+    }
+
+    slice(offset = 0, end = this.buf.length): Uint8Array {
+        this.checkRead(offset, end - offset);
+        return this.buf.slice(offset, end);
+    }
+
+    /**
+     * @override
+     *
+     * @param name
+     * @param compress
+     * @returns
+     */
     writeName(name: FQDN, compress: boolean): number {
         if (compress && !!this.compressor) {
             return this.compressor.writeName(name, this.offset);
@@ -395,12 +432,6 @@ export class PacketBuffer implements Reader, Writer, NameWriter {
             n += this.writeLabel(label);
         }
         return n;
-    }
-
-    freeze(len: number): PacketBuffer {
-        this.buf = this.buf.subarray(0, len);
-        this.writable = false;
-        return this;
     }
 
     dump(encoding: EncodingScheme): string {

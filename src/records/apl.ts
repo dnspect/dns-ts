@@ -1,5 +1,5 @@
 import { Address4, Address6, Prefix } from "@dnspect/ip-address-ts";
-import { AddressRR, RR } from "../rr";
+import { RR } from "../rr";
 import { CharacterString } from "../char";
 import { Slice } from "../packet";
 import { Writer } from "../buffer";
@@ -39,14 +39,14 @@ export class APL extends RR {
     }
 
     parseRdata(rdata: CharacterString[]): void {
-        this.items = rdata.map(v => APItem.parse(v))
+        this.items = rdata.map(v => APItem.parse(v));
     }
 
     /**
      * The textual representation of an APL RR in a DNS zone file is as follows:
-     * 
+     *
      * <owner>   IN   <TTL>   APL   {[!]afi:address/prefix}*
-     * 
+     *
      * The data consists of zero or more strings of the address family indicator <afi>, immediately
      * followed by a colon ":", an address, immediately followed by the "/" character, immediately
      * followed by a decimal numeric value for the prefix length. Any such string may be preceded by
@@ -86,13 +86,13 @@ export class APL extends RR {
 export class APItem {
     // negation flag, indicates the presence of the "!" character in the textual format. It has the
     // value "1" if the "!" was given, "0" else.
-    n!: boolean
-    prefix!: Prefix
+    n!: boolean;
+    prefix!: Prefix;
 
     /**
-     * 
-     * @param n 
-     * @param prefix 
+     *
+     * @param n
+     * @param prefix
      */
     constructor(n: boolean, prefix: Prefix) {
         this.n = n;
@@ -107,8 +107,8 @@ export class APItem {
         // value are address family specific.
         const prefix = data.readUint8();
 
-        let b = data.readUint8();
-        const n = b >> 7 == 1;
+        const b = data.readUint8();
+        const n = b >> 7 === 1;
 
         const dateLength = b & 0x0111_1111;
 
@@ -122,7 +122,7 @@ export class APItem {
                     throw new ParseError(`invalid data length for IPv4: ${dateLength}`);
                 }
 
-                // address family dependent part.     
+                // address family dependent part.
                 let dataPart = data.readUint8Array(dateLength);
                 if (dataPart.byteLength !== 4) {
                     const x = new Uint8Array(4);
@@ -141,7 +141,7 @@ export class APItem {
                     throw new ParseError(`invalid data length for IPv6: ${dateLength}`);
                 }
 
-                // address family dependent part.     
+                // address family dependent part.
                 let dataPart = data.readUint8Array(dateLength);
                 if (dataPart.byteLength !== 16) {
                     const x = new Uint8Array(16);
@@ -181,18 +181,18 @@ export class APItem {
 
     /**
      * Parses an address family textual.
-     * 
-     * @param item 
-     * @returns 
+     *
+     * @param item
+     * @returns
      * @throws ParseError
      */
     static parse(text: CharacterString): APItem {
-        const found = text.raw().match(/^(\!?)([1-2]):([^\/]+\/[0-9]{0,3})$/i);
+        const found = text.raw().match(/^(!?)([1-2]):([^/]+\/[0-9]{0,3})$/i);
         if (found === null) {
             throw new ParseError(`invalid apitem text: "${text}"`);
         }
 
-        const n = found[1] == "!";
+        const n = found[1] === "!";
 
         switch (found[2]) {
             case '1': {
@@ -219,9 +219,9 @@ export class APItem {
 
     /**
      * The textual representation of an APItem in a DNS zone file is as follows:
-     * 
+     *
      *   [!]afi:address/prefix
-     * 
+     *
      * The data consists of the address family indicator <afi>, immediately followed by a colon ":",
      * an address, immediately followed by the "/" character, immediately followed by a decimal
      * numeric value for the prefix length. Any such string may be preceded by a "!" character. The

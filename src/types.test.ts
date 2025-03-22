@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Class, QTypeExtend, RRType, classFrom, rrtypeFrom, qtypeFrom, qclassFrom, QClassExtend, Opcode, opcodeFrom } from "./types";
+import { Class, QTypeExtend, RRType, classFrom, rrtypeFrom, qtypeFrom, qclassFrom, QClassExtend, Opcode, opcodeFrom, rrtypeText, qtypeText } from "./types";
 
 describe("test Opcode", () => {
     it("should get value and name", () => {
@@ -56,7 +56,7 @@ describe("test QClass", () => {
 describe("test RRType", () => {
     it("should get value name", () => {
         expect(RRType.A).to.be.equal(1);
-        expect(RRType[RRType.A]).to.be.equal('A');
+        expect(rrtypeText(RRType.A)).to.be.equal('A');
     });
 
     it("should get enum variant", () => {
@@ -71,6 +71,17 @@ describe("test RRType", () => {
             expect(rrtype, `${str} should be a RRType`).to.not.be.null;
         }
     });
+
+    it("should support TYPEXXX form (RFC 3597)", () => {
+        expect(rrtypeFrom('TYPE1')).to.be.equal(RRType.A);
+        expect(rrtypeFrom('TYPE65535')).to.be.equal(RRType.RESERVED);
+        expect(rrtypeFrom('TYPE65536')).to.be.null;
+        expect(rrtypeText(RRType.A)).to.be.equal('A');
+        expect(rrtypeText(1 as RRType)).to.be.equal('A');
+        expect(rrtypeText(65534 as RRType)).to.be.equal('TYPE65534');
+        expect(rrtypeText(RRType.RESERVED)).to.be.equal('RESERVED');
+        expect(rrtypeText(65535 as RRType)).to.be.equal('RESERVED');
+    });
 });
 
 describe("test QType", () => {
@@ -80,16 +91,23 @@ describe("test QType", () => {
         expect(QTypeExtend.MAILB).to.be.equal(253);
         expect(QTypeExtend.MAILA).to.be.equal(254);
         expect(QTypeExtend.ANY).to.be.equal(255);
-        expect(QTypeExtend[QTypeExtend.IXFR]).to.be.equal('IXFR');
-        expect(QTypeExtend[QTypeExtend.AXFR]).to.be.equal('AXFR');
-        expect(QTypeExtend[QTypeExtend.MAILB]).to.be.equal('MAILB');
-        expect(QTypeExtend[QTypeExtend.MAILA]).to.be.equal('MAILA');
-        expect(QTypeExtend[QTypeExtend.ANY]).to.be.equal('ANY');
+        expect(qtypeText(QTypeExtend.IXFR)).to.be.equal('IXFR');
+        expect(qtypeText(QTypeExtend.AXFR)).to.be.equal('AXFR');
+        expect(qtypeText(QTypeExtend.MAILB)).to.be.equal('MAILB');
+        expect(qtypeText(QTypeExtend.MAILA)).to.be.equal('MAILA');
+        expect(qtypeText(QTypeExtend.ANY)).to.be.equal('ANY');
     });
 
     it("should get enum variant", () => {
         expect(255).to.be.equal(QTypeExtend.ANY);
         expect(qtypeFrom('ANY')).to.be.equal(QTypeExtend.ANY);
         expect(qtypeFrom('UNKNOWN')).to.be.null;
+    });
+
+    it("should support TYPEXXX form (RFC 3597)", () => {
+        expect(qtypeFrom('TYPE255')).to.be.equal(QTypeExtend.ANY);
+        expect(qtypeText(QTypeExtend.ANY)).to.be.equal('ANY');
+        expect(qtypeText(255 as RRType)).to.be.equal('ANY');
+        expect(qtypeText(65534 as RRType)).to.be.equal('TYPE65534');
     });
 });

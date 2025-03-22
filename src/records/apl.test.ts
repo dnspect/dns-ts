@@ -14,7 +14,7 @@ describe("test APL", () => {
         `_axfr.sbo.example.\t\t3600\tIN\tAPL\t1:127.0.0.1/32 1:172.16.64.0/22`,
         // ; List of address ranges for multicast
         `multicast.example.\t\t3600\tIN\tAPL\t1:224.0.0.0/4 2:ff00::/8`,
-    ]
+    ];
     for (const i in examples) {
         let apl: RR | undefined;
 
