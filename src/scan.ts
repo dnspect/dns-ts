@@ -78,7 +78,7 @@ export class Lexer {
      */
     constructor(input: ByteReader) {
         this.input = input;
-        this.charCode = input.dataLength() === 0 ? null : input.readUint8(0);
+        this.charCode = input.byteLength() === 0 ? null : input.readUint8(0);
     }
 
     /**
@@ -103,7 +103,7 @@ export class Lexer {
             this.col = 1;
         }
 
-        this.charCode = this.position < this.input.dataLength() ? this.input.readUint8(this.position) : null;
+        this.charCode = this.position < this.input.byteLength() ? this.input.readUint8(this.position) : null;
     }
 
     /**
@@ -149,7 +149,7 @@ export class Lexer {
      */
     private peek(): Uint8 | null {
         const peekPos = this.position + 1;
-        return peekPos < this.input.dataLength() ? this.input.readUint8(peekPos) : null;
+        return peekPos < this.input.byteLength() ? this.input.readUint8(peekPos) : null;
     }
 
     /**
@@ -256,8 +256,7 @@ export class Lexer {
                     // All other invisible character, should have been encoded as \DDD.
                     if (!this.isVisible(this.charCode)) {
                         throw new ParseError(
-                            `invalid character code: ${this.charCode.toString(16)} encountered at ln ${
-                                this.line
+                            `invalid character code: ${this.charCode.toString(16)} encountered at ln ${this.line
                             }, col ${this.col}`
                         );
                     }
@@ -295,8 +294,7 @@ export class Lexer {
         while (this.charCode !== null && this.charCode !== CHAR_CODE_LF) {
             if (!this.isVisible(this.charCode) && !this.isWhitespace(this.charCode)) {
                 throw new ParseError(
-                    `invalid character: ${this.charCode.toString(16)} encountered in comment at ln ${this.line}, col ${
-                        this.col
+                    `invalid character: ${this.charCode.toString(16)} encountered in comment at ln ${this.line}, col ${this.col
                     }`
                 );
             }

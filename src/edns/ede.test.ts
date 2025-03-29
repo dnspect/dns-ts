@@ -3,12 +3,12 @@ import { ExtendedError, ExtendedErrorCode } from "./ede";
 
 describe("test construction", () => {
     it("should fail to create EDE", () => {
-        expect(() => ExtendedError.from([0])).to.throw(Error, `insufficient bytes remaining for read: needs 2, have 1`);
+        expect(() => ExtendedError.fromData([0])).to.throw(Error, `try to access beyond buffer length: read 2 start from 0`);
     });
 
     it("should create EDE from data", () => {
-        expect(ExtendedError.from([0, 1]).toString()).to.equal(`; EDE: 1 (Unsupported DNSKEY Algorithm)`);
-        expect(ExtendedError.from([0, 1, 65]).toString()).to.equal(`; EDE: 1 (Unsupported DNSKEY Algorithm): (A)`);
+        expect(ExtendedError.fromData([0, 1]).toString()).to.equal(`; EDE: 1 (Unsupported DNSKEY Algorithm)`);
+        expect(ExtendedError.fromData([0, 1, 65]).toString()).to.equal(`; EDE: 1 (Unsupported DNSKEY Algorithm): (A)`);
     });
 
     it("should create EDE from code", () => {

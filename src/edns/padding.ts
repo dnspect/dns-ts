@@ -1,5 +1,4 @@
 import { OptCode, Option } from "./option";
-import { Slice } from "../packet";
 import { Writer } from "../buffer";
 import { Uint16 } from "../types";
 import { ParseError } from "../error";
@@ -12,55 +11,47 @@ import { ParseError } from "../error";
  * Specified by {@link https://datatracker.ietf.org/doc/html/rfc7830 | RFC 7830}.
  */
 export class Padding extends Option {
-    padding!: Uint8Array;
+    size!: Uint16;
 
-    constructor(data: Slice | Uint8Array) {
+    /**
+     * Creates a Padding of requested size.
+     *
+     * @param size
+     */
+    constructor(size: Uint16) {
         super(OptCode.Padding);
-        if (data instanceof Slice) {
-            this.padding = data.readUint8Array();
-        } else {
-            this.padding = data;
-        }
+        this.size = size;
     }
 
     packOptionData(buf: Writer): number {
-        return buf.write(this.padding);
+        return buf.write(new Uint8Array(this.size));
     }
 
     /**
      * @returns
      */
     present(): string {
-        return `; PADDING: ${this.padding.length}`;
-    }
-
-    /**
-     * Creates a Padding of requested size.
-     *
-     * @param size
-     * @returns
-     */
-    static fromSize(size: Uint16): Padding {
-        return new Padding(new Uint8Array(size));
+        return `; PADDING: ${this.size}`;
     }
 
     /**
      * Parses Padding from a textual representation.
      *
-     * @param input A regular comment string that has stripped out "PADDING: "
+     * @param input A regular comment string.
      *
      * @example
      * ```
      * ; PADDING: 370 // dig
      * ;; PADDING: 370 B // kdig
      * ```
+     * Note that the prefix "; PADDING:\s+" may has been stripped from caller.
      */
     static parse(input: string): Padding {
-        const found = input.match(/^(\d+)/i);
+        const found = input.match(/(PADDING:\s+)?(\d+)/i);
         if (found === null) {
             throw new ParseError(`unrecognized PADDING text: "${input}"`);
         }
 
-        return new Padding(new Uint8Array(parseInt(found[1])));
+        return new Padding(parseInt(found[2]));
     }
 }

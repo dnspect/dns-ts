@@ -26,7 +26,7 @@ import { ZONEMD } from "./zonemd";
 import { NSAP, NSAPPTR } from "./nsap";
 import { NAPTR } from "./naptr";
 import { Lexer, scanHeader, scanRdata } from "../scan";
-import { CharReader } from "../buffer";
+import { BufferReader, CharReader } from "../buffer";
 import { APL } from "./apl";
 import { Unknown } from "./unknown";
 
@@ -251,7 +251,7 @@ export function scanRecord(lexer: Lexer, startedHeader: Header | null): RR {
     if (!(rr instanceof Unknown)) {
         const data = Unknown.tryParseUnknownRdata(rdata);
         if (data !== null) {
-            rr.unpackRdata(Slice.from(data));
+            rr.unpackRdata(Slice.fromReader(new BufferReader(data)));
             return rr;
         }
     }

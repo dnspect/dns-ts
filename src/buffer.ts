@@ -15,7 +15,7 @@ export interface ByteReader {
     /**
      * Returns the length of the underlying input source in bytes.
      */
-    dataLength(): number;
+    byteLength(): number;
 
     /**
      * Reads an unsigned 8-bit integer from this source at the specified `offset`.
@@ -34,7 +34,7 @@ export interface Reader extends ByteReader {
     /**
      * Returns the length of the underlying input source in bytes.
      */
-    dataLength(): number;
+    byteLength(): number;
 
     /**
      * Reads an unsigned 8-bit integer from this source at the specified `offset`.
@@ -58,7 +58,7 @@ export interface Reader extends ByteReader {
     readUint32BE(offset?: number): Uint32;
 
     /**
-     * Returns a section of an buffer.
+     * Returns a section of the buffer.
      *
      * @param offset The beginning of the specified portion of the buffer. Defaults to the start of
      *        the source if not specified.
@@ -109,9 +109,9 @@ export interface Writer {
      * must throw an error if it returns n < data.length. Write must not modify the slice data, even
      * temporarily.
      *
-     * @param slice
+     * @param data
      */
-    write(slice: Uint8Array): number;
+    write(data: Uint8Array): number;
 
     /**
      * Writes one byte to the underlying data stream or buffer.
@@ -188,7 +188,7 @@ export class CharReader implements ByteReader {
         return new CharReader(buf);
     }
 
-    dataLength(): number {
+    byteLength(): number {
         return this.buf.byteLength;
     }
 
@@ -265,11 +265,11 @@ export class BufferWriter implements Writer {
         return this.offset;
     }
 
-    write(slice: Uint8Array): number {
-        this.checkWrite(this.offset, slice.length);
-        this.buf.set(slice, this.offset);
-        this.offset += slice.length;
-        return slice.length;
+    write(data: Uint8Array): number {
+        this.checkWrite(this.offset, data.length);
+        this.buf.set(data, this.offset);
+        this.offset += data.length;
+        return data.length;
     }
 
     writeUint8(n: Uint8): number {
@@ -336,6 +336,63 @@ export class BufferWriter implements Writer {
     }
 }
 
+
+/**
+ * A buffer helps read/write binary from DNS wireformat.
+ */
+export class BufferReader implements Reader {
+    buf!: Uint8Array;
+    protected offset = 0;
+
+    constructor(buf: ArrayLike<number> | ArrayBufferLike) {
+        if (buf instanceof Uint8Array) {
+            this.buf = buf;
+        }
+        this.buf = new Uint8Array(buf);
+    }
+
+    checkRead(offset: number, extra: number): void {
+        if (offset < 0) {
+            throw new RangeError(`invalid offset: ${offset}`);
+        }
+
+        if (offset + extra > this.buf.length) {
+            throw new RangeError(`try to access beyond buffer length: read ${extra} start from ${offset}`);
+        }
+    }
+
+    byteLength(): number {
+        return this.buf.byteLength;
+    }
+
+    byteOffset(): number {
+        return this.offset;
+    }
+
+    readUint8(offset?: number): Uint8 {
+        const pos = offset ?? 0;
+        this.checkRead(pos, 1);
+        return this.buf[pos];
+    }
+
+    readUint16BE(offset?: number): Uint16 {
+        const pos = offset ?? 0;
+        this.checkRead(pos, 2);
+        return (this.buf[pos] << 8) | this.buf[pos + 1];
+    }
+
+    readUint32BE(offset?: number): Uint32 {
+        const pos = offset ?? 0;
+        this.checkRead(pos, 4);
+        return this.buf[pos] * 0x1000000 + ((this.buf[pos + 1] << 16) | (this.buf[pos + 2] << 8) | this.buf[pos + 3]);
+    }
+
+    slice(offset = 0, end = this.buf.length): Uint8Array {
+        this.checkRead(offset, end - offset);
+        return this.buf.slice(offset, end);
+    }
+}
+
 /**
  * A buffer helps read/write DNS message in wireformat.
  *
@@ -384,7 +441,7 @@ export class PacketBuffer extends BufferWriter implements Reader, Writer, NameWr
         }
     }
 
-    dataLength(): number {
+    byteLength(): number {
         return this.buf.byteLength;
     }
 

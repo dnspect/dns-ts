@@ -33,19 +33,19 @@ export function unpack(data: Slice): Option[] {
         const len = data.readUint16();
         switch (code) {
             case OptCode.NSID:
-                options.push(new NSID(data.readSlice(len)));
+                options.push(new NSID(data.readUint8Array(len)));
                 break;
             case OptCode.ClientSubnet:
-                options.push(new ClientSubnet(data.readSlice(len)));
+                options.push(ClientSubnet.fromData(data.readUint8Array(len)));
                 break;
             case OptCode.Cookie:
-                options.push(new Cookie(data.readSlice(len)));
+                options.push(Cookie.fromData(data.readUint8Array(len)));
                 break;
             case OptCode.Padding:
-                options.push(new Padding(data.readSlice(len)));
+                options.push(new Padding(len));
                 break;
             case OptCode.ExtendedError:
-                options.push(new ExtendedError(data.readSlice(len)));
+                options.push(ExtendedError.fromData(data.readUint8Array(len)));
                 break;
             default:
                 options.push(new UnknownOption(code, data.readUint8Array(len)));

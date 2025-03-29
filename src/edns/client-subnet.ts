@@ -1,7 +1,6 @@
 import { Address, Address4, Address6, Prefix } from "@dnspect/ip-address-ts";
 import { OptCode, Option } from "./option";
-import { Slice } from "../packet";
-import { Writer } from "../buffer";
+import { BufferReader, Writer } from "../buffer";
 import { Uint8 } from "../types";
 import { ParseError } from "../error";
 
@@ -25,45 +24,16 @@ import { ParseError } from "../error";
  *     +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
  */
 export class ClientSubnet extends Option {
+    address!: Address;
     sourcePrefixLength!: Uint8;
     scopePrefixLength!: Uint8;
-    address!: Address;
 
-    constructor(data: Slice | Prefix) {
+    constructor(address: Address, sourcePrefixLength: Uint8, scopePrefixLength: Uint8) {
         super(OptCode.ClientSubnet);
 
-        if (data instanceof Slice) {
-            const family = data.readUint16();
-            this.sourcePrefixLength = data.readUint8();
-            this.scopePrefixLength = data.readUint8();
-
-            switch (family) {
-                case 1:
-                    this.address = Address4.fromBytes(data.readUint8Array(4));
-                    break;
-                case 2:
-                    this.address = Address6.fromBytes(data.readUint8Array(16));
-                    break;
-                default:
-                    throw new ParseError(`invalid address family: ${family}`);
-            }
-
-            if (this.address.bits() < this.sourcePrefixLength) {
-                throw new ParseError(
-                    `invalid source prefix length ${this.sourcePrefixLength} for address family ${family}`
-                );
-            }
-
-            if (this.address.bits() < this.scopePrefixLength) {
-                throw new ParseError(
-                    `invalid scope prefix length ${this.scopePrefixLength} for address family ${family}`
-                );
-            }
-        } else {
-            this.address = data.ip();
-            this.sourcePrefixLength = data.length();
-            this.scopePrefixLength = 0;
-        }
+        this.address = address;
+        this.sourcePrefixLength = sourcePrefixLength;
+        this.scopePrefixLength = scopePrefixLength;
     }
 
     packOptionData(buf: Writer): number {
@@ -85,28 +55,57 @@ export class ClientSubnet extends Option {
     /**
      * Creates a ClientSubnet from an IP prefix.
      *
-     * @param id
-     * @param encoding
-     * @returns
+     * @param prefix An IP prefixh.
+     * @returns ClientSubnet
      */
     static fromPrefix(prefix: Prefix): ClientSubnet {
-        return new ClientSubnet(prefix);
+        return new ClientSubnet(prefix.ip(), prefix.length(), 0);
     }
 
     /**
      * Creates a ClientSubnet using the passed data.
      *
-     * @param data ClientSubnet data
-     * @returns
+     * @param optionData ClientSubnet data
+     * @returns ClientSubnet
      */
-    static from(data: ArrayLike<number> | ArrayBufferLike): ClientSubnet {
-        return new ClientSubnet(Slice.from(data));
+    static fromData(optionData: ArrayLike<number> | ArrayBufferLike): ClientSubnet {
+        const reader = new BufferReader(optionData);
+
+        const family = reader.readUint16BE(0);
+        const sourcePrefixLength = reader.readUint8(2);
+        const scopePrefixLength = reader.readUint8(3);
+        let address = null;
+
+        switch (family) {
+            case 1:
+                address = Address4.fromBytes(reader.slice(4));
+                break;
+            case 2:
+                address = Address6.fromBytes(reader.slice(16));
+                break;
+            default:
+                throw new ParseError(`invalid address family: ${family}`);
+        }
+
+        if (address.bits() < sourcePrefixLength) {
+            throw new ParseError(
+                `invalid source prefix length ${sourcePrefixLength} for address family ${family}`
+            );
+        }
+
+        if (address.bits() < scopePrefixLength) {
+            throw new ParseError(
+                `invalid scope prefix length ${scopePrefixLength} for address family ${family}`
+            );
+        }
+
+        return new ClientSubnet(address, sourcePrefixLength, scopePrefixLength);
     }
 
     /**
      * Parses ClientSubnet from a textual representation.
      *
-     * @param input A regular comment string that has stripped out "CLIENT-SUBNET: "
+     * @param input A regular comment string.
      *
      * @example
      * ```
@@ -114,18 +113,16 @@ export class ClientSubnet extends Option {
      * ;; CLIENT-SUBNET: 1.2.3.4/32/0 // kdig
      * ```
      *
-     * Note that the prefix "; CLIENT-SUBNET:\s+" should has been stripped from caller.
+     * Note that the prefix "; CLIENT-SUBNET:\s+" may has been stripped from caller.
      */
     static parse(input: string): ClientSubnet {
-        const found = input.match(/^([^/]+\/[0-9]+)\/([0-9]+)/i);
+        const found = input.match(/(CLIENT-SUBNET:\s+)?([^/]+\/[0-9]+)\/([0-9]+)/i);
         if (found === null) {
             throw new ParseError(`unrecognized CLIENT-SUBNET text: "${input}"`);
         }
 
-        const prefix = Prefix.parse(found[1]);
-        const scope = parseInt(found[2]);
-        const cs = new ClientSubnet(prefix);
-        cs.scopePrefixLength = scope;
-        return cs;
+        const prefix = Prefix.parse(found[2]);
+        const scope = parseInt(found[3]);
+        return new ClientSubnet(prefix.ip(), prefix.length(), scope);
     }
 }

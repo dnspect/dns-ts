@@ -2,7 +2,7 @@ import { Uint16, Uint32, Uint48, Uint8 } from "./types";
 import { ParseError } from "./error";
 import { FQDN } from "./fqdn";
 import { EncodingScheme, binaryToString } from "./encoding";
-import { Reader, PacketBuffer } from "./buffer";
+import { Reader } from "./buffer";
 
 /**
  * Max domain label octets
@@ -78,7 +78,7 @@ export class HexString {
 }
 
 /**
- * A slice of fixed-length sequence of bytes.
+ * A slice of fixed-length sequence of bytes from DNS message.
  *
  * It provides functions to read data from the slice and tracks how many bytes have been read. The
  * read cursor is positioned at zero initially and is always pointing to the byte to be read next.
@@ -92,13 +92,13 @@ export class Slice {
     private lookupLabels?: (offset: Uint16, pointers: number) => [string[], Uint16];
 
     /**
-     * Creates a new slice from passed data.
+     * Creates a new slice from passed buffer reader.
      *
-     * @param data
+     * @param buf Reader A buffer reader.
      * @returns
      */
-    static from(data: ArrayLike<number> | ArrayBufferLike): Slice {
-        return new Slice(PacketBuffer.from(data));
+    static fromReader(buf: Reader): Slice {
+        return new Slice(buf);
     }
 
     /**
@@ -116,7 +116,7 @@ export class Slice {
     ) {
         this.buf = buf;
         this.offset = bytesOffset;
-        this.len = length === undefined ? buf.dataLength() : length;
+        this.len = length === undefined ? buf.byteLength() : length;
         this.cur = 0;
         this.lookupLabels = lookupLabels;
     }
@@ -396,7 +396,7 @@ export class Packet extends Slice {
      * @param buf A DNS message buffer
      */
     constructor(buf: Reader) {
-        super(buf, 0, buf.dataLength(), (startPos, pointer) => {
+        super(buf, 0, buf.byteLength(), (startPos, pointer) => {
             // The domain name pointer is an absolute position in the whole message buffer, so
             // always lookup the pointing labels in whole buffer.
             return this.findLabels(startPos, pointer);

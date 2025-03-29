@@ -1,5 +1,4 @@
 import { OptCode, Option } from "./option";
-import { Slice } from "../packet";
 import { ParseError } from "../error";
 import { binaryToString, stringToBinary } from "../encoding";
 import { Writer } from "../buffer";
@@ -45,15 +44,15 @@ import { Writer } from "../buffer";
 export class Cookie extends Option {
     cookie!: Uint8Array;
 
-    constructor(data: Slice) {
+    constructor(data: Uint8Array) {
         super(OptCode.Cookie);
 
         // Valid cookie lengths are 8 and 16 to 40 inclusive.
-        if (data.length() !== 8 && (data.length() < 16 || data.length() > 40)) {
-            throw new ParseError(`malformed cookie option: invalid length ${data.length()}`);
+        if (data.byteLength !== 8 && (data.byteLength < 16 || data.byteLength > 40)) {
+            throw new ParseError(`malformed cookie option: invalid length ${data.byteLength}`);
         }
 
-        this.cookie = data.readUint8Array();
+        this.cookie = data;
     }
 
     /**
@@ -76,16 +75,19 @@ export class Cookie extends Option {
      * Creates a Cookie using the passed data.
      *
      * @param data Cookie data
-     * @returns
+     * @returns Cookie
      */
-    static from(data: ArrayLike<number> | ArrayBufferLike): Cookie {
-        return new Cookie(Slice.from(data));
+    static fromData(data: ArrayLike<number> | ArrayBufferLike): Cookie {
+        if (data instanceof Uint8Array) {
+            return new Cookie(data);
+        }
+        return new Cookie(new Uint8Array(data));
     }
 
     /**
      * Parses Cookie from a textual representation.
      *
-     * @param input A regular comment string that has stripped out "Cookie: "
+     * @param input A regular comment string
      *
      * @example
      * ```
@@ -93,15 +95,15 @@ export class Cookie extends Option {
      * ;; Cookie: 6770646E732D736561 // kdig
      * ```
      *
-     * Note that the prefix "; Cookie:\s+" should has been stripped from caller.
+     * Note that the prefix "; Cookie:\s+" may has been stripped from caller.
      */
     static parse(input: string): Cookie {
-        const found = input.match(/^([0-9a-f]+)/i);
+        const found = input.match(/([0-9a-f]+)/i);
         if (found === null) {
             throw new ParseError(`unrecognized cookie text: "${input}"`);
         }
 
         const data = stringToBinary(found[1], "hex");
-        return this.from(data);
+        return new Cookie(data);
     }
 }

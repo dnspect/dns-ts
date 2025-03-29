@@ -1,5 +1,4 @@
 import { OptCode, Option } from "./option";
-import { Slice } from "../packet";
 import { binaryToString, stringToBinary } from "../encoding";
 import { Writer } from "../buffer";
 import { ParseError } from "../error";
@@ -13,13 +12,9 @@ import { ParseError } from "../error";
 export class NSID extends Option {
     identifier!: Uint8Array;
 
-    constructor(data: Slice | Uint8Array) {
+    constructor(data: Uint8Array) {
         super(OptCode.NSID);
-        if (data instanceof Slice) {
-            this.identifier = data.readUint8Array();
-        } else {
-            this.identifier = data;
-        }
+        this.identifier = data;
     }
 
     packOptionData(buf: Writer): number {
@@ -56,7 +51,7 @@ export class NSID extends Option {
     /**
      * Parses NSID from a textual representation.
      *
-     * @param input A regular comment string that has stripped out "NSID: "
+     * @param input A regular comment string.
      *
      * @example
      * ```
@@ -64,15 +59,15 @@ export class NSID extends Option {
      * ;; NSID: 6770646E732D736561 "gpdns-sea"          // kdig
      * ```
      *
-     * Note that the prefix "; NSID:\s+" should has been stripped from caller.
+     * Note that the prefix "; NSID:\s+" may has been stripped from caller.
      */
     static parse(input: string): NSID {
-        const found = input.match(/^([0-9a-e ]+)/i);
+        const found = input.match(/(NSID:\s+)?([0-9a-e ]+)/i);
         if (found === null) {
             throw new ParseError(`unrecognized NSID text: "${input}"`);
         }
 
-        const data = stringToBinary(found[1].trim().split(" ").join(""), "hex");
+        const data = stringToBinary(found[2].trim().split(" ").join(""), "hex");
         return new NSID(data);
     }
 }

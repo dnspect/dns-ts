@@ -3,7 +3,7 @@ import { TypeBitMaps } from "./type-bitmaps";
 import { RRType } from "../../types";
 import { Slice } from "../../packet";
 import { stringToBinary } from "../../encoding";
-import { PacketBuffer } from "../../buffer";
+import { BufferReader, PacketBuffer } from "../../buffer";
 
 describe("test TypeBitMaps", () => {
     it("should parse()", () => {
@@ -12,7 +12,7 @@ describe("test TypeBitMaps", () => {
     });
 
     it("should unpack", () => {
-        const s = Slice.from(stringToBinary("00 08 22 00 00 00 00 03 80 01", "hex-ws"));
+        const s = Slice.fromReader(new BufferReader(stringToBinary("00 08 22 00 00 00 00 03 80 01", "hex-ws")));
         const bitmap = TypeBitMaps.unpack(s);
         expect(bitmap.toString()).to.be.equals("NS SOA RRSIG NSEC DNSKEY ZONEMD");
     });

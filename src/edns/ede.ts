@@ -1,8 +1,8 @@
 import { OptCode, Option } from "./option";
-import { Slice } from "../packet";
 import { Uint16 } from "../types";
-import { Writer } from "../buffer";
+import { BufferReader, Writer } from "../buffer";
 import { ParseError } from "../error";
+import { binaryToString } from "../encoding";
 
 /**
  * Start of the private range for EDE codes.
@@ -16,34 +16,29 @@ export const EDE_PRIVATE_RANGE_BEGIN: Uint16 = 49152;
  * Specified by {@link https://datatracker.ietf.org/doc/html/rfc8914 | RFC 8914}.
  */
 export class ExtendedError extends Option {
-    infoCode!: ExtendedErrorCode;
-    extraText!: string;
+    code!: ExtendedErrorCode;
+    text!: string;
 
-    constructor(data: Slice | ExtendedErrorCode, text?: string) {
+    constructor(code: ExtendedErrorCode, text?: string) {
         super(OptCode.ExtendedError);
-        if (data instanceof Slice) {
-            this.infoCode = data.readUint16();
-            this.extraText = data.readUTF8String();
-        } else {
-            this.infoCode = data;
-            this.extraText = text ?? "";
-        }
+        this.code = code;
+        this.text = text ?? "";
     }
 
     /**
      * @override
      */
     packOptionData(buf: Writer): number {
-        return buf.writeUint16(this.infoCode) + buf.writeString(this.extraText, "utf-8");
+        return buf.writeUint16(this.code) + buf.writeString(this.text, "utf-8");
     }
 
     /**
      * @override
      */
     present(): string {
-        let output = `; EDE: ${this.infoCode}`;
+        let output = `; EDE: ${this.code}`;
 
-        let name = ExtendedErrorCode[this.infoCode];
+        let name = ExtendedErrorCode[this.code];
         if (name !== undefined) {
             name = name.replace(/([a-z])([A-Z])/g, "$1 $2");
             name = name.replace(/([A-Z])([A-Z][a-z])/g, "$1 $2");
@@ -52,8 +47,8 @@ export class ExtendedError extends Option {
             output += ` (Unknown Code)`;
         }
 
-        if (this.extraText.length > 0) {
-            output += `: (${this.extraText})`;
+        if (this.text.length > 0) {
+            output += `: (${this.text})`;
         }
         return output;
     }
@@ -62,38 +57,40 @@ export class ExtendedError extends Option {
      * Creates a new ExtendedError from the option data.
      *
      * @param data The option data.
-     * @returns
+     * @returns ExtendedError
      */
-    static from(data: ArrayLike<number> | ArrayBufferLike): ExtendedError {
-        return new ExtendedError(Slice.from(data));
+    static fromData(data: ArrayLike<number> | ArrayBufferLike): ExtendedError {
+        const reader = new BufferReader(data);
+        const code = reader.readUint16BE(0);
+        const text = binaryToString(reader.slice(2), "utf-8");
+        return new ExtendedError(code, text);
     }
 
     /**
      * Creates a new ExtendedError from error code and optional text.
      *
-     * @param infoCode
-     * @param extraText
+     * @param code
+     * @param text
      * @returns
      */
-    static fromCode(infoCode: ExtendedErrorCode, extraText?: string): ExtendedError {
-        return new ExtendedError(infoCode, extraText);
+    static fromCode(code: ExtendedErrorCode, text?: string): ExtendedError {
+        return new ExtendedError(code, text);
     }
 
     /**
      * Parses ExtendedError from a textual representation.
      *
-     * @param input A regular comment string that has stripped out "EDE: "
+     * @param input A regular comment string.
      *
      * @example
      * ```
      * ; EDE: 0 (other): (blabla. https://foo.bar/)  // dig
      * ;; EDE: 49152 (Unknown Code): 'blabla. https://foo.bar/' // kdig
      * ```
-     *
-     * Note that the prefix "; EDE:\s+" should has been stripped from caller.
+     * Note that the prefix "; EDE:\s+" may has been stripped from caller.
      */
     static parse(input: string): ExtendedError {
-        const found = input.match(/^(\d+)[^:]+(:\s*[('](.+)[)'])?/i);
+        const found = input.match(/(\d+)[^:]+(:\s*[('](.+)[)'])?/i);
         if (found === null) {
             throw new ParseError(`unrecognized EDE text: "${input}"`);
         }

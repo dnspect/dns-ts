@@ -3,8 +3,8 @@ import { Padding } from "./padding";
 
 describe("test construction", () => {
     it("should create padding from requested size", () => {
-        expect(Padding.fromSize(0).toString()).to.equal(`; PADDING: 0`);
-        expect(Padding.fromSize(10).toString()).to.equal(`; PADDING: 10`);
+        expect(new Padding(0).toString()).to.equal(`; PADDING: 0`);
+        expect(new Padding(10).toString()).to.equal(`; PADDING: 10`);
     });
 });
 
