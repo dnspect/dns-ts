@@ -17,7 +17,7 @@ describe("test stringify", () => {
         }));
     });
 
-    it("should generate dig-like text", () => {
+    it("should generate zonefile text", () => {
         expect(txt.toString()).to.be.equal('example.com.\t\t300\tIN\tTXT\t"abc" "d \\"hi\\" e"');
     });
 });

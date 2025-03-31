@@ -28,6 +28,7 @@ import { NAPTR } from "./naptr";
 import { Lexer, scanHeader, scanRdata } from "../scan";
 import { BufferReader, CharReader } from "../buffer";
 import { APL } from "./apl";
+import { IPSECKEY } from "./ipseckey";
 import { Unknown } from "./unknown";
 
 export { A, isA } from "./a";
@@ -53,6 +54,7 @@ export { ZONEMD } from "./zonemd";
 export { NSAP, NSAPPTR } from "./nsap";
 export { NAPTR } from "./naptr";
 export { APL } from "./apl";
+export { IPSECKEY } from "./ipseckey";
 export { Unknown } from "./unknown";
 
 /**
@@ -199,6 +201,10 @@ function initRecord(h: Header): RR {
         }
         case RRType.APL: {
             record = new APL(h);
+            break;
+        }
+        case RRType.IPSECKEY: {
+            record = new IPSECKEY(h);
             break;
         }
         default:

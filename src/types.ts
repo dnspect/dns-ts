@@ -319,6 +319,7 @@ export enum RRType {
     APL = 42,
     DS = 43,
     SSHFP = 44,
+    IPSECKEY = 45,
     RRSIG = 46,
     NSEC = 47,
     DNSKEY = 48,
@@ -465,6 +466,8 @@ export function rrtypeFrom(text: string): RRType | null {
             return RRType.DS;
         case "SSHFP":
             return RRType.SSHFP;
+        case "IPSECKEY":
+            return RRType.IPSECKEY;
         case "RRSIG":
             return RRType.RRSIG;
         case "NSEC":
