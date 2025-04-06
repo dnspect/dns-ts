@@ -1,5 +1,5 @@
 import { Writer } from "../buffer";
-import { binaryToString } from "../encoding";
+import { binaryToString, stringToBinary } from "../encoding";
 import { ParseError } from "../error";
 import { FQDN } from "../fqdn";
 import { CharacterString } from "../char";
@@ -48,7 +48,7 @@ import { Uint16, Uint48 } from "../types";
  *  /                                                               /
  *  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  *  ```
- * Specified by {@link https://datatracker.ietf.org/doc/html/rfc4034#autoid-13 | RFC 4034}
+ * Specified by {@link https://datatracker.ietf.org/doc/html/rfc2845#section-2 | RFC 2845}
  */
 export class TSIG extends RR {
     /**
@@ -63,10 +63,25 @@ export class TSIG extends RR {
      * on 1970-01-01 UTC, ignoring leap seconds.
      */
     timeSigned!: Uint48;
+    /**
+     * Seconds of error permitted in Time Signed.
+     */
     fudge!: Uint16;
+    /**
+     * Octet stream defined by Algorithm Name.
+     */
     mac!: Uint8Array;
+    /**
+     * Original message ID
+     */
     originalID!: Uint16;
+    /**
+     * Expanded RCODE covering TSIG processing.
+     */
     error!: Uint16;
+    /**
+     * Octet stream, empty unless Error == BADTIME
+     */
     otherData!: Uint8Array;
 
     unpackRdata(rdata: Slice): void {
@@ -84,17 +99,64 @@ export class TSIG extends RR {
         n += buf.writeUint32(this.timeSigned >> 16);
         n += buf.writeUint16(this.timeSigned & 0xffff);
         n += buf.writeUint16(this.fudge);
-        n += buf.writeUint16(this.mac.length);
+        n += buf.writeUint16(this.mac.byteLength);
         n += buf.write(this.mac);
         n += buf.writeUint16(this.originalID);
         n += buf.writeUint16(this.error);
-        n += buf.writeUint16(this.otherData.length);
+        n += buf.writeUint16(this.otherData.byteLength);
         n += buf.write(this.otherData);
         return n;
     }
 
-    parseRdata(_rdata: CharacterString[]): void {
-        throw new ParseError(`unimplemented!`);
+    parseRdata(rdata: CharacterString[]): void {
+        switch (rdata.length) {
+            case 0:
+                throw new ParseError(`Missing RDATA fields in TSIG`);
+            case 1:
+                throw new ParseError(`Missing <TIME-SIGNED> in RDATA`);
+            case 2:
+                throw new ParseError(`Missing <FUDGE> in RDATA`);
+            case 3:
+                throw new ParseError(`Missing <MAC> in RDATA`);
+            case 4:
+                throw new ParseError(`Missing <ORIGINAL-ID> in RDATA`);
+            case 5:
+                throw new ParseError(`Missing <ERROR> in RDATA`);
+        }
+
+        this.algorithm = FQDN.parse(rdata[0].raw()) ??
+            (() => {
+                throw new ParseError("invalid <ALGORITHM> in RDATA");
+            })();
+        this.timeSigned = parseTimeSigned(rdata[1].raw()) ??
+            (() => {
+                throw new ParseError("invalid <TIME-SIGNED> in RDATA");
+            })();
+        this.fudge = rdata[2].toUint16() ??
+            (() => {
+                throw new ParseError("invalid <TIME-SIGNED> in RDATA");
+            })();
+        this.mac = stringToBinary(rdata[3].raw(), "base64") ??
+            (() => {
+                throw new ParseError("invalid <MAC> in RDATA");
+            })();
+        this.originalID = rdata[4].toUint16() ??
+            (() => {
+                throw new ParseError("invalid <ORIGINAL-ID> in RDATA");
+            })();
+        this.error = rdata[5].toUint16() ??
+            (() => {
+                throw new ParseError("invalid <ERROR> in RDATA");
+            })();
+
+        if (rdata.length === 7) {
+            this.otherData = stringToBinary(rdata[6].raw(), "base64") ??
+                (() => {
+                    throw new ParseError("invalid <OTHER-DATA> in RDATA");
+                })();
+        } else {
+            this.otherData = new Uint8Array();
+        }
     }
 
     /**
@@ -104,10 +166,14 @@ export class TSIG extends RR {
      */
     presentRdata(): string {
         const mac = binaryToString(this.mac, "base64");
-        const otherData = binaryToString(this.otherData, "base64");
-        return `${this.algorithm} ${displayTimeSigned(this.timeSigned)} ${this.fudge} ${mac} ${this.originalID} ${
-            this.error
-        } ${otherData}`;
+        let text = `${this.algorithm} ${displayTimeSigned(this.timeSigned)} ${this.fudge} ${mac} ${this.originalID} ${this.error}`;
+
+        if (this.otherData.byteLength > 0) {
+            const otherData = binaryToString(this.otherData, "base64");
+            text += ` ${otherData}`;
+        }
+
+        return text;
     }
 }
 
@@ -123,7 +189,31 @@ function displayTimeSigned(ts: Uint48): string {
         .getUTCDate()
         .toString()
         .padStart(2, "0")}${dt.getUTCHours().toString().padStart(2, "0")}${dt
-        .getUTCMinutes()
-        .toString()
-        .padStart(2, "0")}${dt.getUTCSeconds().toString().padStart(2, "0")}`;
+            .getUTCMinutes()
+            .toString()
+            .padStart(2, "0")}${dt.getUTCSeconds().toString().padStart(2, "0")}`;
+}
+
+/**
+ * Returns UNIX timestamp in seconds.
+ *
+ * @param str
+ * @throws ParseError
+ */
+function parseTimeSigned(str: string): Uint48 {
+    const found = str.match(/^([0-9]{4})([01][0-9])([0123][0-9])([012][0-9])([0-6][0-9])([0-6][0-9])$/i);
+    if (found === null) {
+        throw new ParseError(`invalid <TIME-SIGNED>: ${str}`);
+    }
+
+    const dt = new Date(
+        parseInt(found[1]),
+        parseInt(found[2]) - 1,
+        parseInt(found[3]),
+        parseInt(found[4]),
+        parseInt(found[5]),
+        parseInt(found[6])
+    );
+
+    return dt.getTime() / 1000;
 }

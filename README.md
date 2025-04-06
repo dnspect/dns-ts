@@ -79,13 +79,13 @@ This is a list adopted from <https://github.com/miekg/dns/blob/master/README.md>
 - [x] 3445 - Limiting the scope of (DNS)KEY
 - [x] 3597 - Unknown RRs
 - [x] 4025 - A Method for Storing IPsec Keying Material in DNS
-- [ ] 403{3,4,5} - DNSSEC + validation functions
+- [x] 403{3,4,5} - DNSSEC + validation functions
 - [x] 4255 - SSHFP record
 - [x] 4343 - Case insensitivity
 - [x] 4408 - SPF record
-- [ ] 4509 - SHA256 Hash in DS
+- [x] 4509 - SHA256 Hash in DS
 - [x] 4592 - Wildcards in the DNS
-- [ ] 4635 - HMAC SHA TSIG
+- [x] 4635 - HMAC SHA TSIG
 - [ ] 4701 - DHCID
 - [x] 4892 - id.server
 - [x] 5001 - NSID
