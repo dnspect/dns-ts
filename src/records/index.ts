@@ -29,6 +29,7 @@ import { Lexer, scanHeader, scanRdata } from "../scan";
 import { BufferReader, CharReader } from "../buffer";
 import { APL } from "./apl";
 import { IPSECKEY } from "./ipseckey";
+import { DHCID } from "./dhcid";
 import { Unknown } from "./unknown";
 
 export { A, isA } from "./a";
@@ -55,6 +56,7 @@ export { NSAP, NSAPPTR } from "./nsap";
 export { NAPTR } from "./naptr";
 export { APL } from "./apl";
 export { IPSECKEY } from "./ipseckey";
+export { DHCID } from "./dhcid";
 export { Unknown } from "./unknown";
 
 /**
@@ -207,6 +209,9 @@ function initRecord(h: Header): RR {
             record = new IPSECKEY(h);
             break;
         }
+        case RRType.DHCID:
+            record = new DHCID(h);
+            break;
         default:
             record = new Unknown(h);
             break;

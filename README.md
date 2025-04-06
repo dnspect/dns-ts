@@ -86,7 +86,7 @@ This is a list adopted from <https://github.com/miekg/dns/blob/master/README.md>
 - [x] 4509 - SHA256 Hash in DS
 - [x] 4592 - Wildcards in the DNS
 - [x] 4635 - HMAC SHA TSIG
-- [ ] 4701 - DHCID
+- [x] 4701 - DHCID
 - [x] 4892 - id.server
 - [x] 5001 - NSID
 - [x] 5155 - NSEC3 record
